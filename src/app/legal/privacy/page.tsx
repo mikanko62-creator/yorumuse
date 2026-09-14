@@ -36,7 +36,7 @@ export default function PrivacyPage() {
 
           <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>3. Cookies & Local Storage</h3>
           <p>
-            We utilize essential HTTP-only cookies to preserve secure authentication sessions and local storage solely to retain your 18+ age verification status. No invasive tracking beacons or cross-site tracking scripts are loaded.
+            We utilize essential HTTP-only cookies to preserve secure authentication sessions and local storage solely to retain your interface preferences and playback configurations. No invasive tracking beacons or cross-site tracking scripts are loaded.
           </p>
 
           <div style={{ paddingTop: "20px", borderTop: "1px solid var(--border-subtle)" }}>

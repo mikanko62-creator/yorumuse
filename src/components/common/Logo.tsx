@@ -90,7 +90,7 @@ export default function Logo({
               marginTop: "2px",
             }}
           >
-            ADULT NOIR
+            CINEMA STUDIOS
           </span>
         </div>
       )}

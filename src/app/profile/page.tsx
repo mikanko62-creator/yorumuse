@@ -152,7 +152,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginTop: "4px" }}>
-                  {user.email} • 18+ Age Verified
+                  {user.email} • Verified Member Account
                 </p>
               </div>
             </div>

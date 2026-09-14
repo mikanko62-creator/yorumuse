@@ -1091,7 +1091,7 @@ export default function AdminDashboardPage() {
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: "var(--text-primary)", marginTop: "4px" }}>
                   {stats.totalUsers}
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "var(--status-success)" }}>100% 18+ Terverifikasi</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--status-success)" }}>100% Akun Terverifikasi</span>
               </div>
 
               <div style={{ backgroundColor: "var(--bg-surface)", padding: "22px", borderRadius: "14px", border: "1px solid var(--border-active)", boxShadow: "var(--shadow-sm)" }}>
@@ -1843,7 +1843,7 @@ export default function AdminDashboardPage() {
                     <th style={{ padding: "14px 18px" }}>Patron / User</th>
                     <th style={{ padding: "14px 18px" }}>Role</th>
                     <th style={{ padding: "14px 18px" }}>Status</th>
-                    <th style={{ padding: "14px 18px" }}>Tgl Lahir (18+)</th>
+                    <th style={{ padding: "14px 18px" }}>Tanggal Lahir</th>
                     <th style={{ padding: "14px 18px" }}>Langganan</th>
                     <th style={{ padding: "14px 18px", textAlign: "right" }}>Kelola Akses</th>
                   </tr>
@@ -1976,14 +1976,14 @@ export default function AdminDashboardPage() {
                 Pusat Moderasi & Penanganan Laporan
               </h2>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem" }}>
-                Tinjau laporan pelanggaran member. Laporan perlindungan minoritas atau non-konsensual diprioritaskan tinggi.
+                Tinjau laporan pelanggaran member. Laporan pelanggaran hak cipta atau pelecehan diprioritaskan tinggi.
               </p>
             </div>
 
             {reportList.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {reportList.map((rep) => {
-                  const isSevere = rep.reason === "UNDERAGE_SUSPICION" || rep.reason === "NON_CONSENSUAL";
+                  const isSevere = rep.reason === "HARASSMENT" || rep.reason === "COPYRIGHT";
                   const isResolved = rep.status === "RESOLVED" || rep.status === "DISMISSED";
 
                   return (

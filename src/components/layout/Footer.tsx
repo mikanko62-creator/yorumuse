@@ -34,7 +34,7 @@ export default function Footer() {
                 marginBottom: "24px",
               }}
             >
-              YoruMuse is a curated adult community and cinematic entertainment platform. Designed for discerning adults who appreciate high aesthetic standards, privacy, and community.
+              YoruMuse is a curated cinematic video and serialized entertainment platform. Designed for discerning viewers who appreciate high aesthetic standards, original filmmaking, and private member community.
             </p>
             <div
               style={{
@@ -51,7 +51,7 @@ export default function Footer() {
                 letterSpacing: "0.1em",
               }}
             >
-              <span>18+ ADULTS ONLY</span>
+              <span>STREAMING STUDIOS</span>
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/membership#faq" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  Billing FAQ & Privacy
+                  Billing FAQ & Access
                 </Link>
               </li>
               <li>
@@ -165,36 +165,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/legal/2257" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  18 U.S.C. 2257 Statement
-                </Link>
-              </li>
-              <li>
-                <Link href="/legal/anti-trafficking" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  Zero Tolerance Policy
+                <Link href="/community/guidelines" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+                  Content Standards
                 </Link>
               </li>
             </ul>
           </div>
-        </div>
-
-        {/* 2257 Compliance & Age Statement Box */}
-        <div
-          style={{
-            padding: "24px",
-            borderRadius: "var(--radius-md)",
-            backgroundColor: "var(--bg-surface)",
-            border: "1px solid var(--border-subtle)",
-            marginBottom: "40px",
-            fontSize: "0.82rem",
-            color: "var(--text-muted)",
-            lineHeight: 1.6,
-          }}
-        >
-          <strong style={{ color: "var(--text-secondary)", display: "block", marginBottom: "6px" }}>
-            18 U.S.C. § 2257 RECORD-KEEPING REQUIREMENTS COMPLIANCE STATEMENT
-          </strong>
-          All visual representations depicting actual sexually explicit conduct appearing on this platform comply with the record-keeping requirements of 18 U.S.C. § 2257 and 28 C.F.R. Part 75. All models, actors, and content creators were 18 years of age or older at the time the visual depictions were produced. YoruMuse maintains a strict zero-tolerance policy against non-consensual content and underage material.
         </div>
 
         {/* Bottom Bar */}
@@ -212,7 +188,7 @@ export default function Footer() {
           }}
         >
           <div>
-            © {new Date().getFullYear()} YORUMUSE INC. All rights reserved. Strictly adults only.
+            © {new Date().getFullYear()} YORUMUSE INC. All rights reserved. Premium Streaming Platform.
           </div>
           <div style={{ display: "flex", gap: "20px" }}>
             <Link href="/legal/privacy" style={{ color: "var(--text-muted)" }}>
@@ -221,8 +197,8 @@ export default function Footer() {
             <Link href="/legal/terms" style={{ color: "var(--text-muted)" }}>
               Terms
             </Link>
-            <Link href="/legal/2257" style={{ color: "var(--text-muted)" }}>
-              2257 Notice
+            <Link href="/community/guidelines" style={{ color: "var(--text-muted)" }}>
+              Guidelines
             </Link>
           </div>
         </div>

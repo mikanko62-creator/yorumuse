@@ -29,8 +29,8 @@ export async function POST(request: Request) {
       },
     });
 
-    // If reason is severe (underage suspicion or non-consensual), immediately set target to UNDER_REVIEW
-    if (reason === "UNDERAGE_SUSPICION" || reason === "NON_CONSENSUAL") {
+    // If reason is severe (harassment or copyright), immediately set target to UNDER_REVIEW
+    if (reason === "HARASSMENT" || reason === "COPYRIGHT" || reason === "INAPPROPRIATE") {
       if (targetType === "POST") {
         await prisma.post.update({
           where: { id: targetId },

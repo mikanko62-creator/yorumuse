@@ -101,7 +101,7 @@ export default function RegisterPage() {
             Join YoruMuse
           </h2>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Create an adult account to unlock discussions and exclusive member premieres.
+            Create your member account to unlock discussions and exclusive premieres.
           </p>
         </div>
 
@@ -214,7 +214,7 @@ export default function RegisterPage() {
                 fontWeight: 600,
               }}
             >
-              Date of Birth (Must be 18+)
+              Date of Birth
             </label>
             <input
               id="reg-dob"
@@ -236,7 +236,7 @@ export default function RegisterPage() {
               style={{ marginTop: "4px", width: "18px", height: "18px", accentColor: "var(--accent-gold)" }}
             />
             <label htmlFor="reg-terms" style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-              I certify under penalty of perjury that I am at least 18 years old and agree to the{" "}
+              I agree to the{" "}
               <Link href="/legal/terms" style={{ color: "var(--accent-gold)" }}>Terms of Service</Link>,{" "}
               <Link href="/legal/privacy" style={{ color: "var(--accent-gold)" }}>Privacy Policy</Link>, and{" "}
               <Link href="/community/guidelines" style={{ color: "var(--accent-gold)" }}>Community Guidelines</Link>.

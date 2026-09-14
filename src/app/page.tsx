@@ -284,7 +284,7 @@ export default function HomePage() {
                 className="section-title"
                 style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)", marginBottom: "18px" }}
               >
-                An Exclusive Community for Adult Expression
+                A Curated Community for Cinephiles & Creators
               </h2>
               <p
                 style={{
@@ -294,7 +294,7 @@ export default function HomePage() {
                   marginBottom: "28px",
                 }}
               >
-                YoruMuse is more than cinema. Engage in refined discussions, share reflections with fellow patrons, interact directly with verified creators, and explore intimate topics in a strictly moderated, respectful private sanctuary.
+                YoruMuse is more than streaming. Engage in thoughtful discussions, share reflections with fellow patrons, interact directly with verified creators, and explore episodic filmmaking in a curated, respectful community lounge.
               </p>
 
               <div style={{ display: "flex", gap: "24px", marginBottom: "32px", flexWrap: "wrap" }}>
@@ -303,23 +303,23 @@ export default function HomePage() {
                     100%
                   </div>
                   <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Verified 18+ Adults
+                    Verified Members
                   </div>
                 </div>
                 <div>
                   <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", color: "var(--accent-gold)" }}>
-                    Encrypted
+                    Ultra HD
                   </div>
                   <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Discreet & Private
+                    Ad-Free Experience
                   </div>
                 </div>
                 <div>
                   <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", color: "var(--accent-gold)" }}>
-                    Zero Spam
+                    Direct
                   </div>
                   <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Human Moderated
+                    Creator Access
                   </div>
                 </div>
               </div>

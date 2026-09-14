@@ -165,11 +165,10 @@ export default function ReportModal({
                 onChange={(e) => setReason(e.target.value)}
                 style={{ width: "100%", padding: "10px 14px" }}
               >
-                <option value="UNDERAGE_SUSPICION">Underage / Minor Concern (Immediate Review)</option>
-                <option value="NON_CONSENSUAL">Non-Consensual Material</option>
-                <option value="HARASSMENT">Harassment or Abuse</option>
+                <option value="COPYRIGHT">Copyright or Unauthorized Media</option>
+                <option value="HARASSMENT">Harassment or Defamation</option>
                 <option value="SPAM">Spam or Unsolicited Promotion</option>
-                <option value="COPYRIGHT">Copyright or Impersonation</option>
+                <option value="INAPPROPRIATE">Inappropriate Content</option>
                 <option value="OTHER">Other Community Guideline Violation</option>
               </select>
             </div>

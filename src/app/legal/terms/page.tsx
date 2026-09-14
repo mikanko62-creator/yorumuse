@@ -29,9 +29,9 @@ export default function TermsPage() {
             You must be at least eighteen (18) years of age, or the age of legal majority in the jurisdiction where you reside or access this website, whichever is greater, to view content, register an account, or purchase a membership on YoruMuse.
           </p>
 
-          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>2. Discretion & Billing</h3>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>2. Subscription & Billing</h3>
           <p>
-            All paid memberships are billed on a recurring basis until explicitly cancelled. Charges will appear under the neutral descriptor &ldquo;YM MEDIA LLC&rdquo; on financial statements. You may cancel your subscription at any time via your user profile.
+            All paid memberships are billed on a recurring basis until explicitly cancelled. Charges will appear under the statement descriptor &ldquo;YORUMUSE STUDIOS&rdquo;. You may cancel your subscription at any time via your user profile.
           </p>
 
           <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>3. Prohibited Conduct</h3>
@@ -46,7 +46,7 @@ export default function TermsPage() {
 
           <div style={{ paddingTop: "20px", borderTop: "1px solid var(--border-subtle)" }}>
             <Link href="/" className="btn btn-secondary">
-              ← Return to Home
+              Back to Home
             </Link>
           </div>
         </div>

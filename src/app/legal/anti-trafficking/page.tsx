@@ -12,12 +12,12 @@ export default function AntiTraffickingPage() {
         }}
       >
         <div className="container" style={{ maxWidth: "840px" }}>
-          <span className="section-subtitle">PROTECTION & SAFETY</span>
+          <span className="section-subtitle">ETHICS & INTEGRITY</span>
           <h1 style={{ fontSize: "2.4rem", color: "var(--text-primary)", marginBottom: "12px" }}>
-            Zero-Tolerance Anti-Trafficking Policy
+            Platform Safety & Production Ethics
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
-            Our mandatory ethical standards against non-consensual content and human exploitation.
+            Our mandatory ethical standards regarding production integrity and safety.
           </p>
         </div>
       </section>
@@ -27,29 +27,29 @@ export default function AntiTraffickingPage() {
           <div
             style={{
               padding: "24px",
-              backgroundColor: "#fef2f2",
+              backgroundColor: "rgba(212, 175, 55, 0.08)",
               borderRadius: "12px",
-              border: "1px solid #fecaca",
-              color: "#b91c1c",
+              border: "1px solid rgba(212, 175, 55, 0.25)",
+              color: "var(--text-primary)",
               fontWeight: 500,
             }}
           >
-            YoruMuse enforces a strict zero-tolerance policy regarding human trafficking, non-consensual content, and underage exploitation. Any suspected violation is referred immediately to law enforcement authorities.
+            YoruMuse Studios enforces strict production standards across all commissioned cinema and serialized releases. We are committed to a zero-tolerance policy against any form of exploitation, harassment, or unauthorized recording.
           </div>
 
-          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>Mandatory Creator Verification</h3>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>Verified Cast & Production Standards</h3>
           <p>
-            All performers depicted on YoruMuse are confirmed consenting adults who have signed verified release agreements with identity verification conducted by qualified legal compliance specialists.
+            All personnel, actors, and contributors depicted in YoruMuse releases operate under professional contracts, formal talent releases, and verified production safety oversight.
           </p>
 
-          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>Immediate Takedown & Response</h3>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "1.3rem" }}>Expedited Review & Compliance</h3>
           <p>
-            If you believe content on YoruMuse violates consent or safety standards, please report it immediately using our direct hotline form or email compliance@yorumuse.com. Reports are acted upon within 1 hour.
+            If you believe content on YoruMuse requires copyright review or violates platform policies, please contact our compliance desk at compliance@yorumuse.com. Inquiries are handled expeditiously.
           </p>
 
           <div style={{ paddingTop: "20px", borderTop: "1px solid var(--border-subtle)", display: "flex", gap: "12px" }}>
-            <Link href="/report" className="btn btn-primary" style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}>
-              Report a Violation Now
+            <Link href="/report" className="btn btn-primary">
+              Submit Inquiries
             </Link>
             <Link href="/" className="btn btn-secondary">
               Return to Home

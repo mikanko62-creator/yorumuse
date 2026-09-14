@@ -59,7 +59,7 @@ export default function GeneralReportPage() {
             Report a Violation or Concern
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
-            Submit an urgent compliance report regarding underage suspicion, non-consensual content, or terms violations.
+            Submit an official report regarding copyright infringement, harassment, spam, or platform policy violations.
           </p>
         </div>
       </section>
@@ -81,7 +81,7 @@ export default function GeneralReportPage() {
               Report Registered
             </h2>
             <p style={{ color: "var(--text-secondary)", maxWidth: "480px", margin: "0 auto 28px", lineHeight: 1.6 }}>
-              Thank you for alerting our compliance operations team. All priority safety reports are audited immediately and acted upon without delay.
+              Thank you for alerting our operations team. All reports are audited promptly by our moderation staff.
             </p>
             <Link href="/" className="btn btn-secondary">
               Return to Home
@@ -116,11 +116,10 @@ export default function GeneralReportPage() {
                 onChange={(e) => setReason(e.target.value)}
                 style={{ width: "100%", padding: "12px 14px" }}
               >
-                <option value="UNDERAGE_SUSPICION">Underage / Minor Concern (Highest Priority)</option>
-                <option value="NON_CONSENSUAL">Non-Consensual Conduct or Material</option>
-                <option value="HARASSMENT">Severe Harassment or Bullying</option>
-                <option value="SPAM">Commercial Spam or Unauthorized Solicitation</option>
                 <option value="COPYRIGHT">DMCA / Copyright Infringement</option>
+                <option value="HARASSMENT">Harassment or Defamation</option>
+                <option value="SPAM">Commercial Spam or Unauthorized Solicitation</option>
+                <option value="INAPPROPRIATE">Inappropriate Content or Policy Violation</option>
                 <option value="OTHER">Other Terms Violation</option>
               </select>
             </div>

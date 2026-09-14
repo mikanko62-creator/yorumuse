@@ -407,10 +407,10 @@ export default function MembershipPage() {
             
             <div style={{ flexGrow: 1 }}>
               <h4 style={{ color: "var(--text-primary)", fontSize: "1.05rem", marginBottom: "4px" }}>
-                100% Discreet & Private Billing
+                Secure & Encrypted Billing
               </h4>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", lineHeight: 1.5 }}>
-                Charges will appear neutrally on your credit card or bank statement as <strong>&ldquo;YM MEDIA LLC&rdquo;</strong>. No adult terms or references will ever be disclosed. All transactions use 256-bit bank-grade encryption.
+                All subscriptions are billed securely via 256-bit bank-grade encryption. Statement line displays <strong>&ldquo;YORUMUSE STUDIOS&rdquo;</strong>. Cancel anytime with a single click from your profile.
               </p>
             </div>
           </div>

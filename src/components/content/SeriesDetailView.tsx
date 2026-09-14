@@ -274,16 +274,16 @@ export default function SeriesDetailView({
             <span
               style={{
                 fontSize: "0.74rem",
-                color: "#991b1b",
-                backgroundColor: "#fee2e2",
-                border: "1px solid #fecaca",
+                color: "var(--accent-gold-dark, #a67c1e)",
+                backgroundColor: "rgba(212, 175, 55, 0.12)",
+                border: "1px solid rgba(212, 175, 55, 0.35)",
                 padding: "2px 8px",
                 borderRadius: "4px",
                 fontWeight: 700,
                 letterSpacing: "0.06em",
               }}
             >
-              18+ MATURE CONTENT
+              PREMIUM ORIGINAL
             </span>
           </div>
         </div>
@@ -371,15 +371,15 @@ export default function SeriesDetailView({
                     fontWeight: 800,
                     padding: "3px 8px",
                     borderRadius: "4px",
-                    backgroundColor: "#fee2e2",
-                    color: "#991b1b",
-                    border: "1px solid #fecaca",
+                    backgroundColor: "rgba(212, 175, 55, 0.12)",
+                    color: "var(--accent-gold-dark, #a67c1e)",
+                    border: "1px solid rgba(212, 175, 55, 0.35)",
                   }}
                 >
-                  18+
+                  SERIES
                 </span>
                 <span style={{ fontSize: "0.84rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                  {content.category} • Cinematic Romance
+                  {content.category} • Original Production
                 </span>
               </div>
 

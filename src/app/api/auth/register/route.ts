@@ -16,12 +16,12 @@ export async function POST(request: Request) {
 
     if (!termsAccepted) {
       return NextResponse.json(
-        { error: "You must accept the terms and confirm you are 18 or older." },
+        { error: "You must accept the Terms of Service and Privacy Policy." },
         { status: 400 }
       );
     }
 
-    // Validate 18+ requirement
+    // Validate age requirement
     const dob = new Date(birthDate);
     if (isNaN(dob.getTime())) {
       return NextResponse.json(

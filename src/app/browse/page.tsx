@@ -71,7 +71,7 @@ function BrowseContent() {
             Explore All Productions
           </h1>
           <p style={{ maxWidth: "600px", color: "var(--text-secondary)", fontSize: "1.05rem" }}>
-            Browse our complete vault of cinematic adult originals, moody noir shorts, and exclusive member sessions.
+            Browse our complete vault of cinematic originals, serialized productions, and exclusive member premieres.
           </p>
 
           {/* Filter Controls Bar */}
