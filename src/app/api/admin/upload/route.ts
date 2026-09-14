@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { uploadToBunny } from "@/lib/bunny";
 import path from "path";
 import fs from "fs/promises";
 
@@ -41,15 +42,21 @@ export async function POST(request: Request) {
       }
 
       const safeFilename = `video_${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${fileExt}`;
-      const targetDir = path.join(process.cwd(), "storage", "videos");
-      await fs.mkdir(targetDir, { recursive: true });
-
-      const targetPath = path.join(targetDir, safeFilename);
       const arrayBuffer = await file.arrayBuffer();
-      await fs.writeFile(targetPath, Buffer.from(arrayBuffer));
+      const buffer = Buffer.from(arrayBuffer);
 
-      // Protected streaming URL
-      const streamUrl = `/api/stream/${safeFilename}`;
+      let videoUrl = "";
+      try {
+        // Primary: Upload to Bunny.net Cloud Storage & CDN
+        videoUrl = await uploadToBunny(buffer, "videos", safeFilename, file.type || "video/mp4");
+      } catch (cloudErr) {
+        console.warn("Bunny upload failed, falling back to local storage:", cloudErr);
+        const targetDir = path.join(process.cwd(), "storage", "videos");
+        await fs.mkdir(targetDir, { recursive: true });
+        const targetPath = path.join(targetDir, safeFilename);
+        await fs.writeFile(targetPath, buffer);
+        videoUrl = `/api/stream/${safeFilename}`;
+      }
 
       return NextResponse.json({
         success: true,
@@ -57,7 +64,7 @@ export async function POST(request: Request) {
         filename: safeFilename,
         originalName,
         size: file.size,
-        url: streamUrl,
+        url: videoUrl,
       });
     } else {
       // Thumbnail image
@@ -79,14 +86,21 @@ export async function POST(request: Request) {
       }
 
       const safeFilename = `thumb_${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${fileExt}`;
-      const targetDir = path.join(process.cwd(), "public", "uploads", "thumbnails");
-      await fs.mkdir(targetDir, { recursive: true });
-
-      const targetPath = path.join(targetDir, safeFilename);
       const arrayBuffer = await file.arrayBuffer();
-      await fs.writeFile(targetPath, Buffer.from(arrayBuffer));
+      const buffer = Buffer.from(arrayBuffer);
 
-      const publicUrl = `/uploads/thumbnails/${safeFilename}`;
+      let publicUrl = "";
+      try {
+        // Primary: Upload to Bunny.net Cloud Storage & CDN
+        publicUrl = await uploadToBunny(buffer, "thumbnails", safeFilename, file.type || "image/jpeg");
+      } catch (cloudErr) {
+        console.warn("Bunny upload failed, falling back to local storage:", cloudErr);
+        const targetDir = path.join(process.cwd(), "public", "uploads", "thumbnails");
+        await fs.mkdir(targetDir, { recursive: true });
+        const targetPath = path.join(targetDir, safeFilename);
+        await fs.writeFile(targetPath, buffer);
+        publicUrl = `/uploads/thumbnails/${safeFilename}`;
+      }
 
       return NextResponse.json({
         success: true,
