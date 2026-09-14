@@ -206,6 +206,41 @@ export default function AdminDashboardPage() {
   // Whitelist / New Admin State
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
+  const [adminFormEmail, setAdminFormEmail] = useState("");
+  const [adminFormUsername, setAdminFormUsername] = useState("");
+  const [adminFormPassword, setAdminFormPassword] = useState("");
+  const [adminFormLoading, setAdminFormLoading] = useState(false);
+
+  const handleAdminFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminFormEmail || !adminFormPassword) {
+      alert("Email dan password wajib diisi.");
+      return;
+    }
+    setAdminFormLoading(true);
+    try {
+      const res = await fetch("/api/setup-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: adminFormEmail.trim(),
+          username: adminFormUsername.trim(),
+          password: adminFormPassword,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Gagal membuat akun admin.");
+      setAdminActionMessage(`Sukses: Akun administrator ${adminFormEmail} berhasil disimpan ke Supabase!`);
+      setAdminFormEmail("");
+      setAdminFormUsername("");
+      setAdminFormPassword("");
+      await loadAllAdminData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal memproses.");
+    } finally {
+      setAdminFormLoading(false);
+    }
+  };
 
   // --- 1. Authorization Verification ---
   const checkAdminAuth = useCallback(async () => {
@@ -1810,6 +1845,81 @@ export default function AdminDashboardPage() {
                 {adminActionMessage}
               </div>
             )}
+
+            {/* Form: Tambah / Perbarui Akun Administrator */}
+            <div
+              style={{
+                backgroundColor: "var(--bg-surface)",
+                borderRadius: "16px",
+                border: "1px solid var(--border-medium)",
+                padding: "24px 28px",
+                marginBottom: "28px",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <div style={{ marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 700, marginBottom: "6px" }}>
+                  Tambah / Perbarui Akun Administrator
+                </h3>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                  Buat akun admin baru atau ubah password admin Anda secara langsung ke database Supabase.
+                </p>
+              </div>
+
+              <form onSubmit={handleAdminFormSubmit} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", alignItems: "flex-end" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
+                    Email Admin *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="admin@yorumuse.com"
+                    value={adminFormEmail}
+                    onChange={(e) => setAdminFormEmail(e.target.value)}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
+                    Username (Nama Admin)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama Admin"
+                    value={adminFormUsername}
+                    onChange={(e) => setAdminFormUsername(e.target.value)}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
+                    Password Admin Baru *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Min. 6 karakter"
+                    value={adminFormPassword}
+                    onChange={(e) => setAdminFormPassword(e.target.value)}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={adminFormLoading}
+                    className="btn btn-primary"
+                    style={{ width: "100%", height: "42px", fontWeight: 600 }}
+                  >
+                    {adminFormLoading ? "Menyimpan..." : "Simpan Akun Admin"}
+                  </button>
+                </div>
+              </form>
+            </div>
 
             {/* Dedicated Whitelist Card */}
             <div

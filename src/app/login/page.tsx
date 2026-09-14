@@ -224,7 +224,7 @@ export default function LoginPage() {
 
         <div
           style={{
-            marginTop: "28px",
+            marginTop: "24px",
             textAlign: "center",
             fontSize: "0.9rem",
             color: "var(--text-secondary)",
@@ -233,6 +233,20 @@ export default function LoginPage() {
           Don&apos;t have an account?{" "}
           <Link href="/register" style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
             Create one here
+          </Link>
+        </div>
+
+        <div
+          style={{
+            marginTop: "12px",
+            textAlign: "center",
+            fontSize: "0.82rem",
+            color: "var(--text-muted)",
+          }}
+        >
+          Administrator?{" "}
+          <Link href="/setup-admin" style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
+            Setup / Buat Akun Admin Pribadi
           </Link>
         </div>
       </div>
