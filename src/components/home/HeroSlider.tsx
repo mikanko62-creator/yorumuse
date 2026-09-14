@@ -217,7 +217,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
                       gap: "6px",
                     }}
                   >
-                    {slide.category || "YoruMuse Originals"}
+                    {slide.category || "Manhwa"}
                   </span>
 
                   {(slide as HeroSlideData).badge && 
@@ -283,7 +283,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
                           description: (slide as HeroSlideData).subtitle || (slide as any).description || "",
                           thumbnail: slide.thumbnail,
                           trailer: (slide as any).trailer || (slide as HeroSlideData).trailerUrl || "",
-                          category: slide.category || "YoruMuse Originals",
+                          category: slide.category || "Manhwa",
                           accessLevel: (slide.accessLevel as any) || "PUBLIC",
                           featured: true,
                           published: true,

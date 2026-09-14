@@ -45,15 +45,15 @@ export default function HomePage() {
       {/* 1. Cinematic Hero Slider */}
       <HeroSlider slides={heroSlides} onWatchTrailer={handleWatchTrailer} />
 
-      {/* 2. Featured Originals Section */}
+      {/* 2. Featured Manhwa Section */}
       <section className="section" style={{ paddingTop: "60px" }}>
         <div className="container">
           <div className="section-header">
             <div>
               <span className="section-subtitle">Curated Excellence</span>
-              <h2 className="section-title">YoruMuse Originals</h2>
+              <h2 className="section-title">Manhwa</h2>
             </div>
-            <Link href="/browse?category=originals" className="view-all-link">
+            <Link href="/browse?category=manhwa" className="view-all-link">
               <span>View All</span>
               <span>→</span>
             </Link>
@@ -365,7 +365,7 @@ export default function HomePage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 700 }}>
-                    ORIGINALS • 112 replies
+                    MANHWA • 112 replies
                   </span>
                   <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>5 hours ago</span>
                 </div>

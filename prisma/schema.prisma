@@ -176,7 +176,7 @@ model HeroSlide {
   title            String
   subtitle         String?
   badge            String?  @default("Exclusive Premiere")
-  category         String?  @default("YoruMuse Originals")
+  category         String?  @default("Manhwa")
   thumbnail        String
   trailerUrl       String?
   contentSlug      String?

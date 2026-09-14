@@ -458,7 +458,7 @@ export default function MembershipPage() {
                 What streaming resolutions and formats are available?
               </h4>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.6 }}>
-                All YoruMuse Originals are mastered in 4K HDR at high bitrates with adaptive streaming. We also support lossless audio soundtracks and stereo audio feeds across all modern web browsers, tablets, and phones.
+                All Manhwa series are mastered in 4K HDR at high bitrates with adaptive streaming. We also support lossless audio soundtracks and stereo audio feeds across all modern web browsers, tablets, and phones.
               </p>
             </div>
 

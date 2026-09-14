@@ -20,14 +20,14 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: "member_monthly",
     name: "Velvet Club Member",
-    tagline: "Full unrestricted access to all YoruMuse Originals and private salons.",
+    tagline: "Full unrestricted access to all Manhwa series and private salons.",
     price: 29,
     currency: "USD",
     interval: "month",
     popular: true,
     badge: "MOST POPULAR",
     features: [
-      "Unrestricted access to all YoruMuse Originals",
+      "Unrestricted access to all Manhwa series",
       "Uncompressed 4K Ultra-HD streaming",
       "Full participation in Private Community discussions",
       "Director's cuts and alternative endings",

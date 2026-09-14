@@ -25,13 +25,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "YORUMUSE | Premium Cinema & Serial Streaming Platform",
-  description: "Curated cinematic streaming platform, serialized original films, and private creator community designed for discerning audiences.",
-  keywords: ["YoruMuse", "streaming platform", "cinema series", "cinematic originals", "exclusive membership", "film series", "curated cinema"],
+  title: "YORUMUSE | Premium Manhwa & Cinema Series Streaming Platform",
+  description: "Curated streaming platform for serialized manhwa adaptations, cinematic releases, and private creator community.",
+  keywords: ["YoruMuse", "manhwa", "manhwa adaptation", "streaming platform", "cinema series", "exclusive membership", "serialized manhwa", "curated cinema"],
   authors: [{ name: "YoruMuse Inc." }],
   openGraph: {
-    title: "YORUMUSE | Premium Cinema & Serial Streaming Platform",
-    description: "Curated cinematic streaming platform, serialized original films, and private creator community designed for discerning audiences.",
+    title: "YORUMUSE | Premium Manhwa & Cinema Series Streaming Platform",
+    description: "Curated streaming platform for serialized manhwa adaptations, cinematic releases, and private creator community.",
     url: "https://yorumuse.com",
     siteName: "YoruMuse",
     locale: "en_US",

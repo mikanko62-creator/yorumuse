@@ -210,8 +210,8 @@ export default function ProfilePage() {
             </h3>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "20px" }}>
               {isSubscribed
-                ? "Your active membership grants you full unhindered access to all 4K YoruMuse Originals and private salons."
-                : "You are currently on the discovery tier. Upgrade to unlock full-length originals, member discussions, and exclusive 4K content."}
+                ? "Your active membership grants you full unhindered access to all 4K Manhwa series and private salons."
+                : "You are currently on the discovery tier. Upgrade to unlock full-length episodes, member discussions, and exclusive 4K content."}
             </p>
 
             <div

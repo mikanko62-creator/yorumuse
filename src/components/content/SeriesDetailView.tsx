@@ -283,7 +283,7 @@ export default function SeriesDetailView({
                 letterSpacing: "0.06em",
               }}
             >
-              PREMIUM ORIGINAL
+              MANHWA SERIES
             </span>
           </div>
         </div>
@@ -379,7 +379,7 @@ export default function SeriesDetailView({
                   SERIES
                 </span>
                 <span style={{ fontSize: "0.84rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                  {content.category} • Original Production
+                  {content.category} • Serialized Adaptation
                 </span>
               </div>
 

@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         thumbnail: thumbnail.trim(),
         trailer: trailer.trim(),
         videoUrl: targetVideoUrl,
-        category: category || "YoruMuse Originals",
+        category: category || "Manhwa",
         accessLevel: accessLevel || "PUBLIC",
         featured: Boolean(featured),
         published: published !== undefined ? Boolean(published) : true,

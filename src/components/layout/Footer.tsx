@@ -34,7 +34,7 @@ export default function Footer() {
                 marginBottom: "24px",
               }}
             >
-              YoruMuse is a curated cinematic video and serialized entertainment platform. Designed for discerning viewers who appreciate high aesthetic standards, original filmmaking, and private member community.
+              YoruMuse is a curated cinematic video and serialized manhwa platform. Designed for discerning viewers who appreciate high aesthetic standards, serialized storytelling, and private member community.
             </p>
             <div
               style={{
@@ -77,8 +77,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/browse?category=originals" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  YoruMuse Originals
+                <Link href="/browse?category=manhwa" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+                  Manhwa Series
                 </Link>
               </li>
               <li>

@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         title: title.trim(),
         subtitle: subtitle ? subtitle.trim() : null,
         badge: badge ? badge.trim() : "Exclusive Premiere",
-        category: category ? category.trim() : "YoruMuse Originals",
+        category: category ? category.trim() : "Manhwa",
         thumbnail: thumbnail.trim(),
         trailerUrl: trailerUrl ? trailerUrl.trim() : null,
         contentSlug: contentSlug ? contentSlug.trim() : null,

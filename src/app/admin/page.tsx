@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
   const [heroTitle, setHeroTitle] = useState("");
   const [heroSubtitle, setHeroSubtitle] = useState("");
   const [heroBadge, setHeroBadge] = useState("Exclusive Premiere");
-  const [heroCategory, setHeroCategory] = useState("YoruMuse Originals");
+  const [heroCategory, setHeroCategory] = useState("Manhwa");
   const [heroThumbnail, setHeroThumbnail] = useState("");
   const [heroTrailerUrl, setHeroTrailerUrl] = useState("");
   const [heroContentSlug, setHeroContentSlug] = useState("");
@@ -169,7 +169,7 @@ export default function AdminDashboardPage() {
   const [isAddContentOpen, setIsAddContentOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
-  const [newCategory, setNewCategory] = useState("YoruMuse Originals");
+  const [newCategory, setNewCategory] = useState("Manhwa");
   const [newAccess, setNewAccess] = useState("PUBLIC");
   const [newThumb, setNewThumb] = useState("");
   const [newTrailer, setNewTrailer] = useState("");
@@ -450,7 +450,7 @@ export default function AdminDashboardPage() {
     setHeroTitle("");
     setHeroSubtitle("");
     setHeroBadge("Exclusive Premiere");
-    setHeroCategory("YoruMuse Originals");
+    setHeroCategory("Manhwa");
     setHeroThumbnail("");
     setHeroTrailerUrl("");
     setHeroContentSlug("");
@@ -466,7 +466,7 @@ export default function AdminDashboardPage() {
     setHeroTitle(slide.title);
     setHeroSubtitle(slide.subtitle || "");
     setHeroBadge(slide.badge || "Exclusive Premiere");
-    setHeroCategory(slide.category || "YoruMuse Originals");
+    setHeroCategory(slide.category || "Manhwa");
     setHeroThumbnail(slide.thumbnail);
     setHeroTrailerUrl(slide.trailerUrl || "");
     setHeroContentSlug(slide.contentSlug || "");
@@ -1616,7 +1616,7 @@ export default function AdminDashboardPage() {
                           {slide.badge || "Exclusive"}
                         </span>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                          {slide.category || "Originals"}
+                          {slide.category || "Manhwa"}
                         </span>
                         <span
                           style={{
@@ -2495,7 +2495,7 @@ export default function AdminDashboardPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. YoruMuse Originals, Midnight Noir"
+                    placeholder="e.g. Manhwa, Romance, Fantasy"
                     value={heroCategory}
                     onChange={(e) => setHeroCategory(e.target.value)}
                     style={{ width: "100%" }}
@@ -2803,7 +2803,7 @@ export default function AdminDashboardPage() {
                       onChange={(e) => setNewCategory(e.target.value)}
                       style={{ width: "100%" }}
                     >
-                      <option value="YoruMuse Originals">YoruMuse Originals</option>
+                      <option value="Manhwa">Manhwa</option>
                       <option value="Midnight Noir">Midnight Noir</option>
                       <option value="Velvet Sessions">Velvet Sessions</option>
                       <option value="Elegance & Silk">Elegance & Silk</option>
