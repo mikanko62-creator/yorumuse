@@ -163,33 +163,6 @@ function BrowseContent() {
               ))}
             </div>
 
-            {/* Access Level Filters */}
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                Tier:
-              </span>
-              {["all", "PUBLIC", "MEMBER", "PREMIUM"].map((tier) => (
-                <button
-                  key={tier}
-                  onClick={() => setSelectedAccess(tier)}
-                  style={{
-                    padding: "6px 14px",
-                    borderRadius: "var(--radius-xs)",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    border: selectedAccess === tier ? "1px solid var(--accent-gold)" : "1px solid var(--border-subtle)",
-                    backgroundColor: selectedAccess === tier ? "var(--accent-gold)" : "var(--bg-surface)",
-                    color: selectedAccess === tier ? "#ffffff" : "var(--text-secondary)",
-                    cursor: "pointer",
-                    boxShadow: selectedAccess === tier ? "0 2px 6px rgba(166, 124, 30, 0.2)" : "none",
-                  }}
-                >
-                  {tier === "all" ? "All Tiers" : tier}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </section>

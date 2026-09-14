@@ -189,11 +189,6 @@ export default function Header() {
                 >
                   {user.username}
                 </span>
-                {user.subscription?.status === "ACTIVE" && (
-                  <span className="badge badge-member" style={{ padding: "2px 6px", fontSize: "0.65rem" }}>
-                    PRO
-                  </span>
-                )}
               </Link>
             </div>
           ) : (

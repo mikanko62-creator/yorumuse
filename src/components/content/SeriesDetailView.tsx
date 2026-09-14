@@ -354,7 +354,7 @@ export default function SeriesDetailView({
                     border: "1px solid rgba(212, 175, 55, 0.4)",
                   }}
                 >
-                  {content.accessLevel === "PUBLIC" ? "FREE ACCESS" : `${content.accessLevel} EXCLUSIVE`}
+                  CINEMA SERIES
                 </span>
                 <span style={{ fontSize: "0.78rem", color: "#f3f4f6", fontWeight: 600 }}>
                   {defaultChapters.length} Chapters

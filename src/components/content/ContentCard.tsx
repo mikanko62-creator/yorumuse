@@ -189,25 +189,15 @@ export default function ContentCard({ item, onWatchTrailer }: ContentCardProps) 
         )}
 
         {/* Top Badges */}
-        <div
-          style={{
-            position: "absolute",
-            top: "12px",
-            left: "12px",
-            right: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 3,
-          }}
-        >
-          <span className={getBadgeClass(item.accessLevel)}>
-            
-            {item.accessLevel === "PREMIUM" && "◆ "}
-            {item.accessLevel}
-          </span>
-
-          {item.duration && (
+        {item.duration && (
+          <div
+            style={{
+              position: "absolute",
+              top: "12px",
+              right: "12px",
+              zIndex: 3,
+            }}
+          >
             <span
               style={{
                 fontSize: "0.72rem",
@@ -222,8 +212,8 @@ export default function ContentCard({ item, onWatchTrailer }: ContentCardProps) 
             >
               {item.duration}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Card Information Body */}

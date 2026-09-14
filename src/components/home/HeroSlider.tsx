@@ -220,17 +220,14 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
                     {slide.category || "YoruMuse Originals"}
                   </span>
 
-                  <span
-                    className={`badge ${
-                      slide.accessLevel === "MEMBER"
-                        ? "badge-member"
-                        : slide.accessLevel === "PREMIUM"
-                        ? "badge-premium"
-                        : "badge-public"
-                    }`}
-                  >
-                    {(slide as HeroSlideData).badge || (slide.accessLevel ? `${slide.accessLevel} ACCESS` : "Exclusive Premiere")}
-                  </span>
+                  {(slide as HeroSlideData).badge && 
+                    !(slide as HeroSlideData).badge?.toUpperCase().includes("MEMBER") &&
+                    !(slide as HeroSlideData).badge?.toUpperCase().includes("PREMIUM") &&
+                    !(slide as HeroSlideData).badge?.toUpperCase().includes("PUBLIC") && (
+                    <span className="badge" style={{ backgroundColor: "rgba(212, 175, 55, 0.12)", color: "var(--accent-gold)", border: "1px solid rgba(212, 175, 55, 0.3)" }}>
+                      {(slide as HeroSlideData).badge}
+                    </span>
+                  )}
 
                   {slide.duration && (
                     <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>

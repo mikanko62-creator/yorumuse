@@ -294,7 +294,7 @@ export default function ChapterPlayerView({
                     marginBottom: "8px",
                   }}
                 >
-                  {content.accessLevel} EXCLUSIVE
+                  EXCLUSIVE STREAM
                 </div>
                 <h2
                   style={{
