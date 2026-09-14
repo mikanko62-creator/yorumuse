@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroSlider, { HeroSlideData } from "@/components/home/HeroSlider";
 import ContentCard from "@/components/content/ContentCard";
+import EpisodeListCard from "@/components/content/EpisodeListCard";
 import TrailerModal from "@/components/video/TrailerModal";
 import { MOCK_CONTENT, CATEGORIES } from "@/data/mockContent";
 import { ContentItem } from "@/types/content";
@@ -45,34 +46,245 @@ export default function HomePage() {
       {/* 1. Cinematic Hero Slider */}
       <HeroSlider slides={heroSlides} onWatchTrailer={handleWatchTrailer} />
 
-      {/* 2. Featured Manhwa Section */}
-      <section className="section" style={{ paddingTop: "60px" }}>
+      {/* 2. Gambar 1 Layout: Feed Rilis Manhwa Terbaru + Sidebar */}
+      <section className="section" style={{ paddingTop: "48px", paddingBottom: "48px" }}>
         <div className="container">
-          <div className="section-header">
-            <div>
-              <span className="section-subtitle">Curated Excellence</span>
-              <h2 className="section-title">Manhwa</h2>
-            </div>
-            <Link href="/browse?category=manhwa" className="view-all-link">
-              <span>View All</span>
-              <span>→</span>
-            </Link>
-          </div>
-
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "28px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+              gap: "36px",
+              alignItems: "start",
             }}
           >
-            {featuredItems.map((item) => (
-              <ContentCard
-                key={item.id}
-                item={item}
-                onWatchTrailer={handleWatchTrailer}
-              />
-            ))}
+            {/* Kolom Kiri Utama: List Rilis Episode (Gambar 1) */}
+            <div style={{ minWidth: 0, flex: "1 1 65%" }}>
+              {/* Header Panel Bergaya HASIL RILIS */}
+              <div
+                style={{
+                  backgroundColor: "var(--bg-surface, #101016)",
+                  border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+                  borderBottom: "2px solid var(--accent-gold, #d4af37)",
+                  borderRadius: "10px 10px 0 0",
+                  padding: "14px 20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "16px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: "var(--accent-gold, #d4af37)",
+                      boxShadow: "0 0 8px var(--accent-gold)",
+                      display: "inline-block",
+                    }}
+                  />
+                  <h2
+                    style={{
+                      fontSize: "1.05rem",
+                      fontWeight: 800,
+                      color: "var(--text-primary, #ffffff)",
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                      margin: 0,
+                    }}
+                  >
+                    RILIS MANHWA TERBARU
+                  </h2>
+                </div>
+
+                <Link
+                  href="/browse?category=manhwa"
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "var(--accent-gold, #d4af37)",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <span>Lihat Semua</span>
+                  <span>→</span>
+                </Link>
+              </div>
+
+              {/* Daftar Episode Card (Gambar 1 Stack) */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                {MOCK_CONTENT.slice(0, 6).map((item, index) => (
+                  <EpisodeListCard
+                    key={item.id}
+                    item={item}
+                    badgePrefix="4K"
+                    chapterNumber={index % 2 === 0 ? 1 : 2}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Kolom Kanan Sidebar: Trending & Akses VIP */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px",
+                minWidth: "280px",
+              }}
+            >
+              {/* Widget 1: Trending Manhwa */}
+              <div
+                style={{
+                  backgroundColor: "var(--bg-surface, #101016)",
+                  border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "12px 18px",
+                    backgroundColor: "rgba(255, 255, 255, 0.02)",
+                    borderBottom: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 800,
+                      color: "var(--accent-gold, #d4af37)",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    POPULER & TRENDING
+                  </span>
+                  <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Top Minggu Ini</span>
+                </div>
+
+                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {popularItems.map((item, idx) => (
+                    <Link
+                      key={item.id}
+                      href={`/content/${item.slug}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        textDecoration: "none",
+                        padding: "8px",
+                        borderRadius: "8px",
+                        transition: "background-color 0.2s ease",
+                      }}
+                      className="sidebar-trending-item"
+                    >
+                      {/* Rank Number */}
+                      <span
+                        style={{
+                          fontSize: "1.1rem",
+                          fontWeight: 900,
+                          fontFamily: "var(--font-serif)",
+                          color: idx === 0 ? "var(--accent-gold)" : "var(--text-muted)",
+                          minWidth: "24px",
+                          textAlign: "center",
+                        }}
+                      >
+                        0{idx + 1}
+                      </span>
+
+                      {/* Mini Thumbnail */}
+                      <img
+                        src={item.thumbnail}
+                        alt={item.title}
+                        style={{
+                          width: "56px",
+                          height: "38px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                          flexShrink: 0,
+                        }}
+                      />
+
+                      {/* Title & Views */}
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <h4
+                          style={{
+                            fontSize: "0.86rem",
+                            fontWeight: 700,
+                            color: "var(--text-primary)",
+                            margin: 0,
+                            lineHeight: 1.3,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.title}
+                        </h4>
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                          {(item.views || 18000).toLocaleString()} views
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Widget 2: VIP Member Access */}
+              <div
+                style={{
+                  background: "linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(16, 16, 22, 0.8) 100%)",
+                  border: "1px solid rgba(212, 175, 55, 0.35)",
+                  borderRadius: "12px",
+                  padding: "20px 18px",
+                  textAlign: "center",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.74rem",
+                    fontWeight: 800,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: "var(--accent-gold)",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
+                  PREMIUM PASS
+                </span>
+                <h3
+                  style={{
+                    fontSize: "1.15rem",
+                    fontFamily: "var(--font-serif)",
+                    color: "var(--text-primary)",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Nonton Tanpa Batas 4K
+                </h3>
+                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "16px" }}>
+                  Buka semua chapter penuh serial manhwa favoritmu dengan kualitas tertinggi tanpa kompromi.
+                </p>
+                <Link
+                  href="/membership"
+                  className="btn btn-primary"
+                  style={{ width: "100%", justifyContent: "center", fontSize: "0.85rem", padding: "10px 16px" }}
+                >
+                  Mulai Berlangganan
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

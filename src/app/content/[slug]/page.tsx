@@ -122,6 +122,7 @@ export default async function ContentDetailPage({ params }: PageProps) {
           trailer: content.trailer,
           duration: content.duration,
           releaseYear: content.releaseYear,
+          views: content.views,
           likes: content.likes,
           tags: content.tags,
         }}
