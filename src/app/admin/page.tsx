@@ -161,6 +161,9 @@ export default function AdminDashboardPage() {
   const [heroCtaSecondaryText, setHeroCtaSecondaryText] = useState("Lihat Trailer");
   const [heroIsActive, setHeroIsActive] = useState(true);
   const [savingHero, setSavingHero] = useState(false);
+  const [heroThumbUploadMode, setHeroThumbUploadMode] = useState<"upload" | "url">("upload");
+  const [heroThumbUploading, setHeroThumbUploading] = useState(false);
+  const [heroThumbFileName, setHeroThumbFileName] = useState("");
 
   // Create Content Modal State
   const [isAddContentOpen, setIsAddContentOpen] = useState(false);
@@ -235,6 +238,19 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     checkAdminAuth();
   }, [checkAdminAuth]);
+
+  // Lock body scroll when any modal is open
+  useEffect(() => {
+    const anyModalOpen = isHeroModalOpen || isAddContentOpen || isAddChapterModalOpen;
+    if (anyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isHeroModalOpen, isAddContentOpen, isAddChapterModalOpen]);
 
   // --- 2. Data Loading ---
   const loadAllAdminData = async () => {
@@ -729,6 +745,31 @@ export default function AdminDashboardPage() {
       setNewThumb("");
     } finally {
       setThumbUploading(false);
+    }
+  };
+
+  const handleHeroThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setHeroThumbUploading(true);
+    setHeroThumbFileName(file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "image");
+
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Image upload failed");
+
+      setHeroThumbnail(data.url);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah gambar.";
+      alert(msg);
+      setHeroThumbnail("");
+    } finally {
+      setHeroThumbUploading(false);
     }
   };
 
@@ -2353,17 +2394,96 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                  URL Backdrop Image / Poster *
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/..."
-                  value={heroThumbnail}
-                  onChange={(e) => setHeroThumbnail(e.target.value)}
-                  style={{ width: "100%" }}
-                />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
+                    Backdrop Image / Poster *
+                  </label>
+                  <div style={{ display: "flex", gap: "6px", fontSize: "0.75rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setHeroThumbUploadMode("upload")}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                        backgroundColor: heroThumbUploadMode === "upload" ? "var(--accent-gold)" : "var(--bg-surface-elevated)",
+                        color: heroThumbUploadMode === "upload" ? "#ffffff" : "var(--text-secondary)",
+                        border: "1px solid var(--border-subtle)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHeroThumbUploadMode("url")}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                        backgroundColor: heroThumbUploadMode === "url" ? "var(--accent-gold)" : "var(--bg-surface-elevated)",
+                        color: heroThumbUploadMode === "url" ? "#ffffff" : "var(--text-secondary)",
+                        border: "1px solid var(--border-subtle)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Link URL
+                    </button>
+                  </div>
+                </div>
+
+                {heroThumbUploadMode === "upload" ? (
+                  <label
+                    htmlFor="hero-thumb-file-input"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                      padding: "12px 16px",
+                      border: "2px dashed var(--border-medium)",
+                      borderRadius: "12px",
+                      backgroundColor: "var(--bg-surface-elevated)",
+                      cursor: heroThumbUploading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleHeroThumbUpload}
+                      disabled={heroThumbUploading}
+                      style={{ display: "none" }}
+                      id="hero-thumb-file-input"
+                    />
+                    {heroThumbnail && (
+                      <img
+                        src={heroThumbnail}
+                        alt="Preview"
+                        style={{ width: "64px", height: "42px", objectFit: "cover", borderRadius: "6px" }}
+                      />
+                    )}
+                    <div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                        {heroThumbUploading
+                          ? "Mengunggah gambar..."
+                          : heroThumbFileName
+                          ? heroThumbFileName
+                          : "Klik untuk upload poster/gambar backdrop"}
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                        Format: JPG, PNG, WebP (Maks. 15MB)
+                      </div>
+                    </div>
+                  </label>
+                ) : (
+                  <input
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={heroThumbnail}
+                    onChange={(e) => setHeroThumbnail(e.target.value)}
+                    style={{ width: "100%" }}
+                  />
+                )}
+
                 {heroThumbnail && (
                   <div style={{ marginTop: "6px", width: "100%", height: "90px", borderRadius: "8px", overflow: "hidden" }}>
                     <img src={heroThumbnail} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />

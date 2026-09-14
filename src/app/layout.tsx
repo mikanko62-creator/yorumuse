@@ -3,6 +3,7 @@ import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import AgeGate from "@/components/common/AgeGate";
 
 const serifFont = Playfair_Display({
   variable: "--font-serif",
@@ -56,6 +57,9 @@ export default function RootLayout({
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {/* Global Navigation Header */}
         <Header />
+
+        {/* 18+ Age Verification Modal */}
+        <AgeGate />
 
         {/* Main Content Area */}
         <main style={{ flex: "1 0 auto", position: "relative", zIndex: 1 }}>
