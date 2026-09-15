@@ -13,12 +13,27 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "You must be signed in to comment." }, { status: 401 });
     }
 
+    if (user.status === "BANNED" || user.status === "SUSPENDED") {
+      return NextResponse.json({ error: "Akun Anda sedang dibatasi dan tidak dapat berkomentar." }, { status: 403 });
+    }
+
     const { id: postId } = await params;
+
+    // Verify post exists and is active
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, status: true },
+    });
+
+    if (!post || post.status !== "PUBLISHED") {
+      return NextResponse.json({ error: "Postingan tidak ditemukan atau tidak aktif." }, { status: 404 });
+    }
+
     const body = await request.json();
     const { content } = body;
 
-    if (!content || !content.trim()) {
-      return NextResponse.json({ error: "Comment text cannot be empty." }, { status: 400 });
+    if (!content || !content.trim() || content.trim().length > 3000) {
+      return NextResponse.json({ error: "Isi komentar tidak boleh kosong (maksimal 3000 karakter)." }, { status: 400 });
     }
 
     const comment = await prisma.comment.create({

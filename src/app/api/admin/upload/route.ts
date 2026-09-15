@@ -22,12 +22,20 @@ export async function POST(request: Request) {
     const originalName = file.name;
     const fileExt = path.extname(originalName).toLowerCase().replace(".", "") || (uploadType === "video" ? "mp4" : "jpg");
 
+    const blockedExts = ["php", "html", "htm", "js", "svg", "xml", "exe", "sh", "bat", "cmd", "py", "pl", "cgi", "phar", "phtml"];
+    if (blockedExts.includes(fileExt)) {
+      return NextResponse.json(
+        { error: "Tipe file ini dilarang demi keamanan sistem." },
+        { status: 400 }
+      );
+    }
+
     // Validation by upload type
     if (uploadType === "video") {
       const allowedVideoExts = ["mp4", "webm", "mov", "mkv"];
-      if (!allowedVideoExts.includes(fileExt) && !file.type.startsWith("video/")) {
+      if (!allowedVideoExts.includes(fileExt) || !file.type.startsWith("video/")) {
         return NextResponse.json(
-          { error: "Invalid video format. Supported: MP4, WebM, MOV." },
+          { error: "Format video tidak valid. Format didukung: MP4, WebM, MOV, MKV." },
           { status: 400 }
         );
       }
@@ -36,7 +44,7 @@ export async function POST(request: Request) {
       const maxVideoBytes = 250 * 1024 * 1024;
       if (file.size > maxVideoBytes) {
         return NextResponse.json(
-          { error: "Video file is too large. Maximum supported size is 250MB." },
+          { error: "Ukuran file video terlalu besar. Maksimum 250MB." },
           { status: 400 }
         );
       }
@@ -69,9 +77,9 @@ export async function POST(request: Request) {
     } else {
       // Thumbnail image
       const allowedImageExts = ["jpg", "jpeg", "png", "webp", "avif"];
-      if (!allowedImageExts.includes(fileExt) && !file.type.startsWith("image/")) {
+      if (!allowedImageExts.includes(fileExt) || !file.type.startsWith("image/")) {
         return NextResponse.json(
-          { error: "Invalid image format. Supported: JPG, PNG, WebP." },
+          { error: "Format gambar tidak valid. Format didukung: JPG, PNG, WebP, AVIF." },
           { status: 400 }
         );
       }
@@ -80,7 +88,7 @@ export async function POST(request: Request) {
       const maxImageBytes = 15 * 1024 * 1024;
       if (file.size > maxImageBytes) {
         return NextResponse.json(
-          { error: "Image file is too large. Maximum supported size is 15MB." },
+          { error: "Ukuran file gambar terlalu besar. Maksimum 15MB." },
           { status: 400 }
         );
       }

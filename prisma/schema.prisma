@@ -74,6 +74,7 @@ model Subscription {
   cancelAtEnd      Boolean   @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  paymentMethod    String?   @default("paypal")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

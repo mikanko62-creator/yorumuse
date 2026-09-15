@@ -108,6 +108,11 @@ export async function POST(
       },
     });
 
+    await prisma.content.update({
+      where: { id: contentId },
+      data: { updatedAt: new Date() },
+    });
+
     return NextResponse.json({ success: true, chapter: newChapter }, { status: 201 });
   } catch (error) {
     console.error("Create chapter error:", error);

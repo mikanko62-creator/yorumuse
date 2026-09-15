@@ -40,12 +40,12 @@ body::before {
   z-index: 0;
 }
 
-/* Typography Base */
+/* Typography Base - Clean Developer Modern Sans-Serif */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   color: var(--text-primary);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 

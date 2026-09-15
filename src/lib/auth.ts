@@ -49,6 +49,31 @@ export async function createSession(
 ) {
   const expiresAt = new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
+  // If userMeta is not provided or incomplete, look up user from database securely
+  let meta = userMeta;
+  if (!meta || !meta.role) {
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, username: true, role: true },
+      });
+      if (dbUser) {
+        meta = {
+          email: dbUser.email,
+          username: dbUser.username,
+          role: dbUser.role || "USER",
+        };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Ensure role is never escalated by default
+  const safeRole = meta?.role === "ADMIN" ? "ADMIN" : "USER";
+  const safeEmail = meta?.email || "";
+  const safeUsername = meta?.username || "User";
+
   // Optional: write to DB if database is writable (local dev)
   try {
     const token = crypto.randomBytes(32).toString("hex");
@@ -66,9 +91,9 @@ export async function createSession(
   // Create tamper-proof signed session token (stateless, works on Vercel serverless)
   const signedToken = signSessionToken({
     userId,
-    email: userMeta?.email || "admin@yorumuse.com",
-    username: userMeta?.username || "YoruMuseAdmin",
-    role: userMeta?.role || "ADMIN",
+    email: safeEmail,
+    username: safeUsername,
+    role: safeRole,
     exp: expiresAt.getTime(),
   });
 
@@ -116,6 +141,7 @@ export async function getCurrentUser() {
   // 1. Verify signed token (stateless fallback for Vercel)
   const payload = verifySessionToken(token);
   if (payload) {
+    let dbLookupSucceeded = false;
     try {
       const user = await prisma.user.findUnique({
         where: { id: payload.userId },
@@ -127,7 +153,13 @@ export async function getCurrentUser() {
         },
       });
 
-      if (user && user.status !== "BANNED") {
+      dbLookupSucceeded = true;
+
+      if (user) {
+        if (user.status === "BANNED" || user.status === "SUSPENDED") {
+          return null;
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -139,23 +171,28 @@ export async function getCurrentUser() {
           avatarUrl: user.avatarUrl,
           subscription: user.subscriptions?.[0] || null,
         };
+      } else {
+        // User was explicitly deleted in the database -> revoke access immediately!
+        return null;
       }
     } catch {
-      // Database not reachable, fallback to signed token claims
+      // Database not reachable, fallback only if DB connection errored
     }
 
-    // Return authenticated user from valid signed session token
-    return {
-      id: payload.userId,
-      email: payload.email,
-      username: payload.username,
-      role: payload.role,
-      status: "ACTIVE",
-      birthDate: "1990-01-01",
-      bio: "Verified Member",
-      avatarUrl: null,
-      subscription: payload.role === "ADMIN" ? { status: "ACTIVE", planId: "vip_premium" } : null,
-    };
+    // Only if database was unreachable (network partition / outage), fallback to valid signed token
+    if (!dbLookupSucceeded) {
+      return {
+        id: payload.userId,
+        email: payload.email,
+        username: payload.username,
+        role: payload.role === "ADMIN" ? "ADMIN" : "USER",
+        status: "ACTIVE",
+        birthDate: "1990-01-01",
+        bio: "Verified Member",
+        avatarUrl: null,
+        subscription: payload.role === "ADMIN" ? { status: "ACTIVE", planId: "vip_premium" } : null,
+      };
+    }
   }
 
   // 2. Legacy database session lookup

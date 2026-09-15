@@ -15,6 +15,8 @@ export default function HomePage() {
   const featuredItems = MOCK_CONTENT.filter((item) => item.featured);
   const [heroSlides, setHeroSlides] = useState<(ContentItem | HeroSlideData)[]>(featuredItems);
 
+  const [contentList, setContentList] = useState<any[]>(MOCK_CONTENT);
+
   useEffect(() => {
     fetch("/api/hero")
       .then((res) => (res.ok ? res.json() : null))
@@ -24,12 +26,21 @@ export default function HomePage() {
         }
       })
       .catch((err) => console.error("Error loading dynamic hero slides:", err));
+
+    fetch("/api/content?sort=latest")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.content && data.content.length > 0) {
+          setContentList(data.content);
+        }
+      })
+      .catch((err) => console.error("Error loading dynamic content:", err));
   }, []);
 
-  const latestItems = [...MOCK_CONTENT].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  ).slice(0, 4);
-  const popularItems = [...MOCK_CONTENT].sort(
+  const latestItems = [...contentList].sort(
+    (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+  );
+  const popularItems = [...contentList].sort(
     (a, b) => (b.views || 0) - (a.views || 0)
   ).slice(0, 4);
 
@@ -80,7 +91,6 @@ export default function HomePage() {
                       height: "8px",
                       borderRadius: "50%",
                       backgroundColor: "var(--accent-gold, #d4af37)",
-                      boxShadow: "0 0 8px var(--accent-gold)",
                       display: "inline-block",
                     }}
                   />
@@ -117,12 +127,11 @@ export default function HomePage() {
 
               {/* Daftar Episode Card (Gambar 1 Stack) */}
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                {MOCK_CONTENT.slice(0, 6).map((item, index) => (
+                {latestItems.slice(0, 8).map((item) => (
                   <EpisodeListCard
                     key={item.id}
                     item={item}
-                    badgePrefix="4K"
-                    chapterNumber={index % 2 === 0 ? 1 : 2}
+                    chapterNumber={item.latestChapterNumber || 1}
                   />
                 ))}
               </div>
@@ -144,7 +153,7 @@ export default function HomePage() {
                   border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
                   borderRadius: "12px",
                   overflow: "hidden",
-                  boxShadow: "var(--shadow-sm)",
+                  boxShadow: "none",
                 }}
               >
                 <div
@@ -239,15 +248,15 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Widget 2: VIP Member Access */}
+              {/* Widget 2: Subscription Card */}
               <div
                 style={{
-                  background: "linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(16, 16, 22, 0.8) 100%)",
-                  border: "1px solid rgba(212, 175, 55, 0.35)",
+                  backgroundColor: "var(--bg-surface, #101016)",
+                  border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
                   borderRadius: "12px",
                   padding: "20px 18px",
                   textAlign: "center",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                  boxShadow: "none",
                 }}
               >
                 <span
@@ -261,20 +270,20 @@ export default function HomePage() {
                     marginBottom: "8px",
                   }}
                 >
-                  PREMIUM PASS
+                  SUBSCRIPTION
                 </span>
                 <h3
                   style={{
                     fontSize: "1.15rem",
-                    fontFamily: "var(--font-serif)",
                     color: "var(--text-primary)",
                     marginBottom: "8px",
+                    fontWeight: 700,
                   }}
                 >
-                  Nonton Tanpa Batas 4K
+                  Nonton Semua Chapter Tanpa Batas
                 </h3>
                 <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "16px" }}>
-                  Buka semua chapter penuh serial manhwa favoritmu dengan kualitas tertinggi tanpa kompromi.
+                  Buka semua chapter penuh serial manhwa favoritmu dengan menjadi pengguna subscription.
                 </p>
                 <Link
                   href="/membership"
@@ -549,7 +558,7 @@ export default function HomePage() {
                   borderRadius: "var(--radius-md)",
                   backgroundColor: "var(--bg-surface)",
                   border: "1px solid var(--border-subtle)",
-                  boxShadow: "var(--shadow-sm)",
+                  boxShadow: "none",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -572,7 +581,7 @@ export default function HomePage() {
                   borderRadius: "var(--radius-md)",
                   backgroundColor: "var(--bg-surface)",
                   border: "1px solid var(--border-subtle)",
-                  boxShadow: "var(--shadow-sm)",
+                  boxShadow: "none",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -603,7 +612,7 @@ export default function HomePage() {
               padding: "clamp(36px, 6vw, 72px) clamp(24px, 5vw, 60px)",
               background: "linear-gradient(135deg, #ffffff 0%, #fdfbf7 50%, #f7f3e8 100%)",
               border: "1px solid rgba(166, 124, 30, 0.25)",
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.06), 0 0 30px rgba(166, 124, 30, 0.08)",
+              boxShadow: "none",
               textAlign: "center",
               overflow: "hidden",
             }}
@@ -657,7 +666,7 @@ export default function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Gain unrestricted access to full-length 4K HDR productions, director commentary, behind-the-scenes ateliers, and private member salons.
+              Buka akses tak terbatas ke seluruh episode dan chapter penuh serial manhwa dengan berlangganan.
             </p>
 
             <div
@@ -669,7 +678,7 @@ export default function HomePage() {
               }}
             >
               <Link href="/membership" className="btn btn-primary btn-lg" id="home-membership-cta">
-                View Membership Tiers
+                Mulai Berlangganan
               </Link>
               <Link href="/browse" className="btn btn-secondary btn-lg">
                 Browse Public Previews

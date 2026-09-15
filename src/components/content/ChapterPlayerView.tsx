@@ -459,7 +459,7 @@ export default function ChapterPlayerView({
                       CHAPTER {ch.chapterNumber}
                     </span>
                     <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                      ⏱ {ch.duration || "45 min"}
+                      {ch.duration || "45 min"}
                     </span>
                   </div>
 
@@ -703,7 +703,7 @@ export default function ChapterPlayerView({
                         <div>
                           {cooldownSeconds > 0 ? (
                             <span style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
-                              ⏳ Cooldown Anti-Spam: {cooldownSeconds} detik
+                              Cooldown Anti-Spam: {cooldownSeconds} detik
                             </span>
                           ) : (
                             <span>Batas kirim: 1 ulasan per 15 detik untuk mencegah spam.</span>

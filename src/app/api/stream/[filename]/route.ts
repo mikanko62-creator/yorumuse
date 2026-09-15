@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import { Readable } from "stream";
+import { getCurrentUser, hasMemberAccess } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+const ALLOWED_VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".mov", ".mkv", ".ogg"]);
 
 export async function GET(
   request: NextRequest,
@@ -10,9 +14,52 @@ export async function GET(
   try {
     const { filename } = await params;
 
-    // Security check against directory traversal
-    if (!filename || filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
-      return new NextResponse("Invalid filename", { status: 400 });
+    // Security check against directory traversal and invalid filenames
+    if (
+      !filename ||
+      filename.includes("..") ||
+      filename.includes("/") ||
+      filename.includes("\\") ||
+      !/^[a-zA-Z0-9_\-\.]+$/.test(filename)
+    ) {
+      return new NextResponse("Invalid filename format", { status: 400 });
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    if (!ALLOWED_VIDEO_EXTENSIONS.has(ext)) {
+      return new NextResponse("Unsupported media type", { status: 400 });
+    }
+
+    // Access authorization check for protected content
+    const user = await getCurrentUser();
+    const isMember = await hasMemberAccess(user);
+
+    // Look up if file is associated with a paid Chapter or restricted Content
+    const chapter = await prisma.chapter.findFirst({
+      where: {
+        videoUrl: { contains: filename },
+      },
+      include: {
+        content: true,
+      },
+    }).catch(() => null);
+
+    if (chapter) {
+      // Chapter 1 of PUBLIC content is free; higher chapters or non-public content require membership
+      const isRestricted = chapter.chapterNumber > 1 || chapter.content?.accessLevel !== "PUBLIC";
+      if (isRestricted && !isMember && user?.role !== "ADMIN") {
+        return new NextResponse("Subscription required to stream this chapter", { status: 403 });
+      }
+    } else {
+      const contentItem = await prisma.content.findFirst({
+        where: {
+          videoUrl: { contains: filename },
+        },
+      }).catch(() => null);
+
+      if (contentItem && contentItem.accessLevel !== "PUBLIC" && !isMember && user?.role !== "ADMIN") {
+        return new NextResponse("Subscription required to stream this production", { status: 403 });
+      }
     }
 
     // Locate protected video path
@@ -28,12 +75,17 @@ export async function GET(
       }
     }
 
+    // Ensure resolved path is strictly within project root
+    const resolvedPath = path.resolve(filePath);
+    if (!resolvedPath.startsWith(path.resolve(process.cwd()))) {
+      return new NextResponse("Access denied", { status: 403 });
+    }
+
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
     const range = request.headers.get("range");
 
     // Determine content type
-    const ext = path.extname(filename).toLowerCase();
     const mimeTypes: Record<string, string> = {
       ".mp4": "video/mp4",
       ".webm": "video/webm",

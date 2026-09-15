@@ -1,9 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, createSession } from "@/lib/auth";
+import { hashPassword, createSession, getCurrentUser } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    // 1. Authorization & Bootstrap verification
+    const existingAdminCount = await prisma.user.count({
+      where: { role: "ADMIN" },
+    }).catch(() => 0);
+
+    const currentUser = await getCurrentUser();
+    const setupKeyHeader = request.headers.get("x-setup-admin-key");
+    const configuredKey = process.env.SETUP_ADMIN_KEY;
+    const isAuthorizedViaKey = configuredKey && setupKeyHeader === configuredKey;
+    const isAuthorizedAdmin = currentUser?.role === "ADMIN";
+
+    // If an administrator already exists, restrict creation to authenticated Admins or valid secret key
+    if (existingAdminCount > 0 && !isAuthorizedAdmin && !isAuthorizedViaKey) {
+      return NextResponse.json(
+        { error: "Akses ditolak: Sistem administrator sudah aktif. Hanya Super Admin terdaftar yang dapat menambahkan akun admin baru." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { email, password, username } = body;
 
@@ -14,14 +33,22 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password minimal 6 karakter." },
+        { error: "Password minimal 8 karakter demi keamanan akun." },
         { status: 400 }
       );
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return NextResponse.json(
+        { error: "Format email tidak valid." },
+        { status: 400 }
+      );
+    }
+
     const cleanUsername = username?.trim() || cleanEmail.split("@")[0] || "Admin";
     const passwordHash = await hashPassword(password);
 
@@ -62,12 +89,14 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create session & log the admin in immediately
-    await createSession(user.id, {
-      email: user.email,
-      username: user.username,
-      role: "ADMIN",
-    });
+    // Only create immediate session cookie if this is the initial bootstrap setup (no user was logged in)
+    if (!currentUser) {
+      await createSession(user.id, {
+        email: user.email,
+        username: user.username,
+        role: "ADMIN",
+      });
+    }
 
     return NextResponse.json({
       success: true,

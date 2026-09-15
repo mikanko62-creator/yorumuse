@@ -20,6 +20,7 @@ interface UserProfile {
     planId: string;
     status: string;
     currentPeriodEnd?: string;
+    paymentMethod?: string;
   } | null;
 }
 
@@ -84,12 +85,9 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const isSubscribed = user.subscription?.status === "ACTIVE";
-  const userPlanName =
-    user.subscription?.planId === "vip_premium"
-      ? "VIP Sovereign Patron"
-      : user.subscription?.planId === "member_monthly"
-      ? "Velvet Club Member"
-      : "Free Discovery Tier";
+  const userPlanName = isSubscribed
+    ? "Pengguna Subscription"
+    : "Pengguna Biasa";
 
   // Demo bookmarked watchlist
   const watchlist = MOCK_CONTENT.slice(0, 3);
@@ -195,7 +193,7 @@ export default function ProfilePage() {
           >
             <div
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.78rem",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
                 color: "var(--accent-gold)",
@@ -203,15 +201,15 @@ export default function ProfilePage() {
                 marginBottom: "8px",
               }}
             >
-              Subscription Tier
+              Status Langganan
             </div>
             <h3 style={{ fontSize: "1.5rem", color: "var(--text-primary)", marginBottom: "8px" }}>
               {userPlanName}
             </h3>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "20px" }}>
               {isSubscribed
-                ? "Your active membership grants you full unhindered access to all 4K Manhwa series and private salons."
-                : "You are currently on the discovery tier. Upgrade to unlock full-length episodes, member discussions, and exclusive 4K content."}
+                ? "Akun Anda aktif sebagai Pengguna Subscription dengan akses tak terbatas ke seluruh episode dan chapter penuh manhwa."
+                : "Anda saat ini adalah Pengguna Biasa. Mulai berlangganan untuk membuka dan menonton seluruh chapter penuh serial manhwa."}
             </p>
 
             <div
@@ -220,29 +218,51 @@ export default function ProfilePage() {
                 borderRadius: "var(--radius-sm)",
                 backgroundColor: "var(--bg-surface-elevated)",
                 border: "1px solid var(--border-subtle)",
-                marginBottom: "24px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                marginBottom: "20px",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "14px",
               }}
             >
               <div>
-                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block" }}>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
                   STATUS
                 </span>
-                <span style={{ color: isSubscribed ? "var(--status-success)" : "var(--text-secondary)", fontWeight: 700 }}>
+                <span style={{ color: isSubscribed ? "var(--status-success)" : "var(--text-secondary)", fontWeight: 700, fontSize: "0.95rem" }}>
                   {user.subscription?.status || "FREE"}
                 </span>
               </div>
               <div>
-                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block" }}>
-                  RENEWAL
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
+                  RENEWAL DATE
                 </span>
-                <span style={{ color: "var(--text-primary)", fontSize: "0.88rem" }}>
+                <span style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 600 }}>
                   {user.subscription?.currentPeriodEnd
-                    ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString()
+                    ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
                     : "Lifetime Free"}
                 </span>
+              </div>
+              <div style={{ gridColumn: "span 2", paddingTop: "8px", borderTop: "1px dashed var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
+                    PAYMENT METHOD
+                  </span>
+                  <span style={{ color: "var(--accent-gold)", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                      <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    <span>{user.subscription?.paymentMethod || "PayPal EU"}</span>
+                  </span>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>
+                    STATEMENT LINE
+                  </span>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-secondary)", fontFamily: "monospace" }}>
+                    YM MEDIA LUX
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -254,6 +274,7 @@ export default function ProfilePage() {
               {isSubscribed ? "Manage Subscription & Billing" : "Upgrade to Member Access"}
             </Link>
           </div>
+
 
           {/* Account Settings / Bio Card */}
           <div

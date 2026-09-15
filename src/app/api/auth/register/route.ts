@@ -100,8 +100,12 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create session cookie
-    await createSession(user.id);
+    // Create session cookie with explicit USER role
+    await createSession(user.id, {
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
 
     return NextResponse.json({
       success: true,

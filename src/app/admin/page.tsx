@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import EditContentModal from "@/components/admin/EditContentModal";
+import ManageChaptersModal from "@/components/admin/ManageChaptersModal";
+import UserCrudModal from "@/components/admin/UserCrudModal";
 
 // --- Interfaces ---
 
@@ -203,6 +206,38 @@ export default function AdminDashboardPage() {
   const [extraChapterFileName, setExtraChapterFileName] = useState("");
   const [savingChapter, setSavingChapter] = useState(false);
 
+  // Edit Content Modal State
+  const [editingContentItem, setEditingContentItem] = useState<ContentRow | null>(null);
+  const [isEditContentModalOpen, setIsEditContentModalOpen] = useState(false);
+
+  // Manage Chapters Modal State
+  const [managingContentForChapters, setManagingContentForChapters] = useState<ContentRow | null>(null);
+  const [isManageChaptersModalOpen, setIsManageChaptersModalOpen] = useState(false);
+
+  // User CRUD Modal State
+  const [userToEdit, setUserToEdit] = useState<UserRow | null>(null);
+  const [isUserCrudModalOpen, setIsUserCrudModalOpen] = useState(false);
+
+  const handleDeleteUser = async (userId: string, email: string) => {
+    if (userId === currentUser?.id) {
+      alert("Anda tidak dapat menghapus akun administrator Anda sendiri.");
+      return;
+    }
+    if (!confirm(`Yakin ingin menghapus pengguna "${email}" secara permanen? Semua data terkait (postingan, komentar, dan langganan) akan terhapus total.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/users?id=${userId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menghapus pengguna.");
+      setUserList((prev) => prev.filter((u) => u.id !== userId));
+      alert("Pengguna berhasil dihapus permanen.");
+      await loadAllAdminData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal menghapus pengguna.");
+    }
+  };
+
   // Whitelist / New Admin State
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
@@ -210,6 +245,7 @@ export default function AdminDashboardPage() {
   const [adminFormUsername, setAdminFormUsername] = useState("");
   const [adminFormPassword, setAdminFormPassword] = useState("");
   const [adminFormLoading, setAdminFormLoading] = useState(false);
+
 
   const handleAdminFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,9 +310,17 @@ export default function AdminDashboardPage() {
     checkAdminAuth();
   }, [checkAdminAuth]);
 
-  // Lock body scroll when any modal is open
+  // Lock body scroll when any modal or drawer is open
   useEffect(() => {
-    const anyModalOpen = isHeroModalOpen || isAddContentOpen || isAddChapterModalOpen;
+    const anyModalOpen =
+      isHeroModalOpen ||
+      isAddContentOpen ||
+      isAddChapterModalOpen ||
+      isUserCrudModalOpen ||
+      isEditContentModalOpen ||
+      isManageChaptersModalOpen ||
+      Boolean(inspectingPost);
+
     if (anyModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -285,7 +329,15 @@ export default function AdminDashboardPage() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isHeroModalOpen, isAddContentOpen, isAddChapterModalOpen]);
+  }, [
+    isHeroModalOpen,
+    isAddContentOpen,
+    isAddChapterModalOpen,
+    isUserCrudModalOpen,
+    isEditContentModalOpen,
+    isManageChaptersModalOpen,
+    inspectingPost,
+  ]);
 
   // --- 2. Data Loading ---
   const loadAllAdminData = async () => {
@@ -946,7 +998,17 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div style={{ paddingTop: "140px", textAlign: "center", color: "var(--accent-gold)" }}>
-        <div style={{ fontSize: "2rem", marginBottom: "12px" }}>⏳</div>
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            border: "3px solid rgba(212, 175, 55, 0.2)",
+            borderTopColor: "var(--accent-gold)",
+            borderRadius: "50%",
+            margin: "0 auto 16px",
+          }}
+          className="animate-spin"
+        />
         <p style={{ fontWeight: 600 }}>Memverifikasi hak akses administratif...</p>
       </div>
     );
@@ -1059,24 +1121,26 @@ export default function AdminDashboardPage() {
       >
         <div className="container">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "18px" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ fontSize: "0.75rem", padding: "3px 10px", backgroundColor: "#b91c1c", color: "#ffffff", borderRadius: "4px", fontWeight: 800, letterSpacing: "0.05em" }}>
-                  ADMIN CONSOLE
-                </span>
-                <span style={{ fontSize: "0.85rem", color: "var(--accent-gold)", fontWeight: 700 }}>
-                  YORUMUSE EXECUTIVE
-                </span>
-                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                  • Terhubung: <strong>{currentUser?.email}</strong>
-                </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "0.75rem", padding: "3px 10px", backgroundColor: "#b91c1c", color: "#ffffff", borderRadius: "4px", fontWeight: 800, letterSpacing: "0.05em" }}>
+                    ADMIN CONSOLE
+                  </span>
+                  <span style={{ fontSize: "0.85rem", color: "var(--accent-gold)", fontWeight: 700 }}>
+                    YORUMUSE EXECUTIVE
+                  </span>
+                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                    • Terhubung: <strong>{currentUser?.email}</strong>
+                  </span>
+                </div>
+                <h1 style={{ fontSize: "1.75rem", color: "var(--text-primary)", marginTop: "4px", fontWeight: 700, margin: 0 }}>
+                  Pusat Kontrol Platform
+                </h1>
               </div>
-              <h1 style={{ fontSize: "1.75rem", color: "var(--text-primary)", marginTop: "4px", fontWeight: 700 }}>
-                Pusat Kontrol Platform
-              </h1>
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <Link href="/" target="_blank" className="btn btn-secondary btn-sm" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <span>Lihat Website</span>
               </Link>
@@ -1221,119 +1285,46 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Quick Action Shortcuts */}
+            {/* System Status Banner */}
             <div
               style={{
                 backgroundColor: "var(--bg-surface)",
-                borderRadius: "16px",
-                padding: "28px",
+                borderRadius: "14px",
+                padding: "18px 24px",
                 border: "1px solid var(--border-subtle)",
                 boxShadow: "var(--shadow-sm)",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "16px",
               }}
             >
-              <h3 style={{ fontSize: "1.2rem", color: "var(--text-primary)", marginBottom: "8px" }}>
-                Aksi Cepat Administrator
-              </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginBottom: "20px" }}>
-                Pilih menu di bawah ini untuk mengontrol aspek utama platform YoruMuse:
-              </p>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
-                <button
-                  onClick={() => setActiveTab("posts")}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span
                   style={{
-                    display: "flex",
+                    display: "inline-flex",
                     alignItems: "center",
-                    gap: "12px",
-                    padding: "16px",
-                    borderRadius: "10px",
-                    backgroundColor: "var(--bg-surface-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    cursor: "pointer",
-                    textAlign: "left",
+                    gap: "6px",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    color: "var(--status-success)",
+                    backgroundColor: "rgba(34, 197, 94, 0.1)",
+                    border: "1px solid rgba(34, 197, 94, 0.2)",
+                    padding: "4px 12px",
+                    borderRadius: "20px",
                   }}
                 >
-                  <div>
-                    <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.92rem" }}>
-                      Kontrol Semua Postingan
-                    </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                      Moderasi forum, sembunyikan/hapus
-                    </div>
-                  </div>
-                </button>
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--status-success)" }}></span>
+                  Status Sistem: Operasional Normal
+                </span>
+                <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                  Server DB: <strong>eu-central-1 (Frankfurt)</strong>
+                </span>
+              </div>
 
-                <button
-                  onClick={() => setActiveTab("hero")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "16px",
-                    borderRadius: "10px",
-                    backgroundColor: "var(--bg-surface-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.92rem" }}>
-                      Ubah Hero Section
-                    </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                      Banner slider homepage & CTA
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setIsAddContentOpen(true)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "16px",
-                    borderRadius: "10px",
-                    backgroundColor: "var(--bg-surface-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.92rem" }}>
-                      + Buat Film & Chapter Baru
-                    </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                      Upload video anti-theft & poster
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("users")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "16px",
-                    borderRadius: "10px",
-                    backgroundColor: "var(--bg-surface-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.92rem" }}>
-                      Daftar Email Admin
-                    </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                      Kelola hak akses administrator
-                    </div>
-                  </div>
-                </button>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>Gunakan menu toggle garis 3 di kiri atas atau tepi kiri untuk panel aksi cepat.</span>
               </div>
             </div>
           </div>
@@ -1788,27 +1779,43 @@ export default function AdminDashboardPage() {
                         </button>
                       </td>
                       <td style={{ padding: "16px 18px", textAlign: "right" }}>
-                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                        <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end", alignItems: "center" }}>
                           <button
-                            onClick={() => openAddChapterModal(item)}
+                            onClick={() => {
+                              setManagingContentForChapters(item);
+                              setIsManageChaptersModalOpen(true);
+                            }}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: "0.78rem", padding: "4px 10px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
-                            title="Tambah Chapter Baru ke Film Ini"
+                            style={{ fontSize: "0.75rem", padding: "4px 8px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
+                            title="Kelola semua chapter dari film ini"
                           >
-                            + Chapter
+                            Kelola Chapter
                           </button>
-                          <Link href={`/content/${item.slug}`} className="btn btn-ghost btn-sm" style={{ color: "var(--accent-gold)" }}>
+                          <button
+                            onClick={() => {
+                              setEditingContentItem(item);
+                              setIsEditContentModalOpen(true);
+                            }}
+                            className="btn btn-secondary btn-sm"
+                            style={{ fontSize: "0.75rem", padding: "4px 8px" }}
+                            title="Edit informasi dan metadata film"
+                          >
+                            Edit
+                          </button>
+                          <Link href={`/content/${item.slug}`} className="btn btn-ghost btn-sm" style={{ color: "var(--accent-gold)", fontSize: "0.75rem", padding: "4px 8px" }}>
                             Lihat
                           </Link>
                           <button
                             onClick={() => deleteContent(item.id)}
                             className="btn btn-ghost btn-sm"
-                            style={{ color: "var(--status-error)" }}
+                            style={{ color: "var(--status-error)", fontSize: "0.75rem", padding: "4px 8px" }}
+                            title="Hapus film beserta semua babaknya"
                           >
                             Hapus
                           </button>
                         </div>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
@@ -1820,14 +1827,27 @@ export default function AdminDashboardPage() {
         {/* ================= TAB 5: KELOLA PENGGUNA & WHITELIST ADMIN ================= */}
         {activeTab === "users" && (
           <div>
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                Manajemen Pengguna & Whitelist Administrator
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
-                Sesuai kebijakan keamanan platform, hanya email yang terdaftar sebagai <strong>ADMIN</strong> yang diizinkan mengakses Admin Panel.
-              </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "16px" }}>
+              <div>
+                <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
+                  Manajemen Pengguna & Whitelist Administrator
+                </h2>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
+                  Super User dapat membuat pengguna baru, mengedit hak akses & paket langganan, atau menghapus pengguna.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setUserToEdit(null);
+                  setIsUserCrudModalOpen(true);
+                }}
+                className="btn btn-primary"
+              >
+                + Tambah Pengguna Baru
+              </button>
             </div>
+
 
             {adminActionMessage && (
               <div
@@ -2054,25 +2074,38 @@ export default function AdminDashboardPage() {
                         </td>
 
                         <td style={{ padding: "16px 18px", textAlign: "right" }}>
-                          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                          <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end", alignItems: "center" }}>
+                            {/* Edit Button */}
+                            <button
+                              onClick={() => {
+                                setUserToEdit(usr);
+                                setIsUserCrudModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              style={{ fontSize: "0.75rem", padding: "4px 8px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
+                              title="Edit rincian, role, atau langganan pengguna"
+                            >
+                              Edit
+                            </button>
+
                             {/* Role Toggle Button */}
                             {!isAdmin ? (
                               <button
                                 onClick={() => handlePromoteToAdmin(usr.id, usr.email)}
                                 className="btn btn-secondary btn-sm"
-                                style={{ fontSize: "0.75rem", padding: "4px 8px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
+                                style={{ fontSize: "0.75rem", padding: "4px 8px" }}
                                 title="Jadikan Akun Admin"
                               >
-                                Jadikan Admin
+                                +Admin
                               </button>
                             ) : (
                               usr.id !== currentUser?.id && (
                                 <button
                                   onClick={() => handleDemoteAdmin(usr.id, usr.email)}
                                   className="btn btn-ghost btn-sm"
-                                  style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}
+                                  style={{ fontSize: "0.75rem", color: "var(--text-muted)", padding: "4px 6px" }}
                                 >
-                                  Cabut Admin
+                                  -Admin
                                 </button>
                               )
                             )}
@@ -2084,7 +2117,7 @@ export default function AdminDashboardPage() {
                                   <button
                                     onClick={() => handleUpdateUserStatus(usr.id, "SUSPENDED")}
                                     className="btn btn-ghost btn-sm"
-                                    style={{ color: "var(--status-warning)", fontSize: "0.75rem" }}
+                                    style={{ color: "var(--status-warning)", fontSize: "0.75rem", padding: "4px 6px" }}
                                   >
                                     Suspend
                                   </button>
@@ -2092,24 +2125,28 @@ export default function AdminDashboardPage() {
                                   <button
                                     onClick={() => handleUpdateUserStatus(usr.id, "ACTIVE")}
                                     className="btn btn-ghost btn-sm"
-                                    style={{ color: "var(--status-success)", fontSize: "0.75rem" }}
+                                    style={{ color: "var(--status-success)", fontSize: "0.75rem", padding: "4px 6px" }}
                                   >
                                     Aktifkan
                                   </button>
                                 )}
-                                {usr.status !== "BANNED" && (
-                                  <button
-                                    onClick={() => handleUpdateUserStatus(usr.id, "BANNED")}
-                                    className="btn btn-ghost btn-sm"
-                                    style={{ color: "var(--status-error)", fontSize: "0.75rem" }}
-                                  >
-                                    Ban
-                                  </button>
-                                )}
                               </>
+                            )}
+
+                            {/* Delete User Button */}
+                            {usr.id !== currentUser?.id && (
+                              <button
+                                onClick={() => handleDeleteUser(usr.id, usr.email)}
+                                className="btn btn-ghost btn-sm"
+                                style={{ color: "var(--status-error)", fontSize: "0.75rem", padding: "4px 6px" }}
+                                title="Hapus pengguna secara permanen"
+                              >
+                                Hapus
+                              </button>
                             )}
                           </div>
                         </td>
+
                       </tr>
                     );
                   })}
@@ -2271,12 +2308,15 @@ export default function AdminDashboardPage() {
             position: "fixed",
             inset: 0,
             zIndex: 10000,
-            backgroundColor: "rgba(17, 24, 39, 0.6)",
+            backgroundColor: "rgba(17, 24, 39, 0.75)",
             backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
+            padding: "24px 16px",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setInspectingPost(null);
@@ -2291,8 +2331,9 @@ export default function AdminDashboardPage() {
               borderRadius: "18px",
               boxShadow: "var(--shadow-lg)",
               padding: "32px",
-              maxHeight: "90vh",
+              maxHeight: "min(92vh, 760px)",
               overflowY: "auto",
+              margin: "auto",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
@@ -2391,12 +2432,15 @@ export default function AdminDashboardPage() {
             position: "fixed",
             inset: 0,
             zIndex: 10000,
-            backgroundColor: "rgba(17, 24, 39, 0.6)",
+            backgroundColor: "rgba(17, 24, 39, 0.75)",
             backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
+            padding: "24px 16px",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsHeroModalOpen(false);
@@ -2411,8 +2455,9 @@ export default function AdminDashboardPage() {
               borderRadius: "18px",
               boxShadow: "var(--shadow-lg)",
               padding: "32px",
-              maxHeight: "90vh",
+              maxHeight: "min(92vh, 760px)",
               overflowY: "auto",
+              margin: "auto",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -2685,12 +2730,15 @@ export default function AdminDashboardPage() {
             position: "fixed",
             inset: 0,
             zIndex: 10000,
-            backgroundColor: "rgba(17, 24, 39, 0.6)",
+            backgroundColor: "rgba(17, 24, 39, 0.75)",
             backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
+            padding: "24px 16px",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddContentOpen(false);
@@ -2705,8 +2753,9 @@ export default function AdminDashboardPage() {
               borderRadius: "18px",
               boxShadow: "var(--shadow-lg)",
               padding: "36px",
-              maxHeight: "90vh",
+              maxHeight: "min(92vh, 760px)",
               overflowY: "auto",
+              margin: "auto",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -3109,12 +3158,15 @@ export default function AdminDashboardPage() {
             position: "fixed",
             inset: 0,
             zIndex: 10000,
-            backgroundColor: "rgba(17, 24, 39, 0.6)",
+            backgroundColor: "rgba(17, 24, 39, 0.75)",
             backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
+            padding: "24px 16px",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddChapterModalOpen(false);
@@ -3129,8 +3181,9 @@ export default function AdminDashboardPage() {
               borderRadius: "18px",
               boxShadow: "var(--shadow-lg)",
               padding: "32px",
-              maxHeight: "90vh",
+              maxHeight: "min(92vh, 760px)",
               overflowY: "auto",
+              margin: "auto",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -3323,6 +3376,45 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ================= MODAL: EDIT FILM / SERIAL (SUPER USER) ================= */}
+      <EditContentModal
+        isOpen={isEditContentModalOpen}
+        onClose={() => {
+          setIsEditContentModalOpen(false);
+          setEditingContentItem(null);
+        }}
+        contentItem={editingContentItem}
+        onSuccess={(updated) => {
+          setContentList((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+          alert(`Serial "${updated.title}" berhasil diperbarui!`);
+        }}
+      />
+
+      {/* ================= MODAL: KELOLA CHAPTER SERIAL ================= */}
+      <ManageChaptersModal
+        isOpen={isManageChaptersModalOpen}
+        onClose={() => {
+          setIsManageChaptersModalOpen(false);
+          setManagingContentForChapters(null);
+        }}
+        contentItem={managingContentForChapters}
+      />
+
+      {/* ================= MODAL: USER CRUD (TAMBAH & EDIT PENGGUNA) ================= */}
+      <UserCrudModal
+        isOpen={isUserCrudModalOpen}
+        onClose={() => {
+          setIsUserCrudModalOpen(false);
+          setUserToEdit(null);
+        }}
+        userToEdit={userToEdit}
+        onSuccess={async () => {
+          alert(userToEdit ? "Pengguna berhasil diperbarui!" : "Pengguna baru berhasil dibuat!");
+          await loadAllAdminData();
+        }}
+      />
     </div>
   );
 }
+

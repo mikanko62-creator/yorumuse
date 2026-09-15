@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "../common/Logo";
+import NavigationSidebar from "./NavigationSidebar";
 
 interface UserState {
   id: string;
@@ -18,7 +19,7 @@ interface UserState {
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<UserState | null>(null);
   const pathname = usePathname();
 
@@ -44,9 +45,9 @@ export default function Header() {
       .catch(() => setUser(null));
   }, [pathname]);
 
-  // Close mobile drawer on route change
+  // Close sidebar drawer on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
+    setSidebarOpen(false);
   }, [pathname]);
 
   const navLinks = [
@@ -82,16 +83,50 @@ export default function Header() {
       }}
     >
       <div
-        className="container"
+        className="header-inner"
         style={{
+          width: "100%",
+          paddingLeft: "16px",
+          paddingRight: "24px",
           height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        {/* Left: Brand Logo */}
-        <Logo size="md" />
+        {/* Left: 3-line Toggle Button + Brand Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Buka Menu Navigasi"
+            style={{
+              display: "inline-flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "4px",
+              width: "38px",
+              height: "38px",
+              borderRadius: "8px",
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+              border: "1px solid rgba(0, 0, 0, 0.08)",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              padding: "8px",
+              color: "var(--text-primary, #111827)",
+              flexShrink: 0,
+            }}
+            className="header-left-toggle-btn"
+            title="Buka Menu Navigasi"
+            id="header-left-toggle"
+          >
+            <span style={{ width: "18px", height: "2px", backgroundColor: "currentColor", borderRadius: "2px" }} />
+            <span style={{ width: "18px", height: "2px", backgroundColor: "currentColor", borderRadius: "2px" }} />
+            <span style={{ width: "18px", height: "2px", backgroundColor: "currentColor", borderRadius: "2px" }} />
+          </button>
+
+          <Logo size="md" />
+        </div>
 
         {/* Center: Desktop Navigation */}
         <nav
@@ -306,198 +341,17 @@ export default function Header() {
             </div>
           )}
 
-          {/* Mobile Hamburger Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "5px",
-              padding: "8px",
-              color: "var(--text-primary)",
-              zIndex: 1001,
-            }}
-            className="mobile-toggle-btn"
-          >
-            <span
-              style={{
-                width: "22px",
-                height: "2px",
-                backgroundColor: "var(--text-primary)",
-                transition: "transform 0.3s, opacity 0.3s",
-                transform: mobileMenuOpen ? "translateY(7px) rotate(45deg)" : "none",
-              }}
-            />
-            <span
-              style={{
-                width: "22px",
-                height: "2px",
-                backgroundColor: "var(--text-primary)",
-                transition: "opacity 0.3s",
-                opacity: mobileMenuOpen ? 0 : 1,
-              }}
-            />
-            <span
-              style={{
-                width: "22px",
-                height: "2px",
-                backgroundColor: "var(--text-primary)",
-                transition: "transform 0.3s, opacity 0.3s",
-                transform: mobileMenuOpen ? "translateY(-7px) rotate(-45deg)" : "none",
-              }}
-            />
-          </button>
+          {/* Optional Right Action Spacer */}
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: "var(--header-height)",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            padding: "32px 24px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            animation: "fadeIn 0.25s ease-out",
-            zIndex: 999,
-          }}
-        >
-          <nav style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  fontSize: "1.25rem",
-                  fontFamily: "var(--font-serif)",
-                  color: pathname === link.href ? "var(--accent-gold)" : "var(--text-primary)",
-                  padding: "10px 0",
-                  borderBottom: "1px solid var(--border-subtle)",
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {isAdminOrSuperUser && (
-              <Link
-                href="/admin"
-                style={{
-                  fontSize: "1.25rem",
-                  fontFamily: "var(--font-serif)",
-                  color: "var(--accent-gold)",
-                  padding: "10px 0",
-                  borderBottom: "1px solid var(--border-subtle)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                <span>Admin Panel</span>
-              </Link>
-            )}
-          </nav>
-
-          <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "14px" }}>
-            {user ? (
-              <>
-                <Link
-                  href="/profile"
-                  className="btn btn-secondary btn-lg"
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Profil Saya ({user.username})</span>
-                </Link>
-                {isAdminOrSuperUser && (
-                  <Link
-                    href="/admin"
-                    className="btn btn-primary btn-lg"
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    </svg>
-                    <span>Admin Panel</span>
-                  </Link>
-                )}
-                <button
-                  onClick={async () => {
-                    await fetch("/api/auth/logout", { method: "POST" });
-                    window.location.reload();
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  style={{ color: "var(--status-error)" }}
-                >
-                  Log Out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/membership" className="btn btn-primary btn-lg" style={{ width: "100%" }}>
-                  Join Membership
-                </Link>
-                <Link href="/login" className="btn btn-secondary btn-lg" style={{ width: "100%" }}>
-                  Sign In
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Left Navigation Sidebar Drawer */}
+      <NavigationSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        user={user}
+        isAdmin={isAdminOrSuperUser}
+      />
 
       {/* Global CSS for Responsive Header Queries */}
       <style jsx global>{`
@@ -515,6 +369,12 @@ export default function Header() {
             display: inline-flex !important;
           }
         }
+        @media (max-width: 640px) {
+          .header-inner {
+            padding-left: 12px !important;
+            padding-right: 14px !important;
+          }
+        }
         @media (max-width: 480px) {
           .header-username-label {
             display: none !important;
@@ -523,6 +383,11 @@ export default function Header() {
         .header-profile-link:hover {
           border-color: var(--accent-gold, #d4af37) !important;
           box-shadow: 0 0 10px rgba(212, 175, 55, 0.25) !important;
+        }
+        .header-left-toggle-btn:hover {
+          background-color: rgba(212, 175, 55, 0.12) !important;
+          border-color: rgba(212, 175, 55, 0.35) !important;
+          color: var(--accent-gold, #946c15) !important;
         }
       `}</style>
     </header>

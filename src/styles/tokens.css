@@ -40,15 +40,15 @@
   --status-error: #dc2626;
   --status-warning: #d97706;
 
-  /* Typography */
-  --font-serif: 'Cinzel', 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Typography - Clean Developer Modern Font Stack (Inter / System Sans-Serif) */
+  --font-sans: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  /* Elevation Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
-  --shadow-gold: 0 8px 30px rgba(166, 124, 30, 0.15);
+  /* Elevation Shadows - Flat clean aesthetic without distracting shadows */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-gold: none;
 
   /* Border Radii */
   --radius-xs: 4px;

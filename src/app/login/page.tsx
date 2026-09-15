@@ -40,12 +40,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillQuickDemo = (id: string, pass: string) => {
-    setIdentifier(id);
-    setPassword(pass);
-    setError("");
-  };
-
   return (
     <div
       style={{
@@ -181,50 +175,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Quick Demo Fill Buttons for Convenient Evaluation */}
         <div
           style={{
-            marginTop: "24px",
-            padding: "16px",
-            borderRadius: "var(--radius-sm)",
-            backgroundColor: "var(--bg-surface-elevated)",
-            border: "1px dashed var(--border-medium)",
-          }}
-        >
-          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "8px" }}>
-            QUICK PREVIEW CREDENTIALS:
-          </span>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo("admin@yorumuse.com", "AdminPassword18+")}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: "0.75rem", padding: "6px 10px" }}
-            >
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo("member@yorumuse.com", "MemberPassword18+")}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: "0.75rem", padding: "6px 10px" }}
-            >
-              Member
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo("user@yorumuse.com", "UserPassword18+")}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: "0.75rem", padding: "6px 10px" }}
-            >
-              Free User
-            </button>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: "24px",
+            marginTop: "28px",
             textAlign: "center",
             fontSize: "0.9rem",
             color: "var(--text-secondary)",
@@ -233,20 +186,6 @@ export default function LoginPage() {
           Don&apos;t have an account?{" "}
           <Link href="/register" style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
             Create one here
-          </Link>
-        </div>
-
-        <div
-          style={{
-            marginTop: "12px",
-            textAlign: "center",
-            fontSize: "0.82rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Administrator?{" "}
-          <Link href="/setup-admin" style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
-            Setup / Buat Akun Admin Pribadi
           </Link>
         </div>
       </div>

@@ -4,10 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SUBSCRIPTION_PLANS } from "@/lib/payments/provider";
+import { SubscriptionPlan } from "@/lib/payments/types";
+import CheckoutModal from "@/components/payment/CheckoutModal";
 
 interface UserInfo {
   id: string;
   username: string;
+  email: string;
   role: string;
   subscription?: {
     status: string;
@@ -19,7 +22,7 @@ export default function MembershipPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [billingCycle, setBillingCycle] = useState<"month" | "year">("month");
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +35,7 @@ export default function MembershipPage() {
       .catch(() => {});
   }, []);
 
-  const handleSelectPlan = async (planId: string) => {
+  const handleSelectPlan = (planId: string) => {
     setError(null);
     setMessage(null);
 
@@ -50,38 +53,26 @@ export default function MembershipPage() {
       return;
     }
 
-    setLoadingPlan(planId);
-
-    try {
-      const res = await fetch("/api/subscription/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to initiate subscription.");
-        setLoadingPlan(null);
-        return;
-      }
-
-      setMessage("Membership successfully activated! Redirecting to your private profile...");
-      setTimeout(() => {
-        router.push("/profile");
-        router.refresh();
-      }, 1500);
-    } catch {
-      setError("An unexpected network error occurred.");
-      setLoadingPlan(null);
+    const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+    if (plan) {
+      setCheckoutPlan(plan);
     }
+  };
+
+  const handleCheckoutSuccess = (result: { paymentMethod: string; planName: string; currentPeriodEnd: string }) => {
+    setCheckoutPlan(null);
+    setMessage(`Access unlocked via ${result.paymentMethod}! Redirecting to your profile sanctuary...`);
+    setTimeout(() => {
+      router.push("/profile");
+      router.refresh();
+    }, 1200);
   };
 
   const isCurrentPlan = (planId: string) => {
     if (!user?.subscription) return planId === "free_tier";
     return user.subscription.planId === planId && user.subscription.status === "ACTIVE";
   };
+
 
   return (
     <div style={{ paddingTop: "var(--header-height)", minHeight: "100vh" }}>
@@ -115,7 +106,7 @@ export default function MembershipPage() {
               margin: "0 auto 36px",
             }}
           >
-            Choose your patron tier to experience full-length 4K productions, director cuts, private community salons, and lossless audio.
+            Berlangganan sekarang untuk mendapatkan akses penuh tanpa batas ke seluruh chapter serial manhwa dan komunitas YoruMuse.
           </p>
 
           {/* Billing Cycle Toggle */}
@@ -239,7 +230,7 @@ export default function MembershipPage() {
               const isPopular = plan.popular;
               const displayPrice =
                 billingCycle === "year" && plan.price > 0
-                  ? Math.round(plan.price * 0.75 * 12)
+                  ? Number((plan.price * 0.75 * 12).toFixed(2))
                   : plan.price;
 
               return (
@@ -300,7 +291,7 @@ export default function MembershipPage() {
                     </p>
                   </div>
 
-                  {/* Price */}
+                  {/* Price in EUR */}
                   <div style={{ marginBottom: "32px" }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
                       <span
@@ -312,7 +303,7 @@ export default function MembershipPage() {
                           lineHeight: 1,
                         }}
                       >
-                        ${displayPrice}
+                        €{displayPrice === 0 ? "0" : displayPrice.toFixed(2)}
                       </span>
                       <span style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>
                         /{billingCycle === "year" && plan.price > 0 ? "year" : "month"}
@@ -320,7 +311,7 @@ export default function MembershipPage() {
                     </div>
                     {billingCycle === "year" && plan.price > 0 && (
                       <span style={{ fontSize: "0.78rem", color: "var(--accent-gold)", marginTop: "4px", display: "block" }}>
-                        Billed annually (effectively ${Math.round(plan.price * 0.75)}/mo)
+                        Billed annually (effectively €{(plan.price * 0.75).toFixed(2)}/mo)
                       </span>
                     )}
                   </div>
@@ -328,7 +319,7 @@ export default function MembershipPage() {
                   {/* CTA Button */}
                   <button
                     onClick={() => handleSelectPlan(plan.id)}
-                    disabled={current || loadingPlan === plan.id}
+                    disabled={current}
                     className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-lg`}
                     style={{
                       width: "100%",
@@ -340,8 +331,6 @@ export default function MembershipPage() {
                   >
                     {current
                       ? "Current Plan"
-                      : loadingPlan === plan.id
-                      ? "Activating..."
                       : plan.price === 0
                       ? "Browse Discovery"
                       : "Unlock Access"}
@@ -388,7 +377,7 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* Discreet Billing Notice */}
+      {/* Discreet European Billing Notice */}
       <section style={{ padding: "40px 0" }}>
         <div className="container" style={{ maxWidth: "860px" }}>
           <div
@@ -404,18 +393,32 @@ export default function MembershipPage() {
               flexWrap: "wrap",
             }}
           >
-            
             <div style={{ flexGrow: 1 }}>
-              <h4 style={{ color: "var(--text-primary)", fontSize: "1.05rem", marginBottom: "4px" }}>
-                Secure & Encrypted Billing
-              </h4>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", lineHeight: 1.5 }}>
-                All subscriptions are billed securely via 256-bit bank-grade encryption. Statement line displays <strong>&ldquo;YORUMUSE STUDIOS&rdquo;</strong>. Cancel anytime with a single click from your profile.
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "6px" }}>
+                <h4 style={{ color: "var(--text-primary)", fontSize: "1.05rem", margin: 0 }}>
+                  European Bank-Grade & Discreet Billing
+                </h4>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(212, 175, 55, 0.12)",
+                    color: "var(--accent-gold)",
+                    fontWeight: 700,
+                  }}
+                >
+                  PAYPAL • SEPA • VISA • CRYPTO
+                </span>
+              </div>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", lineHeight: 1.5, margin: 0 }}>
+                All subscriptions are billed securely via 256-bit bank-grade encryption in Euro (€). Bank and card statements display discreetly as <strong>&ldquo;YM MEDIA LUX&rdquo;</strong>. Instant activation with PayPal, SEPA Direct Debit (IBAN), credit/debit card, or private crypto. Cancel anytime with a single click.
               </p>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Membership FAQ Section */}
       <section className="section" id="faq">
@@ -481,6 +484,19 @@ export default function MembershipPage() {
           </div>
         </div>
       </section>
+
+      {/* European & PayPal Checkout Modal */}
+      {checkoutPlan && (
+        <CheckoutModal
+          isOpen={!!checkoutPlan}
+          onClose={() => setCheckoutPlan(null)}
+          plan={checkoutPlan}
+          billingCycle={billingCycle}
+          userEmail={user?.email}
+          onSuccess={handleCheckoutSuccess}
+        />
+      )}
     </div>
   );
 }
+

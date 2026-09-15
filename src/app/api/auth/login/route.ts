@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     const cleanIdentifier = identifier.trim().toLowerCase();
 
     // 1. Try querying Prisma database first
+    let dbConnected = false;
     try {
       const user = await prisma.user.findFirst({
         where: {
@@ -63,6 +64,8 @@ export async function POST(request: Request) {
           },
         },
       });
+
+      dbConnected = true;
 
       if (user) {
         if (user.status === "BANNED") {
@@ -97,37 +100,50 @@ export async function POST(request: Request) {
               subscription: user.subscriptions[0] || null,
             },
           });
+        } else {
+          return NextResponse.json(
+            { error: "Invalid credentials. Please verify your email/username and password." },
+            { status: 401 }
+          );
         }
+      } else {
+        // User not found in active database
+        return NextResponse.json(
+          { error: "Invalid credentials. Please verify your email/username and password." },
+          { status: 401 }
+        );
       }
     } catch (dbError) {
-      console.warn("Database query during login failed, checking fallback accounts:", dbError);
+      console.warn("Database query during login failed:", dbError);
     }
 
-    // 2. Demo fallback check (ensures login never fails on serverless read-only platforms)
-    const demoUser = DEMO_ACCOUNTS.find(
-      (acc) =>
-        (acc.email.toLowerCase() === cleanIdentifier ||
-          acc.username.toLowerCase() === cleanIdentifier) &&
-        acc.password === password
-    );
+    // 2. Demo fallback check (ONLY in development mode when DB is completely unreachable)
+    if (!dbConnected && process.env.NODE_ENV !== "production") {
+      const demoUser = DEMO_ACCOUNTS.find(
+        (acc) =>
+          (acc.email.toLowerCase() === cleanIdentifier ||
+            acc.username.toLowerCase() === cleanIdentifier) &&
+          acc.password === password
+      );
 
-    if (demoUser) {
-      await createSession(demoUser.id, {
-        email: demoUser.email,
-        username: demoUser.username,
-        role: demoUser.role,
-      });
-
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: demoUser.id,
-          username: demoUser.username,
+      if (demoUser) {
+        await createSession(demoUser.id, {
           email: demoUser.email,
+          username: demoUser.username,
           role: demoUser.role,
-          subscription: demoUser.subscription,
-        },
-      });
+        });
+
+        return NextResponse.json({
+          success: true,
+          user: {
+            id: demoUser.id,
+            username: demoUser.username,
+            email: demoUser.email,
+            role: demoUser.role,
+            subscription: demoUser.subscription,
+          },
+        });
+      }
     }
 
     return NextResponse.json(

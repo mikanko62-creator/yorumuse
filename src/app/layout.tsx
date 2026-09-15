@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AgeGate from "@/components/common/AgeGate";
 
-const serifFont = Playfair_Display({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const sansFont = Plus_Jakarta_Sans({
-  variable: "--font-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -53,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${serifFont.variable} ${sansFont.variable}`}>
+    <html lang="en" className={inter.variable}>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {/* Global Navigation Header */}
         <Header />

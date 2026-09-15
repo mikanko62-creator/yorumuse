@@ -125,6 +125,9 @@ export default async function ContentDetailPage({ params }: PageProps) {
           views: content.views,
           likes: content.likes,
           tags: content.tags,
+          createdAt: content.createdAt,
+          updatedAt: content.updatedAt,
+          videoUrl: content.videoUrl,
         }}
         chapters={chapters}
         currentUser={

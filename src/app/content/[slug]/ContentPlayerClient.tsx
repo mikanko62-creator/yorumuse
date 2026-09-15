@@ -6,9 +6,10 @@ interface PlayerProps {
   videoUrl: string;
   poster: string;
   title: string;
+  onDurationLoaded?: (durationString: string) => void;
 }
 
-export default function ContentPlayerClient({ videoUrl, poster, title }: PlayerProps) {
+export default function ContentPlayerClient({ videoUrl, poster, title, onDurationLoaded }: PlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,6 +33,26 @@ export default function ContentPlayerClient({ videoUrl, poster, title }: PlayerP
       setProgress((cur / dur) * 100);
       setCurrentTime(formatTime(cur));
       setDuration(formatTime(dur));
+    }
+  };
+
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const dur = e.currentTarget.duration;
+    if (dur && !isNaN(dur) && isFinite(dur)) {
+      setDuration(formatTime(dur));
+      const mins = Math.floor(dur / 60);
+      const secs = Math.floor(dur % 60);
+      let durStr = "";
+      if (mins >= 60) {
+        durStr = `${Math.floor(mins / 60)} jam ${mins % 60} menit`;
+      } else if (mins > 0) {
+        durStr = `${mins} menit ${secs > 0 ? `${secs} dtk` : ""}`;
+      } else {
+        durStr = `${secs} detik`;
+      }
+      if (onDurationLoaded) {
+        onDurationLoaded(durStr);
+      }
     }
   };
 
@@ -94,6 +115,7 @@ export default function ContentPlayerClient({ videoUrl, poster, title }: PlayerP
         disablePictureInPicture
         onContextMenu={(e) => e.preventDefault()}
         onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
         style={{
           width: "100%",
           height: "100%",
@@ -115,33 +137,7 @@ export default function ContentPlayerClient({ videoUrl, poster, title }: PlayerP
         }}
       />
 
-      {/* Dynamic Anti-Piracy Watermark */}
-      <div
-        style={{
-          position: "absolute",
-          top: "18px",
-          right: "20px",
-          zIndex: 2,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "5px 12px",
-          borderRadius: "20px",
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
-          backdropFilter: "blur(8px)",
-          border: "1px solid rgba(166, 124, 30, 0.35)",
-          color: "rgba(255, 255, 255, 0.8)",
-          fontSize: "0.72rem",
-          fontWeight: 600,
-          letterSpacing: "0.06em",
-          pointerEvents: "none",
-          userSelect: "none",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-      >
-        
-        <span>YORUMUSE • ENCRYPTED STREAM</span>
-      </div>
+
 
       {/* Play Overlay when paused */}
       {!isPlaying && (
@@ -272,17 +268,6 @@ export default function ContentPlayerClient({ videoUrl, poster, title }: PlayerP
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <span
-              style={{
-                fontSize: "0.75rem",
-                color: "var(--accent-gold)",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-              }}
-            >
-              4K MASTER
-            </span>
-
             <button
               onClick={toggleFullscreen}
               aria-label="Toggle Fullscreen"

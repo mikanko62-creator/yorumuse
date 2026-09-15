@@ -56,6 +56,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (user.status === "BANNED" || user.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Akun Anda sedang dibatasi dan tidak dapat membuat postingan." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { title, content, category, media } = body;
 
@@ -67,9 +74,9 @@ export async function POST(request: Request) {
     }
 
     // Safety checks on title and content
-    if (title.length < 5 || content.length < 10) {
+    if (title.trim().length < 5 || title.length > 200 || content.trim().length < 10 || content.length > 20000) {
       return NextResponse.json(
-        { error: "Title must be at least 5 characters, content at least 10." },
+        { error: "Judul minimal 5 (maks 200) karakter, isi postingan minimal 10 (maks 20.000) karakter." },
         { status: 400 }
       );
     }

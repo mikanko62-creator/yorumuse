@@ -360,7 +360,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
             backgroundColor: "#ffffff",
             color: "var(--text-primary)",
             border: "1px solid var(--border-medium)",
-            boxShadow: "var(--shadow-md)",
+            boxShadow: "none",
             cursor: "pointer",
             transition: "all var(--transition-fast)",
           }}
@@ -384,7 +384,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
             backgroundColor: "#ffffff",
             color: "var(--text-primary)",
             border: "1px solid var(--border-medium)",
-            boxShadow: "var(--shadow-md)",
+            boxShadow: "none",
             cursor: "pointer",
             transition: "all var(--transition-fast)",
           }}
@@ -418,7 +418,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
               height: "4px",
               borderRadius: "2px",
               backgroundColor: idx === currentIndex ? "var(--accent-gold)" : "rgba(255, 255, 255, 0.25)",
-              boxShadow: idx === currentIndex ? "0 0 10px var(--accent-gold)" : "none",
+              boxShadow: "none",
               transition: "all 0.35s ease",
               cursor: "pointer",
             }}

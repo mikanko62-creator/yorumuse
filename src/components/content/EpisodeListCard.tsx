@@ -12,7 +12,7 @@ interface EpisodeListCardProps {
 
 export default function EpisodeListCard({
   item,
-  badgePrefix = "4K",
+  badgePrefix,
   chapterNumber = 1,
 }: EpisodeListCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -47,7 +47,7 @@ export default function EpisodeListCard({
         borderRadius: "12px",
         padding: "14px",
         transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-        boxShadow: isHovered ? "0 8px 24px rgba(0,0,0,0.35)" : "var(--shadow-sm, 0 2px 6px rgba(0,0,0,0.2))",
+        boxShadow: "none",
         position: "relative",
       }}
       className="episode-list-card"
@@ -107,10 +107,12 @@ export default function EpisodeListCard({
               fontSize: "0.85rem",
               paddingLeft: "3px",
               transition: "all 0.2s ease",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+              boxShadow: "none",
             }}
           >
-            ▶
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="6 4 20 12 6 20 6 4" />
+            </svg>
           </div>
         </div>
 
@@ -158,24 +160,28 @@ export default function EpisodeListCard({
           >
             <h3
               style={{
-                fontSize: "1.05rem",
+                fontSize: "1.1rem",
                 fontWeight: 700,
-                color: isHovered ? "var(--accent-gold, #d4af37)" : "var(--text-primary, #ffffff)",
-                lineHeight: 1.35,
+                color: "var(--text-primary, #ffffff)",
                 margin: 0,
+                lineHeight: 1.35,
                 transition: "color 0.2s ease",
               }}
             >
-              <span
-                style={{
-                  color: "var(--accent-gold, #d4af37)",
-                  marginRight: "6px",
-                  fontWeight: 800,
-                }}
-              >
-                [{badgePrefix}]
-              </span>
-              {item.title} Chapter {chapterNumber}
+              {badgePrefix ? (
+                <span
+                  style={{
+                    color: "var(--accent-gold, #d4af37)",
+                    marginRight: "6px",
+                    fontWeight: 800,
+                  }}
+                >
+                  [{badgePrefix}]
+                </span>
+              ) : null}
+              {item.title.toLowerCase().includes("chapter")
+                ? item.title
+                : `${item.title} Chapter ${chapterNumber || 1}`}
             </h3>
           </Link>
 

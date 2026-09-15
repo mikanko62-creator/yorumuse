@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ContentCard from "@/components/content/ContentCard";
 import TrailerModal from "@/components/video/TrailerModal";
@@ -12,14 +12,26 @@ function BrowseContent() {
   const initialCategory = searchParams.get("category") || "all";
   const initialSort = searchParams.get("sort") || "latest";
 
+  const [contentList, setContentList] = useState<ContentItem[]>(MOCK_CONTENT);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedAccess, setSelectedAccess] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>(initialSort);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTrailer, setSelectedTrailer] = useState<ContentItem | null>(null);
 
+  useEffect(() => {
+    fetch("/api/content")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.content && data.content.length > 0) {
+          setContentList(data.content);
+        }
+      })
+      .catch((err) => console.error("Error loading browse content:", err));
+  }, []);
+
   const filteredItems = useMemo(() => {
-    return MOCK_CONTENT.filter((item) => {
+    return contentList.filter((item) => {
       // Category filter
       if (selectedCategory !== "all") {
         const catObj = CATEGORIES.find((c) => c.slug === selectedCategory);
