@@ -56,6 +56,15 @@ export default function Header() {
     { href: "/community", label: "Community" },
   ];
 
+  const isAdminOrSuperUser = Boolean(
+    user && (
+      user.role?.toUpperCase() === "ADMIN" ||
+      user.role?.toUpperCase() === "SUPERUSER" ||
+      user.role?.toUpperCase() === "SUPER_USER" ||
+      user.role?.toUpperCase() === "OWNER"
+    )
+  );
+
   return (
     <header
       style={{
@@ -130,10 +139,11 @@ export default function Header() {
         </nav>
 
         {/* Right: Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {user ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {user.role === "ADMIN" && (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {/* Tombol Admin Panel: Hanya muncul jika login sebagai Admin atau Super User */}
+              {isAdminOrSuperUser && (
                 <Link
                   href="/admin"
                   className="btn btn-outline-gold btn-sm"
@@ -142,49 +152,91 @@ export default function Header() {
                     alignItems: "center",
                     gap: "6px",
                     fontWeight: 700,
-                    fontSize: "0.8rem",
-                    padding: "6px 12px",
-                    borderColor: "var(--accent-gold)",
-                    color: "var(--accent-gold)",
+                    fontSize: "0.82rem",
+                    padding: "7px 14px",
+                    borderRadius: "8px",
+                    borderColor: "var(--accent-gold, #d4af37)",
+                    color: "var(--accent-gold, #d4af37)",
+                    backgroundColor: "rgba(212, 175, 55, 0.08)",
+                    boxShadow: "0 2px 8px rgba(212, 175, 55, 0.15)",
+                    transition: "all 0.2s ease",
                   }}
                   id="admin-header-link"
+                  title="Panel Kontrol Administrator"
                 >
-                  Admin Panel
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  <span>Admin Panel</span>
                 </Link>
               )}
+
+              {/* Icon Profile User: Tersedia untuk semua pengguna yang login */}
               <Link
                 href="/profile"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
-                  padding: "6px 14px",
-                  borderRadius: "var(--radius-full)",
-                  background: "var(--bg-surface-elevated)",
-                  border: "1px solid var(--border-subtle)",
+                  gap: "8px",
+                  padding: "4px 12px 4px 6px",
+                  borderRadius: "var(--radius-full, 9999px)",
+                  background: "var(--bg-surface-elevated, #ffffff)",
+                  border: "1px solid var(--border-subtle, rgba(0, 0, 0, 0.1))",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
                 }}
+                className="header-profile-link"
+                title="Profil Saya"
               >
+                {/* SVG Icon Profile dalam bulatan gradasi emas */}
                 <div
                   style={{
                     width: "28px",
                     height: "28px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #b88a25, #8c6411)",
+                    background: "linear-gradient(135deg, var(--accent-gold, #d4af37), #997b1e)",
                     color: "#ffffff",
-                    fontWeight: 700,
-                    fontSize: "0.8rem",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    boxShadow: "0 2px 6px rgba(212, 175, 55, 0.25)",
+                    flexShrink: 0,
                   }}
                 >
-                  {user.username.charAt(0).toUpperCase()}
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                 </div>
                 <span
+                  className="header-username-label"
                   style={{
-                    fontSize: "0.9rem",
+                    fontSize: "0.88rem",
                     fontWeight: 600,
-                    color: "var(--text-primary)",
+                    color: "var(--text-primary, #111827)",
+                    maxWidth: "110px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {user.username}
@@ -192,13 +244,56 @@ export default function Header() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            /* Visitor: Icon Profile untuk Sign In / Register */
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <Link
                 href="/login"
-                className="btn btn-ghost btn-sm"
-                style={{ color: "var(--text-primary)" }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "7px",
+                  padding: "6px 14px",
+                  borderRadius: "var(--radius-full, 9999px)",
+                  background: "var(--bg-surface-elevated, #ffffff)",
+                  border: "1px solid var(--border-subtle, rgba(0, 0, 0, 0.1))",
+                  color: "var(--text-primary, #111827)",
+                  textDecoration: "none",
+                  fontSize: "0.86rem",
+                  fontWeight: 600,
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
+                }}
+                className="header-profile-link"
+                title="Masuk ke Akun / Profil"
               >
-                Sign In
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    background: "rgba(212, 175, 55, 0.15)",
+                    color: "var(--accent-gold, #d4af37)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <span>Sign In</span>
               </Link>
               <Link
                 href="/membership"
@@ -292,7 +387,7 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            {user?.role === "ADMIN" && (
+            {isAdminOrSuperUser && (
               <Link
                 href="/admin"
                 style={{
@@ -301,9 +396,24 @@ export default function Header() {
                   color: "var(--accent-gold)",
                   padding: "10px 0",
                   borderBottom: "1px solid var(--border-subtle)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                Admin Dashboard
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>Admin Panel</span>
               </Link>
             )}
           </nav>
@@ -311,9 +421,59 @@ export default function Header() {
           <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "14px" }}>
             {user ? (
               <>
-                <Link href="/profile" className="btn btn-secondary btn-lg" style={{ width: "100%" }}>
-                  My Profile ({user.username})
+                <Link
+                  href="/profile"
+                  className="btn btn-secondary btn-lg"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span>Profil Saya ({user.username})</span>
                 </Link>
+                {isAdminOrSuperUser && (
+                  <Link
+                    href="/admin"
+                    className="btn btn-primary btn-lg"
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    <span>Admin Panel</span>
+                  </Link>
+                )}
                 <button
                   onClick={async () => {
                     await fetch("/api/auth/logout", { method: "POST" });
@@ -354,6 +514,15 @@ export default function Header() {
           #admin-header-link {
             display: inline-flex !important;
           }
+        }
+        @media (max-width: 480px) {
+          .header-username-label {
+            display: none !important;
+          }
+        }
+        .header-profile-link:hover {
+          border-color: var(--accent-gold, #d4af37) !important;
+          box-shadow: 0 0 10px rgba(212, 175, 55, 0.25) !important;
         }
       `}</style>
     </header>
