@@ -21,12 +21,12 @@ export default function SetupAdminPage() {
     setSuccess(null);
 
     if (password !== confirmPassword) {
-      setError("Password dan Konfirmasi Password tidak cocok.");
+      setError("Password and Confirm Password do not match.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password minimal 6 karakter.");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -46,16 +46,16 @@ export default function SetupAdminPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Gagal menyimpan akun admin.");
+        throw new Error(data.error || "Failed to save admin account.");
       }
 
-      setSuccess("Akun Administrator berhasil dibuat! Mengalihkan ke Admin Panel...");
+      setSuccess("Administrator account created successfully! Redirecting to Admin Panel...");
       setTimeout(() => {
         router.push("/admin");
         router.refresh();
       }, 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+      setError(err instanceof Error ? err.message : "An error occurred.");
       setLoading(false);
     }
   };
@@ -95,10 +95,10 @@ export default function SetupAdminPage() {
               marginBottom: "8px",
             }}
           >
-            Form Akun Administrator
+            Administrator Account Form
           </h2>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.5 }}>
-            Daftarkan atau perbarui email dan password Admin pilihan Anda sendiri ke database Supabase.
+            Register or update your preferred Admin email and password in the Supabase database.
           </p>
         </div>
 
@@ -137,12 +137,12 @@ export default function SetupAdminPage() {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           <div>
             <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>
-              Email Admin *
+              Admin Email *
             </label>
             <input
               type="email"
               required
-              placeholder="email-admin-anda@gmail.com"
+              placeholder="your-admin-email@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{ width: "100%", padding: "12px 16px" }}
@@ -151,11 +151,11 @@ export default function SetupAdminPage() {
 
           <div>
             <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>
-              Username Admin (Nama Tampilan)
+              Admin Username (Display Name)
             </label>
             <input
               type="text"
-              placeholder="Contoh: YoruMuseAdmin atau Nama Anda"
+              placeholder="e.g. YoruMuseAdmin or Your Name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={{ width: "100%", padding: "12px 16px" }}
@@ -164,12 +164,12 @@ export default function SetupAdminPage() {
 
           <div>
             <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>
-              Password Admin Baru *
+              New Admin Password *
             </label>
             <input
               type="password"
               required
-              placeholder="Masukkan password pilihan Anda (min. 6 karakter)"
+              placeholder="Enter your preferred password (min. 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ width: "100%", padding: "12px 16px" }}
@@ -178,12 +178,12 @@ export default function SetupAdminPage() {
 
           <div>
             <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>
-              Konfirmasi Password *
+              Confirm Password *
             </label>
             <input
               type="password"
               required
-              placeholder="Ketik ulang password di atas"
+              placeholder="Re-type the password above"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               style={{ width: "100%", padding: "12px 16px" }}
@@ -203,14 +203,14 @@ export default function SetupAdminPage() {
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? "Menyimpan ke Supabase..." : "Simpan & Masuk Sebagai Admin"}
+            {loading ? "Saving to Supabase..." : "Save & Sign In as Admin"}
           </button>
         </form>
 
         <div style={{ marginTop: "24px", textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)" }}>
-          Sudah punya akun?{" "}
+          Already have an account?{" "}
           <Link href="/login" style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
-            Kembali ke Login
+            Back to Login
           </Link>
         </div>
       </div>

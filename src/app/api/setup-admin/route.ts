@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     // If an administrator already exists, restrict creation to authenticated Admins or valid secret key
     if (existingAdminCount > 0 && !isAuthorizedAdmin && !isAuthorizedViaKey) {
       return NextResponse.json(
-        { error: "Akses ditolak: Sistem administrator sudah aktif. Hanya Super Admin terdaftar yang dapat menambahkan akun admin baru." },
+        { error: "Access denied: Administrator system is already active. Only registered Admins can add new admin accounts." },
         { status: 403 }
       );
     }
@@ -28,14 +28,14 @@ export async function POST(request: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email dan Password wajib diisi." },
+        { error: "Email and password are required." },
         { status: 400 }
       );
     }
 
     if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password minimal 8 karakter demi keamanan akun." },
+        { error: "Password must be at least 8 characters for account security." },
         { status: 400 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
       return NextResponse.json(
-        { error: "Format email tidak valid." },
+        { error: "Invalid email format." },
         { status: 400 }
       );
     }
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Akun Administrator berhasil dibuat/diperbarui.",
+      message: "Administrator account created/updated successfully.",
       user: {
         id: user.id,
         email: user.email,
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Setup admin error:", error);
     return NextResponse.json(
-      { error: "Gagal membuat akun admin: " + (error instanceof Error ? error.message : String(error)) },
+      { error: "Failed to create admin account: " + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     );
   }

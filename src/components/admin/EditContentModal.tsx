@@ -95,7 +95,7 @@ export default function EditContentModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal mengunggah file.");
+      if (!res.ok) throw new Error(data.error || "Failed to upload file.");
 
       if (type === "image") {
         setThumbnail(data.url);
@@ -104,7 +104,7 @@ export default function EditContentModal({
         setVideoUrl(data.url);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal mengunggah file.");
+      alert(err instanceof Error ? err.message : "Failed to upload file.");
     } finally {
       if (type === "image") setUploadingThumb(false);
       else setUploadingVideo(false);
@@ -137,13 +137,13 @@ export default function EditContentModal({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Gagal memperbarui konten.");
+        throw new Error(data.error || "Failed to update content.");
       }
 
       onSuccess(data.content);
       onClose();
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan.");
+      setErrorMessage(err instanceof Error ? err.message : "An error occurred while saving.");
     } finally {
       setSaving(false);
     }
@@ -185,10 +185,10 @@ export default function EditContentModal({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <div>
             <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              SUPER USER • EDIT KONTEN
+              SUPER USER • EDIT CONTENT
             </span>
             <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", color: "var(--text-primary)", margin: "4px 0 0" }}>
-              Edit Serial: {contentItem.title}
+              Edit Series: {contentItem.title}
             </h3>
           </div>
           <button
@@ -219,7 +219,7 @@ export default function EditContentModal({
           <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "14px" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                Judul Serial / Film *
+                Series / Title *
               </label>
               <input
                 type="text"
@@ -247,7 +247,7 @@ export default function EditContentModal({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                Kategori
+                Category
               </label>
               <select
                 value={category}
@@ -265,14 +265,14 @@ export default function EditContentModal({
 
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                Tingkat Akses
+                Access Level
               </label>
               <select
                 value={accessLevel}
                 onChange={(e) => setAccessLevel(e.target.value)}
                 style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface-elevated)", color: "var(--text-primary)" }}
               >
-                <option value="PUBLIC">PUBLIC (Semua Orang)</option>
+                <option value="PUBLIC">PUBLIC (Everyone)</option>
                 <option value="MEMBER">MEMBER (Velvet Club)</option>
                 <option value="VIP">VIP (Sovereign Patron)</option>
               </select>
@@ -280,7 +280,7 @@ export default function EditContentModal({
 
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                Durasi Rata-rata
+                Average Duration
               </label>
               <input
                 type="text"
@@ -295,25 +295,25 @@ export default function EditContentModal({
           {/* Description */}
           <div>
             <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-              Sinopsis Cerita
+              Story Synopsis
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Deskripsi cerita dan sinopsis lengkap..."
+              placeholder="Full story synopsis and description..."
               style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface-elevated)", color: "var(--text-primary)", resize: "vertical" }}
             />
           </div>
 
           {/* Thumbnail */}
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <div style={{ display: "flex", borderBottom: "none", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
               <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                URL Thumbnail Poster *
+                Poster Thumbnail URL *
               </label>
               <label style={{ fontSize: "0.75rem", color: "var(--accent-gold)", cursor: "pointer", textDecoration: "underline" }}>
-                <span>{uploadingThumb ? "Mengunggah..." : "Unggah Gambar Baru"}</span>
+                <span>{uploadingThumb ? "Uploading..." : "Upload New Image"}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -328,7 +328,7 @@ export default function EditContentModal({
               required
               value={thumbnail}
               onChange={(e) => setThumbnail(e.target.value)}
-              placeholder="https://... atau /uploads/..."
+              placeholder="https://... or /uploads/..."
               style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface-elevated)", color: "var(--text-primary)" }}
             />
           </div>
@@ -338,10 +338,10 @@ export default function EditContentModal({
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                 <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                  URL Video Trailer *
+                  Trailer Video URL *
                 </label>
                 <label style={{ fontSize: "0.75rem", color: "var(--accent-gold)", cursor: "pointer", textDecoration: "underline" }}>
-                  <span>{uploadingVideo ? "Mengunggah..." : "Unggah Video"}</span>
+                  <span>{uploadingVideo ? "Uploading..." : "Upload Video"}</span>
                   <input
                     type="file"
                     accept="video/*"
@@ -356,19 +356,19 @@ export default function EditContentModal({
                 required
                 value={trailer}
                 onChange={(e) => setTrailer(e.target.value)}
-                placeholder="/stream/... atau URL mp4"
+                placeholder="/stream/... or MP4 URL"
                 style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface-elevated)", color: "var(--text-primary)" }}
               />
             </div>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                URL Video Master Full
+                Full Master Video URL
               </label>
               <input
                 type="text"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="Sama dengan trailer jika kosong"
+                placeholder="Same as trailer if empty"
                 style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface-elevated)", color: "var(--text-primary)" }}
               />
             </div>
@@ -383,7 +383,7 @@ export default function EditContentModal({
                 onChange={(e) => setPublished(e.target.checked)}
                 style={{ accentColor: "var(--accent-gold)" }}
               />
-              <span>Publikasikan Serial (Aktif & Terlihat)</span>
+              <span>Publish Series (Active & Visible)</span>
             </label>
 
             <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.85rem", color: "var(--text-primary)" }}>
@@ -393,7 +393,7 @@ export default function EditContentModal({
                 onChange={(e) => setFeatured(e.target.checked)}
                 style={{ accentColor: "var(--accent-gold)" }}
               />
-              <span>Tandai Sebagai Featured (Sorotan)</span>
+              <span>Mark as Featured (Spotlight)</span>
             </label>
           </div>
 
@@ -405,7 +405,7 @@ export default function EditContentModal({
               className="btn btn-primary"
               style={{ flex: 1, padding: "12px", fontWeight: 600 }}
             >
-              {saving ? "Menyimpan Perubahan..." : "Simpan Perubahan Film"}
+              {saving ? "Saving Changes..." : "Save Changes"}
             </button>
             <button
               type="button"
@@ -414,7 +414,7 @@ export default function EditContentModal({
               className="btn btn-secondary"
               style={{ padding: "12px 20px" }}
             >
-              Batal
+              Cancel
             </button>
           </div>
         </form>

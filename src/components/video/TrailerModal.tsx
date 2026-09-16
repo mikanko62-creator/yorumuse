@@ -214,7 +214,7 @@ export default function TrailerModal({
               fontSize: "1.2rem",
             }}
           >
-            Tutup
+            ✕
           </button>
         </div>
 

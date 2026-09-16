@@ -69,7 +69,7 @@ export default function NavigationSidebar({
     }
   };
 
-  // Kategori Utama sesuai dengan Navigasi Header
+  // Main categories matching Header navigation
   const headerCategories = [
     {
       label: "Home",
@@ -93,7 +93,7 @@ export default function NavigationSidebar({
         </svg>
       ),
       subCategories: [
-        { label: "Semua Koleksi", href: "/browse" },
+        { label: "All Collections", href: "/browse" },
         { label: "Romance & Drama", href: "/browse?category=Romance" },
         { label: "Fantasy & Supernatural", href: "/browse?category=Fantasy" },
         { label: "Action & Thriller", href: "/browse?category=Action" },
@@ -160,7 +160,7 @@ export default function NavigationSidebar({
           borderRight: "1px solid rgba(0, 0, 0, 0.08)",
           overflow: "hidden",
         }}
-        aria-label="Sidebar Menu Kategori"
+        aria-label="Sidebar Category Menu"
       >
         {/* Header Drawer */}
         <div
@@ -180,7 +180,7 @@ export default function NavigationSidebar({
           </div>
           <button
             onClick={onClose}
-            aria-label="Tutup Menu"
+            aria-label="Close Menu"
             style={{
               width: "34px",
               height: "34px",
@@ -194,7 +194,7 @@ export default function NavigationSidebar({
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
-            title="Tutup Menu (Esc)"
+            title="Close Menu (Esc)"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -214,7 +214,7 @@ export default function NavigationSidebar({
             gap: "24px",
           }}
         >
-          {/* Menu Kategori Navigasi Sesuai Header */}
+          {/* Header Navigation & Category Menu */}
           <div>
             <div
               style={{
@@ -227,7 +227,7 @@ export default function NavigationSidebar({
                 marginBottom: "10px",
               }}
             >
-              Navigasi Header & Kategori
+              Navigation & Categories
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -270,7 +270,7 @@ export default function NavigationSidebar({
                       )}
                     </Link>
 
-                    {/* Sub-Kategori Genre Khusus Browse */}
+                    {/* Browse Genre Sub-Categories */}
                     {item.subCategories && (
                       <div
                         style={{
@@ -313,7 +313,7 @@ export default function NavigationSidebar({
             </div>
           </div>
 
-          {/* Admin Panel Entry (Hanya jika Login sebagai Admin) */}
+          {/* Admin Panel Entry (Only visible for Admin users) */}
           {isAdmin && (
             <div>
               <div
@@ -327,7 +327,7 @@ export default function NavigationSidebar({
                   marginBottom: "8px",
                 }}
               >
-                Area Pengelola
+                Admin Area
               </div>
 
               <Link
@@ -445,7 +445,7 @@ export default function NavigationSidebar({
                     textDecoration: "none",
                   }}
                 >
-                  Profil
+                  Profile
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -465,7 +465,7 @@ export default function NavigationSidebar({
                     gap: "4px",
                   }}
                 >
-                  Keluar
+                  Log Out
                 </button>
               </div>
             </div>

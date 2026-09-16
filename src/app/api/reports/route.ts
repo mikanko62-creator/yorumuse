@@ -7,14 +7,14 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
-        { error: "Silakan login terlebih dahulu untuk mengirimkan laporan konten." },
+        { error: "Please sign in to submit a content report." },
         { status: 401 }
       );
     }
 
     if (user.status === "BANNED" || user.status === "SUSPENDED") {
       return NextResponse.json(
-        { error: "Akun Anda tidak memiliki izin untuk melakukan tindakan ini." },
+        { error: "Your account does not have permission to perform this action." },
         { status: 403 }
       );
     }
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const allowedTargetTypes = ["POST", "COMMENT", "USER", "CONTENT"];
     if (!targetType || !allowedTargetTypes.includes(targetType) || !targetId || !reason) {
       return NextResponse.json(
-        { error: "Data laporan tidak valid. Tipe target dan alasan wajib diisi." },
+        { error: "Invalid report data. Target type and reason are required." },
         { status: 400 }
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         reportId: existingPendingReport.id,
-        message: "Laporan untuk konten ini sudah dalam antrean peninjauan tim moderator.",
+        message: "A report for this content is already queued for moderator review.",
       });
     }
 
@@ -62,10 +62,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       reportId: report.id,
-      message: "Laporan berhasil dikirim. Tim moderasi kami akan segera meninjau konten ini.",
+      message: "Report submitted successfully. Our moderation team will review this content shortly.",
     });
   } catch (error) {
     console.error("Report filing error:", error);
-    return NextResponse.json({ error: "Gagal memproses laporan." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process report." }, { status: 500 });
   }
 }

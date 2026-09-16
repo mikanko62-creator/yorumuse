@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const blockedExts = ["php", "html", "htm", "js", "svg", "xml", "exe", "sh", "bat", "cmd", "py", "pl", "cgi", "phar", "phtml"];
     if (blockedExts.includes(fileExt)) {
       return NextResponse.json(
-        { error: "Tipe file ini dilarang demi keamanan sistem." },
+        { error: "This file type is forbidden for system security." },
         { status: 400 }
       );
     }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       const allowedVideoExts = ["mp4", "webm", "mov", "mkv"];
       if (!allowedVideoExts.includes(fileExt) || !file.type.startsWith("video/")) {
         return NextResponse.json(
-          { error: "Format video tidak valid. Format didukung: MP4, WebM, MOV, MKV." },
+          { error: "Invalid video format. Supported formats: MP4, WebM, MOV, MKV." },
           { status: 400 }
         );
       }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       const maxVideoBytes = 250 * 1024 * 1024;
       if (file.size > maxVideoBytes) {
         return NextResponse.json(
-          { error: "Ukuran file video terlalu besar. Maksimum 250MB." },
+          { error: "Video file size is too large. Maximum 250MB." },
           { status: 400 }
         );
       }
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       const allowedImageExts = ["jpg", "jpeg", "png", "webp", "avif"];
       if (!allowedImageExts.includes(fileExt) || !file.type.startsWith("image/")) {
         return NextResponse.json(
-          { error: "Format gambar tidak valid. Format didukung: JPG, PNG, WebP, AVIF." },
+          { error: "Invalid image format. Supported formats: JPG, PNG, WebP, AVIF." },
           { status: 400 }
         );
       }
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
       const maxImageBytes = 15 * 1024 * 1024;
       if (file.size > maxImageBytes) {
         return NextResponse.json(
-          { error: "Ukuran file gambar terlalu besar. Maksimum 15MB." },
+          { error: "Image file size is too large. Maximum 15MB." },
           { status: 400 }
         );
       }

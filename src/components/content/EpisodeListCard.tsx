@@ -19,20 +19,20 @@ export default function EpisodeListCard({
 
   // Format date if valid
   const formattedDate = React.useMemo(() => {
-    if (!item.createdAt) return "Terbaru";
+    if (!item.createdAt) return "Latest";
     try {
       const d = new Date(item.createdAt);
-      return d.toLocaleDateString("id-ID", {
+      return d.toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
       });
     } catch {
-      return "Terbaru";
+      return "Latest";
     }
   }, [item.createdAt]);
 
-  const viewCount = item.views ? `${item.views.toLocaleString()} tayangan` : "14.2k tayangan";
+  const viewCount = item.views ? `${item.views.toLocaleString()} views` : "14.2k views";
 
   return (
     <div
@@ -199,7 +199,7 @@ export default function EpisodeListCard({
             }}
           >
             <strong style={{ color: "var(--text-muted, #8a8a93)", fontWeight: 600 }}>
-              Sinopsis :{" "}
+              Synopsis :{" "}
             </strong>
             {item.description}
           </p>
@@ -252,7 +252,7 @@ export default function EpisodeListCard({
               textDecoration: "none",
             }}
           >
-            <span>Tonton Chapter</span>
+            <span>Watch Chapter</span>
             <span style={{ transition: "transform 0.2s ease", transform: isHovered ? "translateX(3px)" : "none" }}>
               →
             </span>

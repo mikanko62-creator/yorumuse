@@ -3,8 +3,8 @@ import Link from "next/link";
 import Logo from "@/components/common/Logo";
 
 export const metadata = {
-  title: "404 - Halaman Tidak Ditemukan | YoruMuse",
-  description: "Halaman yang Anda cari tidak ditemukan atau telah dipindahkan.",
+  title: "404 - Page Not Found | YoruMuse",
+  description: "The page you are looking for was not found or has been moved.",
 };
 
 export default function NotFound() {
@@ -19,7 +19,7 @@ export default function NotFound() {
           href="/"
           className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
         >
-          Beranda
+          Home
         </Link>
       </header>
 
@@ -31,11 +31,11 @@ export default function NotFound() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-3 tracking-tight">
-            Halaman Tidak Ditemukan
+            Page Not Found
           </h1>
 
           <p className="text-sm text-zinc-400 leading-relaxed mb-8">
-            Alamat yang Anda tuju tidak tersedia, telah dipindahkan, atau mungkin Anda salah mengetikkan URL.
+            The address you are trying to reach is unavailable, has been moved, or you may have mistyped the URL.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -43,13 +43,13 @@ export default function NotFound() {
               href="/"
               className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#c92a54] hover:bg-[#a32244] text-white font-medium text-xs tracking-wider uppercase transition-colors shadow-lg"
             >
-              Kembali ke Beranda
+              Back to Home
             </Link>
             <Link
               href="/browse"
               className="w-full sm:w-auto px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/10 font-medium text-xs tracking-wider uppercase transition-colors"
             >
-              Jelajahi Katalog
+              Browse Catalog
             </Link>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function NotFound() {
 
       {/* Subtle Footer */}
       <footer className="px-6 py-6 border-t border-white/5 text-center text-xs text-zinc-600">
-        &copy; {new Date().getFullYear()} YoruMuse. Hak cipta dilindungi.
+        &copy; {new Date().getFullYear()} YoruMuse. All rights reserved.
       </footer>
     </div>
   );

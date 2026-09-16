@@ -109,7 +109,7 @@ export default function ReportModal({
             aria-label="Close report dialog"
             style={{ color: "var(--text-muted)", fontSize: "1.2rem", padding: "4px" }}
           >
-            Tutup
+            ✕
           </button>
         </div>
 

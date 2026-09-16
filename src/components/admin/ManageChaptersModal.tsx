@@ -120,7 +120,7 @@ export default function ManageChaptersModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal mengunggah video.");
+      if (!res.ok) throw new Error(data.error || "Failed to upload video.");
 
       if (isEdit) {
         setEditVideoUrl(data.url);
@@ -128,7 +128,7 @@ export default function ManageChaptersModal({
         setNewVideoUrl(data.url);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal mengunggah video.");
+      alert(err instanceof Error ? err.message : "Failed to upload video.");
     } finally {
       if (isEdit) setUploadingEditVideo(false);
       else setUploadingNewVideo(false);
@@ -138,7 +138,7 @@ export default function ManageChaptersModal({
   const handleCreateChapter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newVideoUrl.trim()) {
-      alert("Judul dan URL video chapter wajib diisi.");
+      alert("Chapter title and video URL are required.");
       return;
     }
 
@@ -158,14 +158,14 @@ export default function ManageChaptersModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal membuat chapter.");
+      if (!res.ok) throw new Error(data.error || "Failed to create chapter.");
 
       setShowAddForm(false);
       setNewDesc("");
       setNewVideoUrl("");
       await loadChapters();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menambahkan chapter.");
+      alert(err instanceof Error ? err.message : "Failed to add chapter.");
     } finally {
       setSavingNew(false);
     }
@@ -201,19 +201,19 @@ export default function ManageChaptersModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal memperbarui chapter.");
+      if (!res.ok) throw new Error(data.error || "Failed to update chapter.");
 
       setEditingChapterId(null);
       await loadChapters();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menyimpan perubahan chapter.");
+      alert(err instanceof Error ? err.message : "Failed to save chapter changes.");
     } finally {
       setSavingEdit(false);
     }
   };
 
   const handleDeleteChapter = async (chapterId: string, chapterTitle: string) => {
-    if (!confirm(`Yakin ingin menghapus "${chapterTitle}" secara permanen? Tindakan ini tidak dapat dibatalkan.`)) {
+    if (!confirm(`Are you sure you want to permanently delete "${chapterTitle}"? This action cannot be undone.`)) {
       return;
     }
 
@@ -223,11 +223,11 @@ export default function ManageChaptersModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal menghapus chapter.");
+      if (!res.ok) throw new Error(data.error || "Failed to delete chapter.");
 
       await loadChapters();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menghapus chapter.");
+      alert(err instanceof Error ? err.message : "Failed to delete chapter.");
     }
   };
 
@@ -273,7 +273,7 @@ export default function ManageChaptersModal({
             />
             <div>
               <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                MANAJEMEN CHAPTER • SUPER USER
+                CHAPTER MANAGEMENT • SUPER USER
               </span>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.45rem", color: "var(--text-primary)", margin: "2px 0 0" }}>
                 {contentItem.title}
@@ -300,7 +300,7 @@ export default function ManageChaptersModal({
         {/* Action Bar */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", paddingBottom: "14px", borderBottom: "1px solid var(--border-subtle)" }}>
           <div style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-            Total Chapter: <span style={{ color: "var(--accent-gold)" }}>{chapters.length} Babak</span>
+            Total Chapters: <span style={{ color: "var(--accent-gold)" }}>{chapters.length} Episodes</span>
           </div>
 
           <button
@@ -311,7 +311,7 @@ export default function ManageChaptersModal({
             }}
             className="btn btn-primary btn-sm"
           >
-            {showAddForm ? "✕ Tutup Form" : "+ Tambah Chapter Baru"}
+            {showAddForm ? "✕ Close Form" : "+ Add New Chapter"}
           </button>
         </div>
 
@@ -331,13 +331,13 @@ export default function ManageChaptersModal({
             }}
           >
             <h4 style={{ margin: "0 0 6px", fontSize: "1.05rem", color: "var(--accent-gold)" }}>
-              Tambah Chapter Baru ke Serial
+              Add New Chapter to Series
             </h4>
 
             <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 140px", gap: "12px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                  No. Chapter *
+                  Chapter No. *
                 </label>
                 <input
                   type="number"
@@ -351,7 +351,7 @@ export default function ManageChaptersModal({
 
               <div>
                 <label style={{ display: "block", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                  Judul Chapter *
+                  Chapter Title *
                 </label>
                 <input
                   type="text"
@@ -365,7 +365,7 @@ export default function ManageChaptersModal({
 
               <div>
                 <label style={{ display: "block", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                  Durasi
+                  Duration
                 </label>
                 <input
                   type="text"
@@ -380,10 +380,10 @@ export default function ManageChaptersModal({
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                 <label style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                  URL Video Chapter *
+                  Chapter Video URL *
                 </label>
                 <label style={{ fontSize: "0.75rem", color: "var(--accent-gold)", cursor: "pointer", textDecoration: "underline" }}>
-                  <span>{uploadingNewVideo ? "Mengunggah video..." : "Unggah File Video"}</span>
+                  <span>{uploadingNewVideo ? "Uploading video..." : "Upload Video File"}</span>
                   <input
                     type="file"
                     accept="video/*"
@@ -398,20 +398,20 @@ export default function ManageChaptersModal({
                 required
                 value={newVideoUrl}
                 onChange={(e) => setNewVideoUrl(e.target.value)}
-                placeholder="/stream/... atau URL mp4 terenkripsi"
+                placeholder="/stream/... or encrypted mp4 URL"
                 style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }}
               />
             </div>
 
             <div>
               <label style={{ display: "block", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                Sinopsis Babak (Opsional)
+                Chapter Synopsis (Optional)
               </label>
               <textarea
                 rows={2}
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Rincian alur cerita chapter..."
+                placeholder="Chapter storyline details..."
                 style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: "1px solid var(--border-medium)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)", resize: "vertical" }}
               />
             </div>
@@ -424,7 +424,7 @@ export default function ManageChaptersModal({
                   onChange={(e) => setNewPublished(e.target.checked)}
                   style={{ accentColor: "var(--accent-gold)" }}
                 />
-                <span>Langsung Publikasikan Chapter</span>
+                <span>Publish Chapter Immediately</span>
               </label>
 
               <div style={{ display: "flex", gap: "8px" }}>
@@ -433,14 +433,14 @@ export default function ManageChaptersModal({
                   onClick={() => setShowAddForm(false)}
                   className="btn btn-secondary btn-sm"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingNew || uploadingNewVideo}
                   className="btn btn-primary btn-sm"
                 >
-                  {savingNew ? "Menyimpan..." : "Simpan Chapter"}
+                  {savingNew ? "Saving..." : "Save Chapter"}
                 </button>
               </div>
             </div>
@@ -450,11 +450,11 @@ export default function ManageChaptersModal({
         {/* --- CHAPTER LIST TABLE --- */}
         {loading ? (
           <div style={{ textAlign: "center", padding: "40px", color: "var(--accent-gold)" }}>
-            Memuat daftar chapter serial...
+            Loading series chapter list...
           </div>
         ) : chapters.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px 20px", backgroundColor: "var(--bg-surface-elevated)", borderRadius: "10px", color: "var(--text-muted)" }}>
-            Belum ada chapter pada serial ini. Klik tombol di atas untuk menambahkan chapter pertama.
+            No chapters found for this series yet. Click the button above to add the first chapter.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -484,14 +484,14 @@ export default function ManageChaptersModal({
                           onClick={() => setEditingChapterId(null)}
                           style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "0.8rem" }}
                         >
-                          Batal
+                          Cancel
                         </button>
                       </div>
 
                       <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 140px", gap: "10px" }}>
                         <div>
                           <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-secondary)", marginBottom: "2px" }}>
-                            No. Chapter
+                            Chapter No.
                           </label>
                           <input
                             type="number"
@@ -505,7 +505,7 @@ export default function ManageChaptersModal({
 
                         <div>
                           <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-secondary)", marginBottom: "2px" }}>
-                            Judul Chapter
+                            Chapter Title
                           </label>
                           <input
                             type="text"
@@ -518,7 +518,7 @@ export default function ManageChaptersModal({
 
                         <div>
                           <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-secondary)", marginBottom: "2px" }}>
-                            Durasi
+                            Duration
                           </label>
                           <input
                             type="text"
@@ -532,10 +532,10 @@ export default function ManageChaptersModal({
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2px" }}>
                           <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                            URL Video
+                            Video URL
                           </label>
                           <label style={{ fontSize: "0.72rem", color: "var(--accent-gold)", cursor: "pointer", textDecoration: "underline" }}>
-                            <span>{uploadingEditVideo ? "Mengunggah..." : "Unggah Pengganti"}</span>
+                            <span>{uploadingEditVideo ? "Uploading..." : "Upload Replacement"}</span>
                             <input
                               type="file"
                               accept="video/*"
@@ -562,7 +562,7 @@ export default function ManageChaptersModal({
                             onChange={(e) => setEditPublished(e.target.checked)}
                             style={{ accentColor: "var(--accent-gold)" }}
                           />
-                          <span>Status Terbit (Published)</span>
+                          <span>Published Status</span>
                         </label>
 
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -571,14 +571,14 @@ export default function ManageChaptersModal({
                             onClick={() => setEditingChapterId(null)}
                             className="btn btn-secondary btn-sm"
                           >
-                            Batal
+                            Cancel
                           </button>
                           <button
                             type="submit"
                             disabled={savingEdit || uploadingEditVideo}
                             className="btn btn-primary btn-sm"
                           >
-                            {savingEdit ? "Menyimpan..." : "Simpan Perubahan"}
+                            {savingEdit ? "Saving..." : "Save Changes"}
                           </button>
                         </div>
                       </div>
@@ -596,11 +596,11 @@ export default function ManageChaptersModal({
                             {ch.title}
                           </div>
                           <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "flex", gap: "12px", marginTop: "2px" }}>
-                            <span>Durasi: {ch.duration || "45 min"}</span>
+                            <span>Duration: {ch.duration || "45 min"}</span>
                             <span>•</span>
                             <span>Views: {ch.views}</span>
                             <span>•</span>
-                            <span>Komentar: {ch._count?.comments || 0}</span>
+                            <span>Comments: {ch._count?.comments || 0}</span>
                             <span>•</span>
                             <span style={{ color: ch.published ? "var(--status-success)" : "var(--text-muted)", fontWeight: 600 }}>
                               {ch.published ? "● PUBLISHED" : "○ HIDDEN"}
@@ -627,7 +627,7 @@ export default function ManageChaptersModal({
                           className="btn btn-ghost btn-sm"
                           style={{ color: "var(--status-error)", fontSize: "0.75rem", padding: "4px 10px" }}
                         >
-                          Hapus
+                          Delete
                         </button>
                       </div>
                     </div>

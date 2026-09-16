@@ -62,7 +62,7 @@ export default function QuickActionsSidebar({
             color: "var(--accent-gold)",
             transition: "all 0.2s ease",
           }}
-          title="Buka Menu Aksi Cepat (Garis 3)"
+          title="Open Quick Actions Menu"
           id="floating-left-hamburger-btn"
         >
           <span style={{ display: "block", width: "20px", height: "2.5px", backgroundColor: "var(--accent-gold)", borderRadius: "2px" }} />
@@ -136,14 +136,14 @@ export default function QuickActionsSidebar({
                 </svg>
               </span>
               <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                Pusat Kendali
+                Control Center
               </span>
             </div>
             <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.35rem", color: "var(--text-primary)", margin: 0 }}>
-              Aksi Cepat Admin
+              Admin Quick Actions
             </h3>
             <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", margin: "4px 0 0" }}>
-              Pintasan instan & kontrol platform YoruMuse
+              Instant shortcuts & YoruMuse platform controls
             </p>
           </div>
 
@@ -160,7 +160,7 @@ export default function QuickActionsSidebar({
               lineHeight: 1,
               transition: "color 0.15s",
             }}
-            title="Tutup Sidebar (Esc)"
+            title="Close Sidebar (Esc)"
           >
             ✕
           </button>
@@ -181,7 +181,7 @@ export default function QuickActionsSidebar({
                 marginBottom: "10px",
               }}
             >
-              Tindakan Pembuatan (Create)
+              Creation Actions
             </span>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -226,15 +226,15 @@ export default function QuickActionsSidebar({
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.9rem" }}>
-                    + Buat Film & Chapter Baru
+                    + Create Series & Chapter
                   </div>
                   <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "2px" }}>
-                    Unggah video anti-theft & poster
+                    Upload anti-theft video & poster
                   </div>
                 </div>
               </button>
 
-              {/* Button: Tambah Pengguna Baru */}
+              {/* Button: Add New User */}
               <button
                 onClick={() => {
                   onClose();
@@ -273,10 +273,10 @@ export default function QuickActionsSidebar({
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.9rem" }}>
-                    + Tambah Pengguna Baru
+                    + Add New User
                   </div>
                   <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
-                    Buat akun member atau super user
+                    Create member or super user account
                   </div>
                 </div>
               </button>
@@ -321,10 +321,10 @@ export default function QuickActionsSidebar({
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "0.9rem" }}>
-                    + Tambah Slide Hero Baru
+                    + Add New Hero Slide
                   </div>
                   <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
-                    Banner carousel beranda utama
+                    Homepage carousel banner
                   </div>
                 </div>
               </button>
@@ -344,7 +344,7 @@ export default function QuickActionsSidebar({
                 marginBottom: "10px",
               }}
             >
-              Navigasi Cepat Modul
+              Quick Module Navigation
             </span>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -372,7 +372,7 @@ export default function QuickActionsSidebar({
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
-                  <span>Kontrol Semua Postingan</span>
+                  <span>Manage All Posts</span>
                 </span>
                 <span style={{ color: "var(--accent-gold)", fontSize: "0.8rem" }}>→</span>
               </button>
@@ -402,7 +402,7 @@ export default function QuickActionsSidebar({
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <polyline points="21 15 16 10 5 21" />
                   </svg>
-                  <span>Ubah Hero Section</span>
+                  <span>Edit Hero Section</span>
                 </span>
                 <span style={{ color: "var(--accent-gold)", fontSize: "0.8rem" }}>→</span>
               </button>
@@ -432,7 +432,7 @@ export default function QuickActionsSidebar({
                     <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
                     <line x1="2" y1="12" x2="22" y2="12" />
                   </svg>
-                  <span>Katalog Film & Babak</span>
+                  <span>Series & Chapters Catalog</span>
                 </span>
                 <span style={{ color: "var(--accent-gold)", fontSize: "0.8rem" }}>→</span>
               </button>
@@ -464,7 +464,7 @@ export default function QuickActionsSidebar({
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  <span>Daftar Email & Whitelist Admin</span>
+                  <span>User List & Admin Whitelist</span>
                 </span>
                 <span style={{ color: "var(--accent-gold)", fontSize: "0.8rem" }}>→</span>
               </button>
@@ -493,7 +493,7 @@ export default function QuickActionsSidebar({
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
-                  <span>Pusat Moderasi Laporan</span>
+                  <span>Report Moderation Center</span>
                 </span>
                 <span style={{ color: "var(--accent-gold)", fontSize: "0.8rem" }}>→</span>
               </button>
@@ -513,7 +513,7 @@ export default function QuickActionsSidebar({
                 marginBottom: "10px",
               }}
             >
-              Sistem & Koneksi
+              System & Connection
             </span>
 
             <div
@@ -533,8 +533,8 @@ export default function QuickActionsSidebar({
                 <span style={{ color: "var(--status-success)", fontWeight: 700 }}>● eu-central-1 (Frankfurt)</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--text-muted)" }}>Sesi Admin:</span>
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentUserEmail || "Admin Aktif"}</span>
+                <span style={{ color: "var(--text-muted)" }}>Admin Session:</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentUserEmail || "Active Admin"}</span>
               </div>
 
               <div style={{ paddingTop: "8px", borderTop: "1px dashed var(--border-subtle)", display: "flex", gap: "8px" }}>
@@ -544,7 +544,7 @@ export default function QuickActionsSidebar({
                   className="btn btn-secondary btn-sm"
                   style={{ flex: 1, textAlign: "center", fontSize: "0.75rem" }}
                 >
-                  Buka Beranda
+                  Open Homepage
                 </Link>
                 <Link
                   href="/membership"

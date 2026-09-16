@@ -100,7 +100,7 @@ export default function SeriesDetailView({
   const [ratingFeedback, setRatingFeedback] = useState<string | null>(null);
 
   // Dynamic Video Duration
-  const [videoDuration, setVideoDuration] = useState<string>(activeChapter.duration || content.duration || "45 menit");
+  const [videoDuration, setVideoDuration] = useState<string>(activeChapter.duration || content.duration || "45 min");
 
   // Load saved rating from localStorage
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function SeriesDetailView({
         return Math.round(newAvg * 10) / 10;
       });
     }
-    setRatingFeedback(`Terima kasih! Anda memberi rating ${stars} dari 5 bintang.`);
+    setRatingFeedback(`Thank you! You rated ${stars} out of 5 stars.`);
     setTimeout(() => setRatingFeedback(null), 3500);
   };
 
@@ -153,11 +153,11 @@ export default function SeriesDetailView({
         if (mins >= 60) {
           const hrs = Math.floor(mins / 60);
           const remMins = mins % 60;
-          setVideoDuration(`${hrs} jam ${remMins} menit`);
+          setVideoDuration(`${hrs} hr ${remMins} min`);
         } else if (mins > 0) {
-          setVideoDuration(`${mins} menit ${remSecs > 0 ? `${remSecs} dtk` : ""}`);
+          setVideoDuration(`${mins} min ${remSecs > 0 ? `${remSecs}s` : ""}`);
         } else {
-          setVideoDuration(`${remSecs} detik`);
+          setVideoDuration(`${remSecs}s`);
         }
       }
     };
@@ -182,14 +182,27 @@ export default function SeriesDetailView({
   const playerRef = useRef<HTMLDivElement>(null);
   const chaptersListRef = useRef<HTMLDivElement>(null);
 
-  // Parse tags
-  let tagList = ["Manhwa", "Romance", "Drama", "4K HDR", "Exclusive", "Serialized"];
+  // Parse tags & specifications
+  let tagList = ["Manhwa", "Romance", "Drama", "Exclusive", "Serialized"];
+  let contentType = "Manhwa";
+  let contentStatus = content.status || "Ongoing";
+  let contentPostedBy = "Admin";
+
   if (content.tags) {
     try {
       const parsed = JSON.parse(content.tags);
-      if (Array.isArray(parsed) && parsed.length > 0) tagList = parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        tagList = parsed;
+      } else if (typeof parsed === "object" && parsed !== null) {
+        if (Array.isArray(parsed.genres) && parsed.genres.length > 0) tagList = parsed.genres;
+        if (parsed.type) contentType = parsed.type;
+        if (parsed.status) contentStatus = parsed.status;
+        if (parsed.postedBy) contentPostedBy = parsed.postedBy;
+      }
     } catch {
-      // fallback
+      if (typeof content.tags === "string" && content.tags.trim()) {
+        tagList = content.tags.split(",").map((s) => s.trim()).filter(Boolean);
+      }
     }
   }
 
@@ -291,11 +304,11 @@ export default function SeriesDetailView({
 
     const trimmed = commentText.trim();
     if (trimmed.length < 3) {
-      setSpamError("Komentar terlalu pendek (minimal 3 karakter).");
+      setSpamError("Comment is too short (minimum 3 characters).");
       return;
     }
     if (trimmed.length > 1000) {
-      setSpamError("Komentar melebihi batas 1.000 karakter.");
+      setSpamError("Comment exceeds the 1,000 character limit.");
       return;
     }
 
@@ -314,8 +327,8 @@ export default function SeriesDetailView({
       const data = await res.json();
 
       if (!res.ok) {
-        setSpamError(data.error || "Gagal mengirim komentar.");
-        const match = data.error?.match(/(\d+)\s*detik/);
+        setSpamError(data.error || "Failed to post comment.");
+        const match = data.error?.match(/(\d+)\s*(?:detik|seconds?)/);
         if (match && match[1]) {
           setCooldownSeconds(parseInt(match[1]));
         }
@@ -324,7 +337,7 @@ export default function SeriesDetailView({
 
       // Success
       setCommentText("");
-      setSpamSuccess("Komentar Anda berhasil dipublikasikan di chapter ini!");
+      setSpamSuccess("Your comment has been published on this chapter!");
       setCooldownSeconds(15);
       if (data.comment) {
         setComments((prev) => [data.comment, ...prev]);
@@ -332,7 +345,7 @@ export default function SeriesDetailView({
         fetchComments(activeChapter.id);
       }
     } catch {
-      setSpamError("Terjadi kendala saat mengirimkan komentar.");
+      setSpamError("An error occurred while posting your comment.");
     } finally {
       setSubmittingComment(false);
     }
@@ -342,7 +355,7 @@ export default function SeriesDetailView({
     ? activeChapter.videoUrl || content.trailer
     : null;
 
-  const formattedDate = new Date().toLocaleDateString("id-ID", {
+  const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -350,20 +363,20 @@ export default function SeriesDetailView({
   });
 
   const postedOnDate = content.createdAt
-    ? new Date(content.createdAt).toLocaleDateString("id-ID", {
+    ? new Date(content.createdAt).toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
       })
-    : "14 September 2026";
+    : "September 14, 2026";
 
   const updatedOnDate = content.updatedAt
-    ? new Date(content.updatedAt).toLocaleDateString("id-ID", {
+    ? new Date(content.updatedAt).toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
       })
-    : "15 September 2026";
+    : "September 15, 2026";
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-base, #0a0a0e)", color: "var(--text-primary, #ffffff)" }}>
@@ -379,7 +392,7 @@ export default function SeriesDetailView({
             cursor: "pointer",
             transition: "opacity 0.3s ease",
           }}
-          title="Klik di mana saja untuk menyalakan lampu"
+          title="Click anywhere to exit theater mode"
         />
       )}
 
@@ -416,10 +429,10 @@ export default function SeriesDetailView({
                 letterSpacing: "0.04em",
               }}
             >
-              DIREKOMENDASIKAN
+              RECOMMENDED
             </span>
             <span style={{ color: "var(--text-secondary, #d1d1d6)" }}>
-              {content.title} — Serial Adaptasi Manhwa Eksklusif
+              {content.title} — Exclusive Manhwa Series Adaptation
             </span>
           </div>
 
@@ -481,18 +494,18 @@ export default function SeriesDetailView({
                 flexWrap: "wrap",
               }}
             >
-              <span>{(content.views || 14200).toLocaleString()} ditonton</span>
+              <span>{(content.views || 14200).toLocaleString()} views</span>
               <span>•</span>
               <span>{formattedDate}</span>
               <span>•</span>
-              {/* Rating Bintang Pengguna Interaktif */}
+              {/* Interactive User Star Rating */}
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
                 }}
-                title="Beri rating bintang untuk karya ini"
+                title="Rate this title"
               >
                 <div style={{ display: "inline-flex", gap: "2px" }}>
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -512,7 +525,7 @@ export default function SeriesDetailView({
                         lineHeight: 1,
                         transition: "color 0.15s ease",
                       }}
-                      title={`Beri rating ${star} bintang`}
+                      title={`Rate ${star} stars`}
                     >
                       ★
                     </button>
@@ -541,7 +554,7 @@ export default function SeriesDetailView({
                   fontWeight: 600,
                 }}
               >
-                <span>{likeCount} Suka</span>
+                <span>{likeCount} Likes</span>
               </button>
               <span>•</span>
               <button
@@ -556,7 +569,7 @@ export default function SeriesDetailView({
                   fontWeight: 600,
                 }}
               >
-                {shareCopied ? "Link Disalin" : "Bagikan"}
+                {shareCopied ? "Link Copied" : "Share"}
               </button>
             </div>
 
@@ -617,10 +630,10 @@ export default function SeriesDetailView({
                 lineHeight: 1.6,
               }}
             >
-              {/* Sinopsis */}
+              {/* Synopsis */}
               <div style={{ paddingBottom: "10px", borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.06))" }}>
                 <span style={{ color: "var(--accent-gold, #d4af37)", fontWeight: 800, marginRight: "8px", textTransform: "uppercase", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
-                  SINOPSIS :
+                  SYNOPSIS :
                 </span>
                 <span style={{ color: "var(--text-secondary, #d1d1d6)" }}>
                   {activeChapter.description || content.description}
@@ -643,7 +656,7 @@ export default function SeriesDetailView({
                   TYPE :
                 </span>
                 <span style={{ color: "var(--text-primary, #ffffff)", fontWeight: 600 }}>
-                  Manhwa
+                  {contentType}
                 </span>
               </div>
 
@@ -653,7 +666,7 @@ export default function SeriesDetailView({
                   STATUS :
                 </span>
                 <span style={{ color: "#10b981", fontWeight: 700, fontSize: "0.9rem" }}>
-                  {content.status || "Ongoing"}
+                  {contentStatus}
                 </span>
               </div>
 
@@ -663,7 +676,7 @@ export default function SeriesDetailView({
                   POSTED BY :
                 </span>
                 <span style={{ color: "var(--text-secondary, #d1d1d6)" }}>
-                  Admin
+                  {contentPostedBy}
                 </span>
               </div>
 
@@ -687,7 +700,7 @@ export default function SeriesDetailView({
                 </span>
               </div>
 
-              {/* Rating Pengguna (Rating Bintang) */}
+              {/* User Rating (Star Rating) */}
               <div style={{ paddingBottom: "10px", borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.06))", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
                 <span style={{ color: "var(--accent-gold, #d4af37)", fontWeight: 800, marginRight: "8px", textTransform: "uppercase", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
                   RATING :
@@ -714,7 +727,7 @@ export default function SeriesDetailView({
                             transition: "all 0.15s ease",
                             lineHeight: 1,
                           }}
-                          title={`Beri rating ${star} dari 5 bintang`}
+                          title={`Rate ${star} out of 5 stars`}
                         >
                           ★
                         </button>
@@ -725,11 +738,11 @@ export default function SeriesDetailView({
                     {averageRating.toFixed(1)} / 5.0
                   </span>
                   <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                    ({ratingCount.toLocaleString()} ulasan)
+                    ({ratingCount.toLocaleString()} reviews)
                   </span>
                   {hasRated && (
                     <span style={{ fontSize: "0.72rem", backgroundColor: "rgba(212, 175, 55, 0.15)", color: "var(--accent-gold, #d4af37)", padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
-                      Rating Anda: {userRating}/5
+                      Your Rating: {userRating}/5
                     </span>
                   )}
                 </div>
@@ -738,7 +751,7 @@ export default function SeriesDetailView({
               {/* Durasi (Menyesuaikan Video) */}
               <div>
                 <span style={{ color: "var(--accent-gold, #d4af37)", fontWeight: 800, marginRight: "8px", textTransform: "uppercase", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
-                  DURASI :
+                  DURATION :
                 </span>
                 <span style={{ color: "var(--text-secondary, #d1d1d6)" }}>
                   {videoDuration}
@@ -767,9 +780,9 @@ export default function SeriesDetailView({
             }}
           >
             <div>
-              <span>SERI: {content.title} ({sortedChapters.length} Chapter Tersedia)</span>
+              <span>SERIES: {content.title} ({sortedChapters.length} Chapters Available)</span>
             </div>
-            <span>Lihat Semua Chapter</span>
+            <span>View All Chapters</span>
           </button>
         </div>
 
@@ -827,7 +840,7 @@ export default function SeriesDetailView({
               </span>
             </div>
 
-            {/* Controls: Matikan Lampu & Layar Penuh */}
+            {/* Controls: Theater Mode & Fullscreen */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <button
                 onClick={() => setTheaterMode(!theaterMode)}
@@ -843,7 +856,7 @@ export default function SeriesDetailView({
                   transition: "all 0.2s ease",
                 }}
               >
-                {theaterMode ? "Nyalakan Lampu" : "Matikan Lampu"}
+                {theaterMode ? "Turn On Lights" : "Theater Mode"}
               </button>
 
               <button
@@ -859,7 +872,7 @@ export default function SeriesDetailView({
                   cursor: "pointer",
                 }}
               >
-                Layar Penuh
+                Fullscreen
               </button>
             </div>
           </div>
@@ -913,7 +926,7 @@ export default function SeriesDetailView({
                   marginBottom: "8px",
                 }}
               >
-                Konten Eksklusif Member
+                Exclusive Member Content
               </h3>
               <p
                 style={{
@@ -924,7 +937,7 @@ export default function SeriesDetailView({
                   lineHeight: 1.6,
                 }}
               >
-                Untuk menonton full video Chapter {activeChapter.chapterNumber} dalam kualitas 4K HDR tanpa batas, silakan bergabung menjadi Member.
+                To watch the full video of Chapter {activeChapter.chapterNumber} in unlimited 4K HDR quality, please become a Member.
               </p>
               <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
                 <Link
@@ -932,7 +945,7 @@ export default function SeriesDetailView({
                   className="btn btn-primary"
                   style={{ padding: "12px 28px", fontSize: "0.95rem", fontWeight: 700 }}
                 >
-                  Mulai Berlangganan (VIP Member)
+                  Subscribe Now (VIP Member)
                 </Link>
                 {!currentUser && (
                   <Link
@@ -940,7 +953,7 @@ export default function SeriesDetailView({
                     className="btn btn-secondary"
                     style={{ padding: "12px 24px", fontSize: "0.95rem" }}
                   >
-                    Masuk Akun
+                    Sign In
                   </Link>
                 )}
               </div>
@@ -978,16 +991,16 @@ export default function SeriesDetailView({
                   transition: "background-color 0.2s ease",
                 }}
               >
-                <span>Chapter {prevChapter.chapterNumber} (Sebelumnya)</span>
+                <span>Chapter {prevChapter.chapterNumber} (Previous)</span>
               </button>
             ) : (
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                Chapter Pertama
+                First Chapter
               </div>
             )}
 
             <div style={{ fontSize: "0.85rem", color: "var(--accent-gold)", fontWeight: 700 }}>
-              Chapter {activeChapter.chapterNumber} dari {sortedChapters.length}
+              Chapter {activeChapter.chapterNumber} of {sortedChapters.length}
             </div>
 
             {nextChapter ? (
@@ -1008,11 +1021,11 @@ export default function SeriesDetailView({
                   transition: "background-color 0.2s ease",
                 }}
               >
-                <span>Chapter {nextChapter.chapterNumber} (Selanjutnya)</span>
+                <span>Chapter {nextChapter.chapterNumber} (Next)</span>
               </button>
             ) : (
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                Chapter Terakhir
+                Latest Chapter
               </div>
             )}
           </div>
@@ -1056,7 +1069,7 @@ export default function SeriesDetailView({
                   gap: "8px",
                 }}
               >
-                <span>DAFTAR CHAPTER</span>
+                <span>CHAPTER LIST</span>
                 <span
                   style={{
                     fontSize: "0.78rem",
@@ -1088,7 +1101,7 @@ export default function SeriesDetailView({
                 gap: "4px",
               }}
             >
-              <span>Urutkan: {sortOrder === "asc" ? "Chapter 1 Dulu" : "Chapter Terbaru"}</span>
+              <span>Sort: {sortOrder === "asc" ? "Oldest First" : "Newest First"}</span>
             </button>
           </div>
 
@@ -1170,11 +1183,11 @@ export default function SeriesDetailView({
                       Chapter {chapter.chapterNumber}: {chapter.title}
                     </div>
                     <div style={{ fontSize: "0.76rem", color: "var(--text-muted, #8a8a93)" }}>
-                      Durasi: {chapter.duration || "45 min"} • {chapter._count?.comments || 0} komentar
+                      Duration: {chapter.duration || "45 min"} • {chapter._count?.comments || 0} comments
                     </div>
                   </div>
 
-                  {/* Badge: Sedang Diputar or Tonton */}
+                  {/* Badge: Now Playing or Select Chapter */}
                   <div>
                     {isActive ? (
                       <span
@@ -1188,7 +1201,7 @@ export default function SeriesDetailView({
                           letterSpacing: "0.04em",
                         }}
                       >
-                        SEDANG DIPUTAR
+                        NOW PLAYING
                       </span>
                     ) : (
                       <span
@@ -1199,7 +1212,7 @@ export default function SeriesDetailView({
                           padding: "4px 8px",
                         }}
                       >
-                        Pilih Chapter
+                        Select Chapter
                       </span>
                     )}
                   </div>
@@ -1210,7 +1223,7 @@ export default function SeriesDetailView({
         </div>
 
 
-        {/* ================= SECTION 4 (GAMBAR 3): DISKUSI & KOMENTAR ================= */}
+        {/* ================= SECTION 4: DISCUSSION & COMMENTS ================= */}
         <div
           style={{
             backgroundColor: "var(--bg-surface, #101016)",
@@ -1232,7 +1245,7 @@ export default function SeriesDetailView({
             }}
           >
             <h3 style={{ fontSize: "1.1rem", color: "var(--text-primary)", fontWeight: 800, margin: 0 }}>
-              Diskusi Chapter {activeChapter.chapterNumber} ({comments.length})
+              Chapter {activeChapter.chapterNumber} Discussion ({comments.length})
             </h3>
             <span
               style={{
@@ -1244,7 +1257,7 @@ export default function SeriesDetailView({
                 fontWeight: 700,
               }}
             >
-              Komunitas Penonton
+              Viewer Community
             </span>
           </div>
 
@@ -1317,7 +1330,7 @@ export default function SeriesDetailView({
                   <textarea
                     rows={2}
                     required
-                    placeholder={`Tulis pandangan atau ulasan mengenai Chapter ${activeChapter.chapterNumber}...`}
+                    placeholder={`Write your thoughts or review about Chapter ${activeChapter.chapterNumber}...`}
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     maxLength={1000}
@@ -1345,8 +1358,8 @@ export default function SeriesDetailView({
                   >
                     <span>
                       {cooldownSeconds > 0
-                        ? `Cooldown anti-spam: ${cooldownSeconds} detik`
-                        : "Batas 1 komentar per 15 detik"}
+                        ? `Anti-spam cooldown: ${cooldownSeconds}s`
+                        : "Limit 1 comment per 15 seconds"}
                     </span>
                     <span>{commentText.length} / 1000</span>
                   </div>
@@ -1358,7 +1371,7 @@ export default function SeriesDetailView({
                       className="btn btn-primary btn-sm"
                       style={{ padding: "6px 18px", fontWeight: 700 }}
                     >
-                      {submittingComment ? "Mengirim..." : "Kirim Komentar"}
+                      {submittingComment ? "Submitting..." : "Post Comment"}
                     </button>
                   </div>
                 </div>
@@ -1382,10 +1395,10 @@ export default function SeriesDetailView({
             >
               <div>
                 <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "2px" }}>
-                  Wajib Login untuk Berkomentar
+                  Sign In Required to Comment
                 </div>
                 <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                  Masuk untuk berdiskusi dengan sesama penonton di chapter ini.
+                  Sign in to join the discussion with other viewers on this chapter.
                 </div>
               </div>
 
@@ -1394,7 +1407,7 @@ export default function SeriesDetailView({
                 className="btn btn-primary btn-sm"
                 style={{ padding: "8px 18px", fontWeight: 700 }}
               >
-                Masuk Akun
+                Sign In
               </Link>
             </div>
           )}
@@ -1402,11 +1415,11 @@ export default function SeriesDetailView({
           {/* Comments List */}
           {loadingComments ? (
             <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px" }}>
-              Memuat komentar...
+              Loading comments...
             </div>
           ) : comments.length === 0 ? (
             <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "24px 0", fontSize: "0.88rem" }}>
-              Belum ada komentar di chapter ini. Jadilah yang pertama berkomentar!
+              No comments on this chapter yet. Be the first to comment!
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -1439,7 +1452,7 @@ export default function SeriesDetailView({
                       </span>
                     </div>
                     <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>
-                      {new Date(comm.createdAt).toLocaleDateString("id-ID", {
+                      {new Date(comm.createdAt).toLocaleDateString("en-US", {
                         day: "numeric",
                         month: "short",
                         hour: "2-digit",

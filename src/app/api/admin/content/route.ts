@@ -49,14 +49,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const generatedSlug = (slug || title)
+    let generatedSlug = (slug || title)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
+    const existing = await prisma.content.findUnique({ where: { slug: generatedSlug } });
+    if (existing) {
+      generatedSlug = `${generatedSlug}-${Date.now().toString().slice(-4)}`;
+    }
+
     const chapterNum = Number(body.chapterNumber) || 1;
     const chapterName = body.chapterTitle?.trim() || `Chapter ${chapterNum}: ${title.trim()}`;
     const targetVideoUrl = videoUrl ? videoUrl.trim() : trailer.trim();
+    const tagsValue = typeof body.tags === "object" ? JSON.stringify(body.tags) : body.tags || null;
 
     const newContent = await prisma.content.create({
       data: {
@@ -71,6 +77,7 @@ export async function POST(request: Request) {
         featured: Boolean(featured),
         published: published !== undefined ? Boolean(published) : true,
         duration: duration || "45 min",
+        tags: tagsValue,
         chapters: {
           create: {
             chapterNumber: chapterNum,

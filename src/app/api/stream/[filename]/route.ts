@@ -77,7 +77,7 @@ export async function GET(
 
     // Ensure resolved path is strictly within project root
     const resolvedPath = path.resolve(filePath);
-    if (!resolvedPath.startsWith(path.resolve(process.cwd()))) {
+    if (!resolvedPath.startsWith(path.resolve(/*turbopackIgnore: true*/ process.cwd()))) {
       return new NextResponse("Access denied", { status: 403 });
     }
 

@@ -135,11 +135,11 @@ export default function ChapterPlayerView({
 
     const trimmed = commentText.trim();
     if (trimmed.length < 3) {
-      setSpamError("Komentar terlalu pendek (minimal 3 karakter).");
+      setSpamError("Comment is too short (minimum 3 characters).");
       return;
     }
     if (trimmed.length > 1000) {
-      setSpamError("Komentar melebihi batas 1.000 karakter.");
+      setSpamError("Comment exceeds the 1,000 character limit.");
       return;
     }
 
@@ -158,9 +158,9 @@ export default function ChapterPlayerView({
       const data = await res.json();
 
       if (!res.ok) {
-        setSpamError(data.error || "Gagal mengirim komentar.");
+        setSpamError(data.error || "Failed to submit comment.");
         // Extract remaining seconds if rate limited
-        const match = data.error?.match(/(\d+)\s*detik/);
+        const match = data.error?.match(/(\d+)\s*(detik|seconds|s)/i);
         if (match && match[1]) {
           setCooldownSeconds(parseInt(match[1]));
         }
@@ -169,7 +169,7 @@ export default function ChapterPlayerView({
 
       // Success
       setCommentText("");
-      setSpamSuccess("Komentar Anda berhasil dipublikasikan di chapter ini!");
+      setSpamSuccess("Your comment has been published on this chapter!");
       setCooldownSeconds(15); // Start 15s local cooldown
       if (data.comment) {
         setComments((prev) => [data.comment, ...prev]);
@@ -177,7 +177,7 @@ export default function ChapterPlayerView({
         fetchComments(activeChapter.id);
       }
     } catch {
-      setSpamError("Terjadi kendala jaringan saat mengirimkan komentar.");
+      setSpamError("Network issue encountered while submitting comment.");
     } finally {
       setSubmittingComment(false);
     }
@@ -315,7 +315,7 @@ export default function ChapterPlayerView({
                     marginBottom: "32px",
                   }}
                 >
-                  &ldquo;{content.title}&rdquo; adalah tayangan eksklusif untuk patron terdaftar YoruMuse. Buka akses penuh 4K streaming dan nikmati seluruh episode sinematik.
+                  &ldquo;{content.title}&rdquo; is an exclusive presentation for registered YoruMuse patrons. Unlock full 4K streaming access and enjoy every cinematic episode.
                 </p>
                 <div style={{ display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
                   <Link href="/membership" className="btn btn-primary btn-lg">
@@ -392,7 +392,7 @@ export default function ChapterPlayerView({
                 }}
               >
                 
-                <strong>{comments.length}</strong> Komentar di Chapter Ini
+                <strong>{comments.length}</strong> Comments on This Chapter
               </span>
             </div>
           </div>
@@ -412,11 +412,11 @@ export default function ChapterPlayerView({
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               
               <h3 style={{ fontSize: "1.1rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                Daftar Chapter / Episode ({defaultChapters.length})
+                Chapter / Episode List ({defaultChapters.length})
               </h3>
             </div>
             <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Pilih chapter untuk berpindah video & membaca komentar spesifik
+              Select a chapter to switch videos & view specific comments
             </span>
           </div>
 
@@ -488,7 +488,7 @@ export default function ChapterPlayerView({
                       color: "var(--text-muted)",
                     }}
                   >
-                    <span>{ch._count?.comments || (isActive ? comments.length : 0)} ulasan</span>
+                    <span>{ch._count?.comments || (isActive ? comments.length : 0)} reviews</span>
                     {isActive && (
                       <span
                         style={{
@@ -539,7 +539,7 @@ export default function ChapterPlayerView({
             >
               <div>
                 <div style={{ fontSize: "0.8rem", color: "var(--accent-gold)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                  DISKUSI & KOMENTAR RESMI
+                  OFFICIAL DISCUSSION & COMMENTS
                 </div>
                 <h3
                   style={{
@@ -549,7 +549,7 @@ export default function ChapterPlayerView({
                     marginTop: "4px",
                   }}
                 >
-                  Komentar {activeChapter.title}
+                  Comments: {activeChapter.title}
                 </h3>
               </div>
 
@@ -674,7 +674,7 @@ export default function ChapterPlayerView({
                       <textarea
                         rows={3}
                         required
-                        placeholder={`Tulis pandangan, apresiasi sinematografi, atau diskusi mengenai ${activeChapter.title}...`}
+                        placeholder={`Share your thoughts, cinematographic appreciation, or discussion regarding ${activeChapter.title}...`}
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         maxLength={1000}
@@ -703,14 +703,14 @@ export default function ChapterPlayerView({
                         <div>
                           {cooldownSeconds > 0 ? (
                             <span style={{ color: "var(--accent-gold)", fontWeight: 600 }}>
-                              Cooldown Anti-Spam: {cooldownSeconds} detik
+                              Anti-Spam Cooldown: {cooldownSeconds}s
                             </span>
                           ) : (
-                            <span>Batas kirim: 1 ulasan per 15 detik untuk mencegah spam.</span>
+                            <span>Rate limit: 1 review every 15 seconds to prevent spam.</span>
                           )}
                         </div>
                         <span style={{ color: commentText.length > 900 ? "#e11d48" : "var(--text-muted)" }}>
-                          {commentText.length} / 1000 karakter
+                          {commentText.length} / 1000 characters
                         </span>
                       </div>
                     </div>
@@ -723,14 +723,14 @@ export default function ChapterPlayerView({
                         style={{ minWidth: "160px" }}
                         id="submit-chapter-comment-btn"
                       >
-                        {submittingComment ? "Mengirim Komentar..." : "Kirim Komentar"}
+                        {submittingComment ? "Posting Comment..." : "Post Comment"}
                       </button>
                     </div>
                   </div>
                 </div>
               </form>
             ) : (
-              /* MANDATORY LOGIN PROMPT CARD (Wajib Sudah Login Akun) */
+              /* MANDATORY LOGIN PROMPT CARD (Requires User Sign-in) */
               <div
                 style={{
                   padding: "32px 28px",
@@ -773,7 +773,7 @@ export default function ChapterPlayerView({
                       marginBottom: "4px",
                     }}
                   >
-                    Akses Komentar Khusus Pengguna
+                    Member-Only Comments
                   </div>
                   <h4
                     style={{
@@ -783,7 +783,7 @@ export default function ChapterPlayerView({
                       marginBottom: "6px",
                     }}
                   >
-                    Wajib Sudah Login Akun untuk Berkomentar
+                    Account Login Required to Comment
                   </h4>
                   <p
                     style={{
@@ -793,7 +793,7 @@ export default function ChapterPlayerView({
                       margin: 0,
                     }}
                   >
-                    Untuk menjaga kenyamanan komunitas eksklusif YoruMuse dan mencegah spam bot otomatis, Anda wajib masuk atau membuat akun terlebih dahulu sebelum dapat menambahkan ulasan pada tiap chapter.
+                    To maintain the quality of the exclusive YoruMuse community and prevent automated spam bots, you must sign in or create an account before posting reviews on each chapter.
                   </p>
                 </div>
 
@@ -804,14 +804,14 @@ export default function ChapterPlayerView({
                     style={{ padding: "10px 22px" }}
                     id="comment-login-redirect-btn"
                   >
-                    Masuk Akun
+                    Sign In
                   </Link>
                   <Link
                     href={`/register?redirect=/content/${content.slug}`}
                     className="btn btn-secondary"
                     style={{ padding: "10px 18px" }}
                   >
-                    Daftar Baru
+                    Register
                   </Link>
                 </div>
               </div>
@@ -830,7 +830,7 @@ export default function ChapterPlayerView({
                   gap: "8px",
                 }}
               >
-                <span>Daftar Komentar</span>
+                <span>Comments</span>
                 <span
                   style={{
                     backgroundColor: "var(--bg-surface-elevated)",
@@ -848,7 +848,7 @@ export default function ChapterPlayerView({
 
               {loadingComments ? (
                 <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                  Memuat komentar chapter...
+                  Loading chapter comments...
                 </div>
               ) : comments.length === 0 ? (
                 <div
@@ -862,10 +862,10 @@ export default function ChapterPlayerView({
                 >
                   
                   <div style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
-                    Belum ada ulasan di {activeChapter.title}
+                    No reviews yet for {activeChapter.title}
                   </div>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", margin: 0 }}>
-                    Jadilah yang pertama menuliskan ulasan dan diskusi tentang sinematografi chapter ini!
+                    Be the first to share your thoughts and discuss the cinematography of this chapter!
                   </p>
                 </div>
               ) : (
@@ -934,7 +934,7 @@ export default function ChapterPlayerView({
                               </span>
                             </div>
                             <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                              {new Date(comment.createdAt).toLocaleDateString("id-ID", {
+                              {new Date(comment.createdAt).toLocaleDateString("en-US", {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",

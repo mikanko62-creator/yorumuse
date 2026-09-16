@@ -57,7 +57,22 @@ export default function CommunityPage() {
   };
 
   useEffect(() => {
-    fetchPosts();
+    let mounted = true;
+    const run = () => {
+      setLoading(true);
+      fetch(`/api/posts?category=${category}`)
+        .then((res) => (res.ok ? res.json() : { posts: [] }))
+        .then((data) => {
+          if (!mounted) return;
+          setPosts(data.posts || []);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (mounted) setLoading(false);
+        });
+    };
+    run();
+    return () => { mounted = false; };
   }, [category]);
 
   const handleLike = async (postId: string) => {
@@ -394,8 +409,8 @@ export default function CommunityPage() {
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.5rem", color: "var(--text-primary)" }}>
                 Start Discussion
               </h3>
-              <button onClick={() => setIsComposeOpen(false)} style={{ color: "var(--text-muted)", fontSize: "1.2rem" }}>
-                Tutup
+              <button onClick={() => setIsComposeOpen(false)} aria-label="Close" style={{ color: "var(--text-muted)", fontSize: "1.2rem" }}>
+                ✕
               </button>
             </div>
 

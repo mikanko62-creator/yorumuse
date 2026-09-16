@@ -1,12 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ContentCard from "@/components/content/ContentCard";
-import TrailerModal from "@/components/video/TrailerModal";
-import { MOCK_CONTENT } from "@/data/mockContent";
-import { ContentItem } from "@/types/content";
 
 interface UserProfile {
   id: string;
@@ -15,12 +11,14 @@ interface UserProfile {
   role: string;
   birthDate: string;
   bio?: string;
+  avatarUrl?: string | null;
   subscription?: {
     id: string;
     planId: string;
     status: string;
     currentPeriodEnd?: string;
     paymentMethod?: string;
+    createdAt?: string;
   } | null;
 }
 
@@ -28,9 +26,11 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTrailer, setSelectedTrailer] = useState<ContentItem | null>(null);
   const [bioInput, setBioInput] = useState("");
   const [savedBio, setSavedBio] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -42,6 +42,9 @@ export default function ProfilePage() {
         if (data.user) {
           setUser(data.user);
           setBioInput(data.user.bio || "");
+          if (data.user.avatarUrl) {
+            setAvatarPreview(data.user.avatarUrl);
+          }
         } else {
           router.push("/login");
         }
@@ -64,6 +67,57 @@ export default function ProfilePage() {
     setTimeout(() => setSavedBio(false), 2500);
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate on client side
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("File format not supported. Please use JPEG, PNG, WebP, or GIF.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size is too large. Maximum 5MB.");
+      return;
+    }
+
+    // Show preview immediately
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/auth/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAvatarPreview(data.avatarUrl);
+        setUser((prev) => prev ? { ...prev, avatarUrl: data.avatarUrl } : prev);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to upload profile photo.");
+        // Revert preview
+        setAvatarPreview(user?.avatarUrl || null);
+      }
+    } catch {
+      alert("Failed to upload profile photo.");
+      setAvatarPreview(user?.avatarUrl || null);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -76,7 +130,7 @@ export default function ProfilePage() {
         }}
       >
         <div style={{ color: "var(--accent-gold)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
-          Loading profile sanctuary...
+          Loading profile...
         </div>
       </div>
     );
@@ -85,12 +139,7 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const isSubscribed = user.subscription?.status === "ACTIVE";
-  const userPlanName = isSubscribed
-    ? "Pengguna Subscription"
-    : "Pengguna Biasa";
-
-  // Demo bookmarked watchlist
-  const watchlist = MOCK_CONTENT.slice(0, 3);
+  const userPlanName = isSubscribed ? "Member Subscription" : "Free User";
 
   return (
     <div style={{ paddingTop: "var(--header-height)", minHeight: "100vh" }}>
@@ -112,27 +161,94 @@ export default function ProfilePage() {
               gap: "24px",
             }}
           >
-            {/* User Avatar & Identity */}
+            {/* Avatar & Identity */}
             <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+              {/* Clickable Avatar */}
               <div
+                onClick={handleAvatarClick}
                 style={{
                   width: "84px",
                   height: "84px",
                   borderRadius: "50%",
-                  background: "linear-gradient(135deg, #b88a25 0%, #8c6411 100%)",
-                  color: "#ffffff",
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "2.4rem",
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 8px 24px rgba(166, 124, 30, 0.2)",
-                  border: "2px solid rgba(255, 255, 255, 0.5)",
+                  position: "relative",
+                  cursor: "pointer",
                   flexShrink: 0,
+                  overflow: "hidden",
+                  border: "2px solid rgba(255, 255, 255, 0.5)",
+                  boxShadow: "0 8px 24px rgba(166, 124, 30, 0.2)",
                 }}
               >
-                {user.username.charAt(0).toUpperCase()}
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt={user.username}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      background: "linear-gradient(135deg, #b88a25 0%, #8c6411 100%)",
+                      color: "#ffffff",
+                      fontFamily: "var(--font-serif)",
+                      fontSize: "2.4rem",
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+
+                {/* Hover overlay */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: uploadingAvatar ? 1 : 0,
+                    transition: "opacity 0.2s ease",
+                    borderRadius: "50%",
+                  }}
+                  className="avatar-overlay"
+                >
+                  {uploadingAvatar ? (
+                    <div
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        border: "2px solid rgba(255,255,255,0.3)",
+                        borderTopColor: "#fff",
+                        borderRadius: "50%",
+                        animation: "spin 0.8s linear infinite",
+                      }}
+                    />
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  )}
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
               </div>
 
               <div>
@@ -150,7 +266,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginTop: "4px" }}>
-                  {user.email} • Verified Member Account
+                  {user.email}
                 </p>
               </div>
             </div>
@@ -170,14 +286,13 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* Main Profile Grid */}
+      {/* Main Profile Content */}
       <div className="container" style={{ padding: "48px 24px 80px" }}>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             gap: "32px",
-            marginBottom: "48px",
           }}
         >
           {/* Subscription Status Card */}
@@ -185,7 +300,9 @@ export default function ProfilePage() {
             style={{
               backgroundColor: "var(--bg-surface)",
               borderRadius: "16px",
-              border: "1px solid rgba(212, 175, 55, 0.3)",
+              border: isSubscribed
+                ? "1px solid rgba(212, 175, 55, 0.3)"
+                : "1px solid var(--border-subtle)",
               padding: "32px",
               position: "relative",
               overflow: "hidden",
@@ -201,15 +318,15 @@ export default function ProfilePage() {
                 marginBottom: "8px",
               }}
             >
-              Status Langganan
+              Subscription Status
             </div>
             <h3 style={{ fontSize: "1.5rem", color: "var(--text-primary)", marginBottom: "8px" }}>
               {userPlanName}
             </h3>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "20px" }}>
               {isSubscribed
-                ? "Akun Anda aktif sebagai Pengguna Subscription dengan akses tak terbatas ke seluruh episode dan chapter penuh manhwa."
-                : "Anda saat ini adalah Pengguna Biasa. Mulai berlangganan untuk membuka dan menonton seluruh chapter penuh serial manhwa."}
+                ? "Your account is active as a Member Subscriber with unlimited access to all episodes and full chapters."
+                : "You are currently a Free User. Subscribe to unlock all full chapters of manhwa series."}
             </p>
 
             <div
@@ -239,30 +356,24 @@ export default function ProfilePage() {
                 <span style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 600 }}>
                   {user.subscription?.currentPeriodEnd
                     ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-                    : "Lifetime Free"}
+                    : "—"}
                 </span>
               </div>
-              <div style={{ gridColumn: "span 2", paddingTop: "8px", borderTop: "1px dashed var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
-                    PAYMENT METHOD
-                  </span>
-                  <span style={{ color: "var(--accent-gold)", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                      <line x1="1" y1="10" x2="23" y2="10" />
-                    </svg>
-                    <span>{user.subscription?.paymentMethod || "PayPal EU"}</span>
-                  </span>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block" }}>
-                    STATEMENT LINE
-                  </span>
-                  <span style={{ fontSize: "0.78rem", color: "var(--text-secondary)", fontFamily: "monospace" }}>
-                    YM MEDIA LUX
-                  </span>
-                </div>
+              <div>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
+                  PAYMENT METHOD
+                </span>
+                <span style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 600 }}>
+                  {user.subscription?.paymentMethod || "—"}
+                </span>
+              </div>
+              <div>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", letterSpacing: "0.08em" }}>
+                  PLAN
+                </span>
+                <span style={{ color: "var(--accent-gold)", fontSize: "0.9rem", fontWeight: 600 }}>
+                  {user.subscription?.planId?.replace(/_/g, " ").toUpperCase() || "FREE"}
+                </span>
               </div>
             </div>
 
@@ -271,10 +382,9 @@ export default function ProfilePage() {
               className={isSubscribed ? "btn btn-secondary" : "btn btn-primary"}
               style={{ width: "100%" }}
             >
-              {isSubscribed ? "Manage Subscription & Billing" : "Upgrade to Member Access"}
+              {isSubscribed ? "Manage Subscription" : "Upgrade to Member"}
             </Link>
           </div>
-
 
           {/* Account Settings / Bio Card */}
           <div
@@ -296,79 +406,86 @@ export default function ProfilePage() {
                 marginBottom: "8px",
               }}
             >
-              Patron Profile
+              Account Settings
             </div>
             <h3 style={{ fontSize: "1.5rem", color: "var(--text-primary)", marginBottom: "16px" }}>
-              Personal Details
+              Profile Details
             </h3>
 
             <form onSubmit={handleSaveBio} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                  Community Bio
+                  Bio
                 </label>
                 <textarea
                   rows={3}
                   value={bioInput}
                   onChange={(e) => setBioInput(e.target.value)}
-                  placeholder="Share a thought or aesthetic preference with the community..."
+                  placeholder="Write something about yourself..."
                   style={{ width: "100%", resize: "vertical" }}
                 />
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <button type="submit" className="btn btn-secondary btn-sm">
-                  Save Changes
+                  Save
                 </button>
                 {savedBio && (
                   <span style={{ color: "var(--status-success)", fontSize: "0.85rem" }}>
-                    Bio updated
+                    Bio saved
                   </span>
                 )}
               </div>
             </form>
-          </div>
-        </div>
 
-        {/* Watchlist / Saved Productions Section */}
-        <div style={{ marginTop: "32px" }}>
-          <div className="section-header">
+            {/* Divider */}
+            <div style={{ borderTop: "1px solid var(--border-subtle)", margin: "24px 0" }} />
+
+            {/* Logout section */}
             <div>
-              <span className="section-subtitle">Private Curation</span>
-              <h2 className="section-title">My Saved Productions</h2>
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  fontWeight: 700,
+                  marginBottom: "12px",
+                }}
+              >
+                Account Session
+              </div>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginBottom: "16px" }}>
+                Sign out of your account on this device.
+              </p>
+              <button
+                onClick={handleLogout}
+                className="btn btn-secondary"
+                style={{
+                  width: "100%",
+                  borderColor: "rgba(239, 68, 68, 0.4)",
+                  color: "#ef4444",
+                }}
+              >
+                Log Out
+              </button>
             </div>
-            <Link href="/browse" className="view-all-link">
-              <span>Explore More</span>
-              <span>→</span>
-            </Link>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "28px",
-            }}
-          >
-            {watchlist.map((item) => (
-              <ContentCard
-                key={item.id}
-                item={item}
-                onWatchTrailer={(it) => setSelectedTrailer(it)}
-              />
-            ))}
           </div>
         </div>
       </div>
 
-      <TrailerModal
-        isOpen={!!selectedTrailer}
-        onClose={() => setSelectedTrailer(null)}
-        videoUrl={selectedTrailer?.trailer || ""}
-        posterImage={selectedTrailer?.thumbnail}
-        title={selectedTrailer?.title || ""}
-        category={selectedTrailer?.category}
-      />
+      {/* Avatar hover style + spin animation */}
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .avatar-overlay {
+          opacity: 0;
+        }
+        div:hover > .avatar-overlay {
+          opacity: 1 !important;
+        }
+      `}</style>
     </div>
   );
 }

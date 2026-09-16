@@ -156,14 +156,14 @@ export default async function ContentDetailPage({ params }: PageProps) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <div>
                 <span style={{ fontSize: "0.78rem", color: "var(--accent-gold)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  Rekomendasi Serupa
+                  Related Recommendations
                 </span>
                 <h3 style={{ fontSize: "1.4rem", color: "var(--text-primary)", fontFamily: "var(--font-serif)", marginTop: "2px" }}>
-                  Lebih Banyak di {content.category}
+                  More in {content.category}
                 </h3>
               </div>
               <Link href={`/browse?category=${content.category.toLowerCase().replace(/ /g, "-")}`} className="view-all-link" style={{ color: "var(--accent-gold)" }}>
-                Lihat Semua →
+                View All →
               </Link>
             </div>
 

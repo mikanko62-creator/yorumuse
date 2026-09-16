@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import EditContentModal from "@/components/admin/EditContentModal";
 import ManageChaptersModal from "@/components/admin/ManageChaptersModal";
 import UserCrudModal from "@/components/admin/UserCrudModal";
+import StorageFileManager from "@/components/admin/StorageFileManager";
+import UploadVideoContentModal from "@/components/admin/UploadVideoContentModal";
 
 // --- Interfaces ---
 
@@ -129,7 +131,7 @@ interface CatalogItemForHero {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "posts" | "hero" | "content" | "users" | "moderation">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "posts" | "hero" | "content" | "users" | "moderation" | "storage">("overview");
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string; role: string } | null>(null);
@@ -161,14 +163,15 @@ export default function AdminDashboardPage() {
   const [heroContentSlug, setHeroContentSlug] = useState("");
   const [heroCtaPrimaryText, setHeroCtaPrimaryText] = useState("Nonton Sekarang");
   const [heroCtaPrimaryLink, setHeroCtaPrimaryLink] = useState("/browse");
-  const [heroCtaSecondaryText, setHeroCtaSecondaryText] = useState("Lihat Trailer");
+  const [heroCtaSecondaryText, setHeroCtaSecondaryText] = useState("Watch Trailer");
   const [heroIsActive, setHeroIsActive] = useState(true);
   const [savingHero, setSavingHero] = useState(false);
   const [heroThumbUploadMode, setHeroThumbUploadMode] = useState<"upload" | "url">("upload");
   const [heroThumbUploading, setHeroThumbUploading] = useState(false);
   const [heroThumbFileName, setHeroThumbFileName] = useState("");
 
-  // Create Content Modal State
+  // Upload Video & Create Content Modal State
+  const [isUploadVideoModalOpen, setIsUploadVideoModalOpen] = useState(false);
   const [isAddContentOpen, setIsAddContentOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
@@ -218,129 +221,8 @@ export default function AdminDashboardPage() {
   const [userToEdit, setUserToEdit] = useState<UserRow | null>(null);
   const [isUserCrudModalOpen, setIsUserCrudModalOpen] = useState(false);
 
-  const handleDeleteUser = async (userId: string, email: string) => {
-    if (userId === currentUser?.id) {
-      alert("Anda tidak dapat menghapus akun administrator Anda sendiri.");
-      return;
-    }
-    if (!confirm(`Yakin ingin menghapus pengguna "${email}" secara permanen? Semua data terkait (postingan, komentar, dan langganan) akan terhapus total.`)) {
-      return;
-    }
-    try {
-      const res = await fetch(`/api/admin/users?id=${userId}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal menghapus pengguna.");
-      setUserList((prev) => prev.filter((u) => u.id !== userId));
-      alert("Pengguna berhasil dihapus permanen.");
-      await loadAllAdminData();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menghapus pengguna.");
-    }
-  };
-
-  // Whitelist / New Admin State
-  const [newAdminEmail, setNewAdminEmail] = useState("");
-  const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
-  const [adminFormEmail, setAdminFormEmail] = useState("");
-  const [adminFormUsername, setAdminFormUsername] = useState("");
-  const [adminFormPassword, setAdminFormPassword] = useState("");
-  const [adminFormLoading, setAdminFormLoading] = useState(false);
-
-
-  const handleAdminFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminFormEmail || !adminFormPassword) {
-      alert("Email dan password wajib diisi.");
-      return;
-    }
-    setAdminFormLoading(true);
-    try {
-      const res = await fetch("/api/setup-admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: adminFormEmail.trim(),
-          username: adminFormUsername.trim(),
-          password: adminFormPassword,
-        }),
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error || "Gagal membuat akun admin.");
-      setAdminActionMessage(`Sukses: Akun administrator ${adminFormEmail} berhasil disimpan ke Supabase!`);
-      setAdminFormEmail("");
-      setAdminFormUsername("");
-      setAdminFormPassword("");
-      await loadAllAdminData();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memproses.");
-    } finally {
-      setAdminFormLoading(false);
-    }
-  };
-
-  // --- 1. Authorization Verification ---
-  const checkAdminAuth = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (!res.ok) {
-        setAuthorized(false);
-        setCurrentUser(null);
-        setLoading(false);
-        return;
-      }
-      const data = await res.json();
-      setCurrentUser(data.user);
-
-      if (data.user?.role !== "ADMIN") {
-        setAuthorized(false);
-        setLoading(false);
-        return;
-      }
-
-      setAuthorized(true);
-      loadAllAdminData();
-    } catch {
-      setAuthorized(false);
-      setCurrentUser(null);
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkAdminAuth();
-  }, [checkAdminAuth]);
-
-  // Lock body scroll when any modal or drawer is open
-  useEffect(() => {
-    const anyModalOpen =
-      isHeroModalOpen ||
-      isAddContentOpen ||
-      isAddChapterModalOpen ||
-      isUserCrudModalOpen ||
-      isEditContentModalOpen ||
-      isManageChaptersModalOpen ||
-      Boolean(inspectingPost);
-
-    if (anyModalOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [
-    isHeroModalOpen,
-    isAddContentOpen,
-    isAddChapterModalOpen,
-    isUserCrudModalOpen,
-    isEditContentModalOpen,
-    isManageChaptersModalOpen,
-    inspectingPost,
-  ]);
-
   // --- 2. Data Loading ---
-  const loadAllAdminData = async () => {
+  const loadAllAdminData = useCallback(async () => {
     setLoading(true);
     try {
       const [statsRes, contentRes, usersRes, reportsRes, postsRes, heroRes] = await Promise.all([
@@ -382,7 +264,129 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleDeleteUser = async (userId: string, email: string) => {
+    if (userId === currentUser?.id) {
+      alert("You cannot delete your own administrator account.");
+      return;
+    }
+    if (!confirm(`Are you sure you want to permanently delete user "${email}"? All related data (posts, comments, and subscriptions) will be permanently removed.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/users?id=${userId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete user.");
+      setUserList((prev) => prev.filter((u) => u.id !== userId));
+      alert("User permanently deleted.");
+      await loadAllAdminData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete user.");
+    }
   };
+
+  // Whitelist / New Admin State
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
+  const [adminFormEmail, setAdminFormEmail] = useState("");
+  const [adminFormUsername, setAdminFormUsername] = useState("");
+  const [adminFormPassword, setAdminFormPassword] = useState("");
+  const [adminFormLoading, setAdminFormLoading] = useState(false);
+
+
+  const handleAdminFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminFormEmail || !adminFormPassword) {
+      alert("Email and password are required.");
+      return;
+    }
+    setAdminFormLoading(true);
+    try {
+      const res = await fetch("/api/setup-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: adminFormEmail.trim(),
+          username: adminFormUsername.trim(),
+          password: adminFormPassword,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Failed to create admin account.");
+      setAdminActionMessage(`Success: Administrator account ${adminFormEmail} saved to Supabase!`);
+      setAdminFormEmail("");
+      setAdminFormUsername("");
+      setAdminFormPassword("");
+      await loadAllAdminData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to process.");
+    } finally {
+      setAdminFormLoading(false);
+    }
+  };
+
+  // --- 1. Authorization Verification ---
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) {
+          setAuthorized(false);
+          setCurrentUser(null);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        if (!mounted) return;
+        setCurrentUser(data.user);
+        if (data.user?.role !== "ADMIN") {
+          setAuthorized(false);
+          setLoading(false);
+          return;
+        }
+        setAuthorized(true);
+        await loadAllAdminData();
+      } catch {
+        if (!mounted) return;
+        setAuthorized(false);
+        setCurrentUser(null);
+        setLoading(false);
+      }
+    };
+    run();
+    return () => { mounted = false; };
+  }, [loadAllAdminData]);
+
+  // Lock body scroll when any modal or drawer is open
+  useEffect(() => {
+    const anyModalOpen =
+      isHeroModalOpen ||
+      isAddContentOpen ||
+      isAddChapterModalOpen ||
+      isUserCrudModalOpen ||
+      isEditContentModalOpen ||
+      isManageChaptersModalOpen ||
+      Boolean(inspectingPost);
+
+    if (anyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [
+    isHeroModalOpen,
+    isAddContentOpen,
+    isAddChapterModalOpen,
+    isUserCrudModalOpen,
+    isEditContentModalOpen,
+    isManageChaptersModalOpen,
+    inspectingPost,
+  ]);
 
   const loadPosts = async () => {
     setLoadingPosts(true);
@@ -433,15 +437,15 @@ export default function AdminDashboardPage() {
           setInspectingPost({ ...inspectingPost, status: newStatus });
         }
       } else {
-        alert("Gagal memperbarui status postingan.");
+        alert("Failed to update post status.");
       }
     } catch {
-      alert("Terjadi kesalahan jaringan.");
+      alert("Network error occurred.");
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!confirm("Apakah Anda yakin ingin MENGHAPUS PERMANEN postingan ini beserta seluruh komentarnya?")) {
+    if (!confirm("Are you sure you want to PERMANENTLY DELETE this post along with all its comments?")) {
       return;
     }
     try {
@@ -452,9 +456,9 @@ export default function AdminDashboardPage() {
           setInspectingPost(null);
         }
         if (stats) setStats({ ...stats, postCount: Math.max(0, stats.postCount - 1) });
-        alert("Postingan berhasil dihapus permanen.");
+        alert("Post permanently deleted.");
       } else {
-        alert("Gagal menghapus postingan.");
+        alert("Failed to delete post.");
       }
     } catch {
       alert("Terjadi kesalahan jaringan.");
@@ -462,7 +466,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeletePostComment = async (commentId: string) => {
-    if (!confirm("Hapus komentar member ini?")) return;
+    if (!confirm("Delete this member's comment?")) return;
     try {
       const res = await fetch(`/api/admin/comments?id=${commentId}&type=post`, { method: "DELETE" });
       if (res.ok) {
@@ -489,7 +493,7 @@ export default function AdminDashboardPage() {
           )
         );
       } else {
-        alert("Gagal menghapus komentar.");
+        alert("Failed to delete comment.");
       }
     } catch {
       alert("Terjadi kesalahan jaringan.");
@@ -506,9 +510,9 @@ export default function AdminDashboardPage() {
     setHeroThumbnail("");
     setHeroTrailerUrl("");
     setHeroContentSlug("");
-    setHeroCtaPrimaryText("Nonton Sekarang");
+    setHeroCtaPrimaryText("Watch Now");
     setHeroCtaPrimaryLink("/browse");
-    setHeroCtaSecondaryText("Lihat Trailer");
+    setHeroCtaSecondaryText("Watch Trailer");
     setHeroIsActive(true);
     setIsHeroModalOpen(true);
   };
@@ -522,9 +526,9 @@ export default function AdminDashboardPage() {
     setHeroThumbnail(slide.thumbnail);
     setHeroTrailerUrl(slide.trailerUrl || "");
     setHeroContentSlug(slide.contentSlug || "");
-    setHeroCtaPrimaryText(slide.ctaPrimaryText || "Nonton Sekarang");
+    setHeroCtaPrimaryText(slide.ctaPrimaryText || "Watch Now");
     setHeroCtaPrimaryLink(slide.ctaPrimaryLink || (slide.contentSlug ? `/content/${slide.contentSlug}` : "/browse"));
-    setHeroCtaSecondaryText(slide.ctaSecondaryText || "Lihat Trailer");
+    setHeroCtaSecondaryText(slide.ctaSecondaryText || "Watch Trailer");
     setHeroIsActive(slide.isActive);
     setIsHeroModalOpen(true);
   };
@@ -545,7 +549,7 @@ export default function AdminDashboardPage() {
   const handleSaveHeroSlide = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!heroTitle.trim() || !heroThumbnail.trim()) {
-      alert("Judul dan Thumbnail banner hero wajib diisi.");
+      alert("Hero banner title and thumbnail are required.");
       return;
     }
 
@@ -575,10 +579,10 @@ export default function AdminDashboardPage() {
         if (res.ok) {
           setIsHeroModalOpen(false);
           await loadHeroData();
-          alert("Slide hero berhasil diperbarui!");
+          alert("Hero slide updated successfully!");
         } else {
           const d = await res.json();
-          alert(d.error || "Gagal memperbarui slide hero.");
+          alert(d.error || "Failed to update hero slide.");
         }
       } else {
         // Create new slide
@@ -603,14 +607,14 @@ export default function AdminDashboardPage() {
         if (res.ok) {
           setIsHeroModalOpen(false);
           await loadHeroData();
-          alert("Slide hero baru berhasil ditambahkan ke homepage!");
+          alert("New hero slide successfully added to homepage!");
         } else {
           const d = await res.json();
-          alert(d.error || "Gagal menambahkan slide hero.");
+          alert(d.error || "Failed to add hero slide.");
         }
       }
     } catch {
-      alert("Terjadi kesalahan jaringan.");
+      alert("Network error occurred.");
     } finally {
       setSavingHero(false);
     }
@@ -629,7 +633,7 @@ export default function AdminDashboardPage() {
         );
       }
     } catch {
-      alert("Gagal mengubah status slide.");
+      alert("Failed to update slide status.");
     }
   };
 
@@ -658,26 +662,26 @@ export default function AdminDashboardPage() {
       ]);
       await loadHeroData();
     } catch {
-      alert("Gagal mengatur urutan slide.");
+      alert("Failed to reorder slides.");
     }
   };
 
   const handleDeleteHeroSlide = async (id: string) => {
-    if (!confirm("Hapus slide ini dari Hero Section beranda?")) return;
+    if (!confirm("Delete this slide from the homepage Hero Section?")) return;
     try {
       const res = await fetch(`/api/admin/hero?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setHeroSlides((prev) => prev.filter((s) => s.id !== id));
-        alert("Slide hero berhasil dihapus.");
+        alert("Hero slide deleted successfully.");
       }
     } catch {
-      alert("Gagal menghapus slide.");
+      alert("Failed to delete slide.");
     }
   };
 
   // --- 5. User & Admin Whitelist Handlers ---
   const handlePromoteToAdmin = async (userId: string, email: string) => {
-    if (!confirm(`Berikan hak akses ADMINISTRATOR kepada email: ${email}? Pengguna ini akan dapat mengakses seluruh panel admin.`)) {
+    if (!confirm(`Grant ADMINISTRATOR access to email: ${email}? This user will be able to access the entire admin panel.`)) {
       return;
     }
     try {
@@ -688,28 +692,28 @@ export default function AdminDashboardPage() {
       });
       if (res.ok) {
         setUserList((prev) => prev.map((u) => (u.id === userId ? { ...u, role: "ADMIN" } : u)));
-        setAdminActionMessage(`Sukses! Akun ${email} sekarang terdaftar resmi sebagai Admin.`);
+        setAdminActionMessage(`Success! Account ${email} is now officially registered as an Admin.`);
         setTimeout(() => setAdminActionMessage(null), 5000);
       } else {
-        alert("Gagal mempromosikan user.");
+        alert("Failed to promote user.");
       }
     } catch {
-      alert("Terjadi kesalahan jaringan.");
+      alert("Network error occurred.");
     }
   };
 
   const handleDemoteAdmin = async (userId: string, email: string) => {
     const adminCount = userList.filter((u) => u.role === "ADMIN").length;
     if (adminCount <= 1) {
-      alert("Perhatian: Tidak dapat mencabut admin terakhir! Sistem membutuhkan minimal satu akun administrator aktif.");
+      alert("Attention: Cannot revoke the last admin! The system requires at least one active administrator account.");
       return;
     }
     if (currentUser?.id === userId) {
-      if (!confirm("Anda akan mencabut hak admin akun Anda sendiri! Anda tidak akan bisa masuk ke panel ini lagi. Lanjutkan?")) {
+      if (!confirm("You are about to revoke your own admin rights! You will lose access to this control panel. Continue?")) {
         return;
       }
     } else {
-      if (!confirm(`Cabut hak akses Administrator dari email: ${email}?`)) return;
+      if (!confirm(`Revoke Administrator access from email: ${email}?`)) return;
     }
 
     try {
@@ -723,12 +727,12 @@ export default function AdminDashboardPage() {
         if (currentUser?.id === userId) {
           router.push("/");
         } else {
-          setAdminActionMessage(`Hak admin untuk ${email} telah dicabut.`);
+          setAdminActionMessage(`Admin rights for ${email} have been revoked.`);
           setTimeout(() => setAdminActionMessage(null), 5000);
         }
       }
     } catch {
-      alert("Gagal mencabut status admin.");
+      alert("Failed to revoke admin status.");
     }
   };
 
@@ -743,7 +747,7 @@ export default function AdminDashboardPage() {
         setUserList((prev) => prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u)));
       }
     } catch {
-      alert("Gagal mengubah status pengguna.");
+      alert("Failed to update user status.");
     }
   };
 
@@ -775,7 +779,7 @@ export default function AdminDashboardPage() {
   };
 
   const deleteContent = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus produksi film ini secara permanen?")) return;
+    if (!confirm("Are you sure you want to permanently delete this production?")) return;
     const res = await fetch(`/api/admin/content/${id}`, { method: "DELETE" });
     if (res.ok) {
       setContentList((prev) => prev.filter((c) => c.id !== id));
@@ -801,7 +805,7 @@ export default function AdminDashboardPage() {
 
       setNewTrailer(data.url);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal mengunggah video.";
+      const msg = err instanceof Error ? err.message : "Failed to upload video.";
       setUploadError(msg);
       setNewTrailer("");
     } finally {
@@ -827,7 +831,7 @@ export default function AdminDashboardPage() {
 
       setNewThumb(data.url);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal mengunggah poster.";
+      const msg = err instanceof Error ? err.message : "Failed to upload poster.";
       setUploadError(msg);
       setNewThumb("");
     } finally {
@@ -852,7 +856,7 @@ export default function AdminDashboardPage() {
 
       setHeroThumbnail(data.url);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal mengunggah gambar.";
+      const msg = err instanceof Error ? err.message : "Failed to upload image.";
       alert(msg);
       setHeroThumbnail("");
     } finally {
@@ -898,12 +902,12 @@ export default function AdminDashboardPage() {
         setNewDesc("");
         setNewThumb("");
         setNewTrailer("");
-        alert("Film produksi baru berhasil ditambahkan ke katalog!");
+        alert("New production successfully added to the catalog!");
       } else {
-        setUploadError(data.error || "Gagal membuat konten baru.");
+        setUploadError(data.error || "Failed to create new content.");
       }
     } catch {
-      setUploadError("Kesalahan jaringan saat menyimpan konten.");
+      setUploadError("Network error while saving content.");
     } finally {
       setCreatingContent(false);
     }
@@ -932,11 +936,11 @@ export default function AdminDashboardPage() {
 
       const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal mengunggah video chapter");
+      if (!res.ok) throw new Error(data.error || "Failed to upload chapter video");
 
       setExtraChapterVideo(data.url);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal mengunggah video chapter.";
+      const msg = err instanceof Error ? err.message : "Failed to upload chapter video.";
       alert(msg);
       setExtraChapterVideo("");
     } finally {
@@ -964,13 +968,13 @@ export default function AdminDashboardPage() {
 
       if (res.ok) {
         setIsAddChapterModalOpen(false);
-        alert(`Sukses! Chapter ${extraChapterNum} berhasil ditambahkan ke "${selectedProduction.title}".`);
+        alert(`Success! Chapter ${extraChapterNum} has been added to "${selectedProduction.title}".`);
       } else {
         const d = await res.json();
-        alert(d.error || "Gagal menambahkan chapter.");
+        alert(d.error || "Failed to add chapter.");
       }
     } catch {
-      alert("Terjadi kesalahan jaringan.");
+      alert("Network error occurred.");
     } finally {
       setSavingChapter(false);
     }
@@ -1061,13 +1065,13 @@ export default function AdminDashboardPage() {
               marginBottom: "12px",
             }}
           >
-            Khusus Email Terdaftar Admin
+            Registered Admin Email Only
           </h2>
 
           {currentUser ? (
             <div>
               <p style={{ color: "var(--text-secondary)", marginBottom: "16px", lineHeight: 1.6 }}>
-                Anda saat ini terhubung sebagai:
+                You are currently connected as:
               </p>
               <div
                 style={{
@@ -1081,24 +1085,24 @@ export default function AdminDashboardPage() {
                   marginBottom: "20px",
                 }}
               >
-                {currentUser.email} <span style={{ color: "#ef4444", fontSize: "0.8rem", fontWeight: 700 }}>(Bukan Admin)</span>
+                {currentUser.email} <span style={{ color: "#ef4444", fontSize: "0.8rem", fontWeight: 700 }}>(Not Admin)</span>
               </div>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginBottom: "32px", lineHeight: 1.6 }}>
-                Email akun ini tidak memiliki izin akses administrator. Silakan keluar dan masuk dengan akun yang memiliki email resmi administrator (misal: <code>admin@yorumuse.com</code>).
+                This account's email does not have administrator access. Please sign out and sign in with an account that has an official administrator email (e.g.: <code>admin@yorumuse.com</code>).
               </p>
             </div>
           ) : (
             <p style={{ color: "var(--text-secondary)", marginBottom: "32px", lineHeight: 1.6 }}>
-              Portal administrasi ini diproteksi ketat. Hanya pengguna dengan email yang telah terdaftar resmi sebagai Administrator yang dapat masuk untuk mengontrol postingan, hero section, dan katalog.
+              This admin portal is strictly protected. Only users with emails officially registered as Administrators can sign in to control posts, hero section, and catalog.
             </p>
           )}
 
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/login?redirect=/admin" className="btn btn-primary btn-lg">
-              Masuk dengan Email Admin
+              Sign In with Admin Email
             </Link>
             <Link href="/" className="btn btn-secondary btn-lg">
-              Kembali ke Beranda
+              Back to Home
             </Link>
           </div>
         </div>
@@ -1131,18 +1135,31 @@ export default function AdminDashboardPage() {
                     YORUMUSE EXECUTIVE
                   </span>
                   <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                    • Terhubung: <strong>{currentUser?.email}</strong>
+                    • Connected: <strong>{currentUser?.email}</strong>
                   </span>
                 </div>
                 <h1 style={{ fontSize: "1.75rem", color: "var(--text-primary)", marginTop: "4px", fontWeight: 700, margin: 0 }}>
-                  Pusat Kontrol Platform
+                  Platform Control Center
                 </h1>
               </div>
             </div>
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <button
+                onClick={() => setIsUploadVideoModalOpen(true)}
+                className="btn btn-primary btn-sm"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontWeight: 700,
+                  boxShadow: "0 4px 14px rgba(212, 175, 55, 0.3)",
+                }}
+              >
+                <span>+ Upload Video / New Title</span>
+              </button>
               <Link href="/" target="_blank" className="btn btn-secondary btn-sm" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>Lihat Website</span>
+                <span>View Website</span>
               </Link>
             </div>
           </div>
@@ -1161,11 +1178,12 @@ export default function AdminDashboardPage() {
           >
             {[
               { id: "overview", label: "Overview", count: null },
-              { id: "posts", label: "Kontrol Postingan", count: postList.length },
+              { id: "posts", label: "Post Control", count: postList.length },
               { id: "hero", label: "Hero Section", count: heroSlides.length },
-              { id: "content", label: "Katalog & Chapter", count: contentList.length },
-              { id: "users", label: "Kelola Pengguna", count: userList.length },
-              { id: "moderation", label: "Moderasi", count: stats?.pendingReports || 0 },
+              { id: "content", label: "Catalog & Chapters", count: contentList.length },
+              { id: "users", label: "Manage Users", count: userList.length },
+              { id: "moderation", label: "Moderation", count: stats?.pendingReports || 0 },
+              { id: "storage", label: "Bunny Storage", count: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -1226,42 +1244,42 @@ export default function AdminDashboardPage() {
             >
               <div style={{ backgroundColor: "var(--bg-surface)", padding: "22px", borderRadius: "14px", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-sm)" }}>
                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Total Pengguna Terdaftar
+                  Total Registered Users
                 </span>
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: "var(--text-primary)", marginTop: "4px" }}>
                   {stats.totalUsers}
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "var(--status-success)" }}>100% Akun Terverifikasi</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--status-success)" }}>100% Verified Accounts</span>
               </div>
 
               <div style={{ backgroundColor: "var(--bg-surface)", padding: "22px", borderRadius: "14px", border: "1px solid var(--border-active)", boxShadow: "var(--shadow-sm)" }}>
                 <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Langganan Aktif (Patrons)
+                  Active Subscriptions (Patrons)
                 </span>
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: "var(--accent-gold)", marginTop: "4px" }}>
                   {stats.activeSubscriptions}
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Member Berbayar</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Paid Members</span>
               </div>
 
               <div style={{ backgroundColor: "var(--bg-surface)", padding: "22px", borderRadius: "14px", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-sm)" }}>
                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Katalog Produksi Film
+                  Film Production Catalog
                 </span>
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: "var(--text-primary)", marginTop: "4px" }}>
                   {stats.contentCount}
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Film & Series Chapter</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Films & Series Chapters</span>
               </div>
 
               <div style={{ backgroundColor: "var(--bg-surface)", padding: "22px", borderRadius: "14px", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-sm)" }}>
                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Postingan Komunitas
+                  Community Posts
                 </span>
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: "var(--text-primary)", marginTop: "4px" }}>
                   {stats.postCount}
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Diskusi & Pengumuman</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Discussions & Announcements</span>
               </div>
 
               <div
@@ -1274,59 +1292,17 @@ export default function AdminDashboardPage() {
                 }}
               >
                 <span style={{ fontSize: "0.75rem", color: stats.pendingReports > 0 ? "#dc2626" : "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Laporan Pelanggaran
+                  Violation Reports
                 </span>
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: "2.3rem", color: stats.pendingReports > 0 ? "#dc2626" : "var(--text-primary)", marginTop: "4px" }}>
                   {stats.pendingReports}
                 </div>
                 <span style={{ fontSize: "0.75rem", color: stats.pendingReports > 0 ? "#dc2626" : "var(--status-success)" }}>
-                  {stats.pendingReports > 0 ? "Perlu Ditinjau Segera" : "Semua Bersih"}
+                  {stats.pendingReports > 0 ? "Needs Immediate Review" : "All Clear"}
                 </span>
               </div>
             </div>
 
-            {/* System Status Banner */}
-            <div
-              style={{
-                backgroundColor: "var(--bg-surface)",
-                borderRadius: "14px",
-                padding: "18px 24px",
-                border: "1px solid var(--border-subtle)",
-                boxShadow: "var(--shadow-sm)",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "16px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    color: "var(--status-success)",
-                    backgroundColor: "rgba(34, 197, 94, 0.1)",
-                    border: "1px solid rgba(34, 197, 94, 0.2)",
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--status-success)" }}></span>
-                  Status Sistem: Operasional Normal
-                </span>
-                <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                  Server DB: <strong>eu-central-1 (Frankfurt)</strong>
-                </span>
-              </div>
-
-              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>Gunakan menu toggle garis 3 di kiri atas atau tepi kiri untuk panel aksi cepat.</span>
-              </div>
-            </div>
           </div>
         )}
 
@@ -1336,10 +1312,10 @@ export default function AdminDashboardPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
               <div>
                 <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Kontrol & Moderasi Seluruh Postingan Komunitas
+                  Control & Moderate All Community Posts
                 </h2>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
-                  Kelola semua diskusi, forum, dan pengumuman. Anda dapat mengubah status publikasi, memeriksa komentar, atau menghapus postingan secara permanen.
+                  Manage all discussions, forums, and announcements. You can change publication status, review comments, or permanently delete posts.
                 </p>
               </div>
 
@@ -1347,14 +1323,14 @@ export default function AdminDashboardPage() {
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
                 <input
                   type="text"
-                  placeholder="Cari judul, konten, atau email penulis..."
+                  placeholder="Search by title, content, or author email..."
                   value={postSearch}
                   onChange={(e) => setPostSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && loadPosts()}
                   style={{ padding: "8px 14px", borderRadius: "8px", fontSize: "0.85rem", width: "260px" }}
                 />
                 <button onClick={loadPosts} className="btn btn-secondary btn-sm">
-                  Cari
+                  Search
                 </button>
               </div>
             </div>
@@ -1378,7 +1354,7 @@ export default function AdminDashboardPage() {
                     cursor: "pointer",
                   }}
                 >
-                  {st === "ALL" ? "Semua Status" : st}
+                  {st === "ALL" ? "All Status" : st}
                 </button>
               ))}
             </div>
@@ -1388,12 +1364,12 @@ export default function AdminDashboardPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: "0.75rem", textTransform: "uppercase" }}>
-                    <th style={{ padding: "14px 18px" }}>Postingan & Konten</th>
-                    <th style={{ padding: "14px 18px" }}>Penulis (Email)</th>
-                    <th style={{ padding: "14px 18px" }}>Kategori</th>
-                    <th style={{ padding: "14px 18px" }}>Interaksi</th>
+                    <th style={{ padding: "14px 18px" }}>Post & Content</th>
+                    <th style={{ padding: "14px 18px" }}>Author (Email)</th>
+                    <th style={{ padding: "14px 18px" }}>Category</th>
+                    <th style={{ padding: "14px 18px" }}>Interactions</th>
                     <th style={{ padding: "14px 18px" }}>Status</th>
-                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Aksi Moderasi</th>
+                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Moderation Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1474,7 +1450,7 @@ export default function AdminDashboardPage() {
                                   textDecoration: "underline",
                                 }}
                               >
-                                {post._count?.comments ?? post.comments?.length ?? 0} Komentar
+                                {post._count?.comments ?? post.comments?.length ?? 0} Comments
                               </button>
                             </td>
 
@@ -1510,24 +1486,24 @@ export default function AdminDashboardPage() {
                                   onClick={() => handleTogglePostStatus(post.id, post.status)}
                                   className="btn btn-secondary btn-sm"
                                   style={{ fontSize: "0.78rem", padding: "4px 10px" }}
-                                  title={isPublished ? "Sembunyikan dari Komunitas" : "Publikasikan ke Komunitas"}
+                                  title={isPublished ? "Hide from Community" : "Publish to Community"}
                                 >
-                                  {isPublished ? "Sembunyikan" : "Tampilkan"}
+                                  {isPublished ? "Hide" : "Show"}
                                 </button>
                                 <button
                                   onClick={() => setInspectingPost(post)}
                                   className="btn btn-secondary btn-sm"
                                   style={{ fontSize: "0.78rem", padding: "4px 10px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
                                 >
-                                  Komentar
+                                  Comments
                                 </button>
                                 <button
                                   onClick={() => handleDeletePost(post.id)}
                                   className="btn btn-ghost btn-sm"
                                   style={{ color: "var(--status-error)", fontSize: "0.78rem" }}
-                                  title="Hapus Postingan Permanen"
+                                  title="Delete Post Permanently"
                                 >
-                                  Hapus
+                                  Delete
                                 </button>
                               </div>
                             </td>
@@ -1537,7 +1513,7 @@ export default function AdminDashboardPage() {
                   ) : (
                     <tr>
                       <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                        {loadingPosts ? "Memuat postingan..." : "Tidak ada postingan yang sesuai filter."}
+                        {loadingPosts ? "Loading posts..." : "No posts match the current filter."}
                       </td>
                     </tr>
                   )}
@@ -1547,28 +1523,30 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ================= TAB 3: PENGATURAN HERO SECTION ================= */}
+        {/* ================= TAB 3: HERO SECTION SETTINGS ================= */}
         {activeTab === "hero" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
               <div>
                 <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Pengaturan Hero Section Homepage
+                  Hero Carousel Settings
                 </h2>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
-                  Kelola banner carousel yang ditampilkan di halaman beranda. Anda dapat mengubah judul, sinopsis, video trailer, tombol CTA, dan mengatur urutan tampilan.
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem" }}>
+                  Customize the banner slides displayed on the homepage. Drag or adjust order, trailer, and CTA.
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button onClick={openNewHeroModal} className="btn btn-primary" id="add-hero-slide-btn">
-                  + Tambah Slide Hero Baru
-                </button>
-              </div>
+              <button
+                onClick={openNewHeroModal}
+                className="btn btn-primary"
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span>+</span> Add Hero Slide
+              </button>
             </div>
 
             {/* Hero Slides List Cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {heroSlides.length > 0 ? (
                 heroSlides.map((slide, index) => (
                   <div
@@ -1576,38 +1554,50 @@ export default function AdminDashboardPage() {
                     style={{
                       backgroundColor: "var(--bg-surface)",
                       borderRadius: "14px",
-                      border: slide.isActive ? "1px solid var(--border-subtle)" : "1px dashed var(--border-medium)",
+                      border: "1px solid var(--border-subtle)",
                       boxShadow: "var(--shadow-sm)",
-                      padding: "20px",
+                      padding: "18px 22px",
                       display: "flex",
-                      gap: "20px",
                       alignItems: "center",
-                      flexWrap: "wrap",
+                      gap: "18px",
                       opacity: slide.isActive ? 1 : 0.65,
+                      transition: "var(--transition-fast)",
                     }}
                   >
-                    {/* Order & Thumbnail */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <span style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent-gold)", width: "30px", textAlign: "center" }}>
-                        #{index + 1}
-                      </span>
-                      <div style={{ position: "relative", width: "120px", height: "70px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border-subtle)" }}>
-                        <img
-                          src={slide.thumbnail}
-                          alt={slide.title}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      </div>
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        width: "110px",
+                        height: "64px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "var(--bg-surface-elevated)",
+                        flexShrink: 0,
+                        border: "1px solid var(--border-subtle)",
+                      }}
+                    >
+                      <img
+                        src={slide.thumbnail}
+                        alt={slide.title}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
                     </div>
 
                     {/* Details */}
-                    <div style={{ flex: "1 1 300px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "0.72rem", padding: "2px 8px", backgroundColor: "rgba(166, 124, 30, 0.12)", color: "var(--accent-gold)", borderRadius: "4px", fontWeight: 700 }}>
-                          {slide.badge || "Exclusive"}
-                        </span>
-                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                          {slide.category || "Manhwa"}
+                    <div style={{ flexGrow: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                            backgroundColor: "var(--bg-surface-elevated)",
+                            color: "var(--accent-gold)",
+                            fontWeight: 700,
+                            border: "1px solid var(--border-subtle)",
+                          }}
+                        >
+                          ORDER: #{index + 1}
                         </span>
                         <span
                           style={{
@@ -1619,7 +1609,7 @@ export default function AdminDashboardPage() {
                             fontWeight: 700,
                           }}
                         >
-                          {slide.isActive ? "● AKTIF DI BERANDA" : "○ NONAKTIF"}
+                          {slide.isActive ? "● ACTIVE ON HOME" : "○ INACTIVE"}
                         </span>
                       </div>
 
@@ -1627,12 +1617,12 @@ export default function AdminDashboardPage() {
                         {slide.title}
                       </h4>
                       <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.4, margin: "4px 0", maxWidth: "600px" }}>
-                        {slide.subtitle || "(Tidak ada sinopsis)"}
+                        {slide.subtitle || "(No synopsis)"}
                       </p>
 
                       <div style={{ display: "flex", gap: "14px", fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "6px" }}>
-                        <span>CTA: <strong>{slide.ctaPrimaryText || "Nonton"}</strong> ({slide.ctaPrimaryLink || "/browse"})</span>
-                        {slide.trailerUrl && <span>Trailer Aktif</span>}
+                        <span>CTA: <strong>{slide.ctaPrimaryText || "Watch Now"}</strong> ({slide.ctaPrimaryLink || "/browse"})</span>
+                        {slide.trailerUrl && <span>Trailer Active</span>}
                       </div>
                     </div>
 
@@ -1644,7 +1634,7 @@ export default function AdminDashboardPage() {
                         disabled={index === 0}
                         className="btn btn-secondary btn-sm"
                         style={{ padding: "6px 10px" }}
-                        title="Geser ke Atas"
+                        title="Move Up"
                       >
                         ↑
                       </button>
@@ -1653,7 +1643,7 @@ export default function AdminDashboardPage() {
                         disabled={index === heroSlides.length - 1}
                         className="btn btn-secondary btn-sm"
                         style={{ padding: "6px 10px" }}
-                        title="Geser ke Bawah"
+                        title="Move Down"
                       >
                         ↓
                       </button>
@@ -1664,7 +1654,7 @@ export default function AdminDashboardPage() {
                         className="btn btn-secondary btn-sm"
                         style={{ fontSize: "0.78rem" }}
                       >
-                        {slide.isActive ? "Nonaktifkan" : "Aktifkan"}
+                        {slide.isActive ? "Deactivate" : "Activate"}
                       </button>
 
                       {/* Edit Button */}
@@ -1682,34 +1672,34 @@ export default function AdminDashboardPage() {
                         className="btn btn-ghost btn-sm"
                         style={{ color: "var(--status-error)", fontSize: "0.78rem" }}
                       >
-                        Hapus
+                        Delete
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
                 <div style={{ textAlign: "center", padding: "60px 20px", backgroundColor: "var(--bg-surface)", borderRadius: "14px" }}>
-                  <p style={{ color: "var(--text-muted)" }}>Belum ada slide hero kustom. Klik tombol di atas untuk menambahkan slide.</p>
+                  <p style={{ color: "var(--text-muted)" }}>No custom hero slides yet. Click the button above to add a slide.</p>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* ================= TAB 4: KATALOG KONTEN & CHAPTER ================= */}
+        {/* ================= TAB 4: CONTENT CATALOG & CHAPTERS ================= */}
         {activeTab === "content" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
               <div>
                 <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Katalog Produksi Film & Chapter ({contentList.length})
+                  Film Production Catalog & Chapters ({contentList.length})
                 </h2>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
-                  Kelola film dan babak (chapter). Unggah video dengan streaming terenkripsi anti-download.
+                  Manage films and chapters. Upload videos with encrypted anti-download streaming.
                 </p>
               </div>
-              <button onClick={() => setIsAddContentOpen(true)} className="btn btn-primary" id="admin-add-content-btn">
-                + Tambah Film Baru
+              <button onClick={() => setIsUploadVideoModalOpen(true)} className="btn btn-primary" id="admin-add-content-btn">
+                + Upload Video / New Title
               </button>
             </div>
 
@@ -1717,12 +1707,12 @@ export default function AdminDashboardPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: "0.75rem", textTransform: "uppercase" }}>
-                    <th style={{ padding: "14px 18px" }}>Produksi Film</th>
-                    <th style={{ padding: "14px 18px" }}>Kategori</th>
-                    <th style={{ padding: "14px 18px" }}>Akses</th>
+                    <th style={{ padding: "14px 18px" }}>Film Production</th>
+                    <th style={{ padding: "14px 18px" }}>Category</th>
+                    <th style={{ padding: "14px 18px" }}>Access</th>
                     <th style={{ padding: "14px 18px" }}>Status</th>
                     <th style={{ padding: "14px 18px" }}>Featured</th>
-                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Aksi</th>
+                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1787,9 +1777,9 @@ export default function AdminDashboardPage() {
                             }}
                             className="btn btn-secondary btn-sm"
                             style={{ fontSize: "0.75rem", padding: "4px 8px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
-                            title="Kelola semua chapter dari film ini"
+                            title="Manage all chapters for this film"
                           >
-                            Kelola Chapter
+                            Manage Chapters
                           </button>
                           <button
                             onClick={() => {
@@ -1798,20 +1788,20 @@ export default function AdminDashboardPage() {
                             }}
                             className="btn btn-secondary btn-sm"
                             style={{ fontSize: "0.75rem", padding: "4px 8px" }}
-                            title="Edit informasi dan metadata film"
+                            title="Edit film info and metadata"
                           >
                             Edit
                           </button>
                           <Link href={`/content/${item.slug}`} className="btn btn-ghost btn-sm" style={{ color: "var(--accent-gold)", fontSize: "0.75rem", padding: "4px 8px" }}>
-                            Lihat
+                            View
                           </Link>
                           <button
                             onClick={() => deleteContent(item.id)}
                             className="btn btn-ghost btn-sm"
                             style={{ color: "var(--status-error)", fontSize: "0.75rem", padding: "4px 8px" }}
-                            title="Hapus film beserta semua babaknya"
+                            title="Delete film and all its chapters"
                           >
-                            Hapus
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -1824,28 +1814,16 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ================= TAB 5: KELOLA PENGGUNA & WHITELIST ADMIN ================= */}
+        {/* ================= TAB 5: MANAGE USERS & ADMIN WHITELIST ================= */}
         {activeTab === "users" && (
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "16px" }}>
-              <div>
-                <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Manajemen Pengguna & Whitelist Administrator
-                </h2>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "4px" }}>
-                  Super User dapat membuat pengguna baru, mengedit hak akses & paket langganan, atau menghapus pengguna.
-                </p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setUserToEdit(null);
-                  setIsUserCrudModalOpen(true);
-                }}
-                className="btn btn-primary"
-              >
-                + Tambah Pengguna Baru
-              </button>
+            <div style={{ marginBottom: "24px" }}>
+              <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
+                User Management & Access Control
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem" }}>
+                Manage member roles, active subscriptions, suspensions, and the dedicated admin whitelist.
+              </p>
             </div>
 
 
@@ -1866,7 +1844,7 @@ export default function AdminDashboardPage() {
               </div>
             )}
 
-            {/* Form: Tambah / Perbarui Akun Administrator */}
+            {/* Form: Add / Update Administrator Account */}
             <div
               style={{
                 backgroundColor: "var(--bg-surface)",
@@ -1879,17 +1857,17 @@ export default function AdminDashboardPage() {
             >
               <div style={{ marginBottom: "16px" }}>
                 <h3 style={{ fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 700, marginBottom: "6px" }}>
-                  Tambah / Perbarui Akun Administrator
+                  Add / Update Administrator Account
                 </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-                  Buat akun admin baru atau ubah password admin Anda secara langsung ke database Supabase.
+                  Create a new admin account or update your admin password directly in the database.
                 </p>
               </div>
 
               <form onSubmit={handleAdminFormSubmit} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", alignItems: "flex-end" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Email Admin *
+                    Admin Email *
                   </label>
                   <input
                     type="email"
@@ -1903,11 +1881,11 @@ export default function AdminDashboardPage() {
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Username (Nama Admin)
+                    Username (Admin Name)
                   </label>
                   <input
                     type="text"
-                    placeholder="Nama Admin"
+                    placeholder="Admin Name"
                     value={adminFormUsername}
                     onChange={(e) => setAdminFormUsername(e.target.value)}
                     style={{ width: "100%" }}
@@ -1916,12 +1894,12 @@ export default function AdminDashboardPage() {
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Password Admin Baru *
+                    New Admin Password *
                   </label>
                   <input
                     type="password"
                     required
-                    placeholder="Min. 6 karakter"
+                    placeholder="Min. 6 characters"
                     value={adminFormPassword}
                     onChange={(e) => setAdminFormPassword(e.target.value)}
                     style={{ width: "100%" }}
@@ -1935,7 +1913,7 @@ export default function AdminDashboardPage() {
                     className="btn btn-primary"
                     style={{ width: "100%", height: "42px", fontWeight: 600 }}
                   >
-                    {adminFormLoading ? "Menyimpan..." : "Simpan Akun Admin"}
+                    {adminFormLoading ? "Saving..." : "Save Admin Account"}
                   </button>
                 </div>
               </form>
@@ -1954,11 +1932,11 @@ export default function AdminDashboardPage() {
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
                 <h3 style={{ fontSize: "1.2rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Daftar Email Resmi Terdaftar Sebagai Admin ({adminUsers.length})
+                  Official Registered Admin Emails ({adminUsers.length})
                 </h3>
               </div>
               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px" }}>
-                Hanya akun dengan email-email di bawah ini yang dapat masuk ke <code>/admin</code> dan mengontrol semua fitur platform:
+                Only accounts with the email addresses below can access <code>/admin</code> and manage platform features:
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
@@ -1989,13 +1967,13 @@ export default function AdminDashboardPage() {
                         onClick={() => handleDemoteAdmin(adm.id, adm.email)}
                         className="btn btn-ghost btn-sm"
                         style={{ color: "var(--status-error)", fontSize: "0.75rem" }}
-                        title="Cabut hak administrator"
+                        title="Revoke administrator access"
                       >
-                        Cabut Admin
+                        Revoke Admin
                       </button>
                     ) : (
                       <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 700 }}>
-                        (Akun Anda)
+                        (Your Account)
                       </span>
                     )}
                   </div>
@@ -2005,7 +1983,7 @@ export default function AdminDashboardPage() {
 
             {/* All Users Directory Table */}
             <h3 style={{ fontSize: "1.2rem", color: "var(--text-primary)", fontWeight: 700, marginBottom: "16px" }}>
-              Seluruh Pengguna Platform ({userList.length})
+              All Platform Users ({userList.length})
             </h3>
             <div style={{ backgroundColor: "var(--bg-surface)", borderRadius: "14px", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-sm)", overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
@@ -2015,8 +1993,8 @@ export default function AdminDashboardPage() {
                     <th style={{ padding: "14px 18px" }}>Role</th>
                     <th style={{ padding: "14px 18px" }}>Status</th>
                     <th style={{ padding: "14px 18px" }}>Tanggal Lahir</th>
-                    <th style={{ padding: "14px 18px" }}>Langganan</th>
-                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Kelola Akses</th>
+                    <th style={{ padding: "14px 18px" }}>Subscription</th>
+                    <th style={{ padding: "14px 18px", textAlign: "right" }}>Manage Access</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2083,7 +2061,7 @@ export default function AdminDashboardPage() {
                               }}
                               className="btn btn-secondary btn-sm"
                               style={{ fontSize: "0.75rem", padding: "4px 8px", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
-                              title="Edit rincian, role, atau langganan pengguna"
+                              title="Edit user details, role, or subscription"
                             >
                               Edit
                             </button>
@@ -2094,7 +2072,7 @@ export default function AdminDashboardPage() {
                                 onClick={() => handlePromoteToAdmin(usr.id, usr.email)}
                                 className="btn btn-secondary btn-sm"
                                 style={{ fontSize: "0.75rem", padding: "4px 8px" }}
-                                title="Jadikan Akun Admin"
+                                title="Make Admin Account"
                               >
                                 +Admin
                               </button>
@@ -2127,7 +2105,7 @@ export default function AdminDashboardPage() {
                                     className="btn btn-ghost btn-sm"
                                     style={{ color: "var(--status-success)", fontSize: "0.75rem", padding: "4px 6px" }}
                                   >
-                                    Aktifkan
+                                    Activate
                                   </button>
                                 )}
                               </>
@@ -2139,9 +2117,9 @@ export default function AdminDashboardPage() {
                                 onClick={() => handleDeleteUser(usr.id, usr.email)}
                                 className="btn btn-ghost btn-sm"
                                 style={{ color: "var(--status-error)", fontSize: "0.75rem", padding: "4px 6px" }}
-                                title="Hapus pengguna secara permanen"
+                                title="Delete user permanently"
                               >
-                                Hapus
+                                Delete
                               </button>
                             )}
                           </div>
@@ -2156,15 +2134,15 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ================= TAB 6: PUSAT MODERASI ================= */}
+        {/* ================= TAB 6: MODERATION CENTER ================= */}
         {activeTab === "moderation" && (
           <div>
             <div style={{ marginBottom: "24px" }}>
               <h2 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                Pusat Moderasi & Penanganan Laporan
+                Moderation Center & Report Handling
               </h2>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem" }}>
-                Tinjau laporan pelanggaran member. Laporan pelanggaran hak cipta atau pelecehan diprioritaskan tinggi.
+                Review member violation reports. Copyright infringement or harassment reports are prioritized.
               </p>
             </div>
 
@@ -2209,7 +2187,7 @@ export default function AdminDashboardPage() {
                             </span>
                           </div>
                           <div style={{ marginTop: "6px", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-                            Dilaporkan oleh <strong>{rep.reporter?.username || "Patron"}</strong> pada {new Date(rep.createdAt).toLocaleString()}
+                            Reported by <strong>{rep.reporter?.username || "Patron"}</strong> on {new Date(rep.createdAt).toLocaleString("en-US")}
                           </div>
                         </div>
 
@@ -2250,39 +2228,39 @@ export default function AdminDashboardPage() {
                             className="btn btn-secondary btn-sm"
                             style={{ color: "var(--status-success)" }}
                           >
-                            Tetap Aman
+                            Keep Content
                           </button>
                           <button
                             onClick={() => handleModerate(rep.id, "HIDE")}
                             className="btn btn-secondary btn-sm"
                             style={{ color: "var(--status-warning)" }}
                           >
-                            Sembunyikan
+                            Hide
                           </button>
                           <button
                             onClick={() => handleModerate(rep.id, "REMOVE")}
                             className="btn btn-secondary btn-sm"
                             style={{ color: "var(--status-error)" }}
                           >
-                            Hapus Permanen
+                            Delete Permanently
                           </button>
                           <button
                             onClick={() => handleModerate(rep.id, "BAN_USER")}
                             className="btn btn-primary btn-sm"
                             style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
                           >
-                            Ban Pengguna
+                            Ban User
                           </button>
                           <button
                             onClick={() => handleModerate(rep.id, "DISMISS")}
                             className="btn btn-ghost btn-sm"
                           >
-                            Abaikan
+                            Dismiss
                           </button>
                         </div>
                       ) : (
                         <div style={{ fontSize: "0.82rem", color: "var(--status-success)" }}>
-                          Laporan telah diselesaikan oleh administrator.
+                          Report has been resolved by administrator.
                         </div>
                       )}
                     </div>
@@ -2291,15 +2269,22 @@ export default function AdminDashboardPage() {
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 20px", backgroundColor: "var(--bg-surface)", borderRadius: "14px", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-sm)" }}>
-                <h3 style={{ color: "var(--text-primary)", marginBottom: "6px" }}>Antrean moderasi kosong</h3>
-                <p style={{ color: "var(--text-secondary)" }}>Tidak ada laporan pelanggaran yang tertunda.</p>
+                <h3 style={{ color: "var(--text-primary)", marginBottom: "6px" }}>Moderation queue is empty</h3>
+                <p style={{ color: "var(--text-secondary)" }}>No pending violation reports.</p>
               </div>
             )}
           </div>
         )}
+
+        {/* ================= TAB 7: BUNNY CLOUD STORAGE ================= */}
+        {activeTab === "storage" && (
+          <div>
+            <StorageFileManager onOpenUploadModal={() => setIsUploadVideoModalOpen(true)} />
+          </div>
+        )}
       </div>
 
-      {/* ================= MODAL: INSPEKSI KOMENTAR POSTINGAN ================= */}
+      {/* ================= MODAL: POST COMMENT INSPECTION ================= */}
       {inspectingPost && (
         <div
           role="dialog"
@@ -2345,11 +2330,11 @@ export default function AdminDashboardPage() {
                   {inspectingPost.title}
                 </h3>
                 <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "2px" }}>
-                  Oleh <strong>{inspectingPost.author.username}</strong> ({inspectingPost.author.email})
+                  By <strong>{inspectingPost.author.username}</strong> ({inspectingPost.author.email})
                 </div>
               </div>
               <button onClick={() => setInspectingPost(null)} style={{ color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer", background: "none", border: "none" }}>
-                Tutup
+                Close
               </button>
             </div>
 
@@ -2371,7 +2356,7 @@ export default function AdminDashboardPage() {
             <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
                 <h4 style={{ fontSize: "1.05rem", color: "var(--text-primary)", fontWeight: 700 }}>
-                  Daftar Komentar Member ({inspectingPost.comments?.length || 0})
+                  Member Comments ({inspectingPost.comments?.length || 0})
                 </h4>
               </div>
 
@@ -2399,7 +2384,7 @@ export default function AdminDashboardPage() {
                           {comm.content}
                         </p>
                         <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                          {new Date(comm.createdAt).toLocaleString()}
+                          {new Date(comm.createdAt).toLocaleString("en-US")}
                         </div>
                       </div>
 
@@ -2408,14 +2393,14 @@ export default function AdminDashboardPage() {
                         className="btn btn-ghost btn-sm"
                         style={{ color: "var(--status-error)", fontSize: "0.75rem", flexShrink: 0 }}
                       >
-                        Hapus
+                        Delete
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                  Belum ada komentar pada postingan ini.
+                  No comments on this post yet.
                 </div>
               )}
             </div>
@@ -2462,10 +2447,10 @@ export default function AdminDashboardPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", color: "var(--text-primary)" }}>
-                {editingHeroId ? "Edit Slide Hero Section" : "Tambah Slide Hero Baru"}
+                {editingHeroId ? "Edit Hero Section Slide" : "Add New Hero Slide"}
               </h3>
               <button onClick={() => setIsHeroModalOpen(false)} style={{ color: "var(--text-muted)", fontSize: "1.2rem", background: "none", border: "none", cursor: "pointer" }}>
-                Tutup
+                Close
               </button>
             </div>
 
@@ -2473,7 +2458,7 @@ export default function AdminDashboardPage() {
             {!editingHeroId && catalogItems.length > 0 && (
               <div style={{ marginBottom: "20px", padding: "14px", backgroundColor: "var(--bg-surface-elevated)", borderRadius: "10px", border: "1px solid var(--border-subtle)" }}>
                 <label style={{ display: "block", fontSize: "0.8rem", color: "var(--accent-gold)", fontWeight: 700, marginBottom: "6px" }}>
-                  Impor Otomatis dari Film Katalog:
+                  Auto Import from Catalog Film:
                 </label>
                 <select
                   onChange={(e) => {
@@ -2483,7 +2468,7 @@ export default function AdminDashboardPage() {
                   defaultValue=""
                   style={{ width: "100%", fontSize: "0.85rem" }}
                 >
-                  <option value="" disabled>-- Pilih film katalog untuk mengisi otomatis --</option>
+                  <option value="" disabled>-- Select a catalog film to auto-fill --</option>
                   {catalogItems.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.title} ({c.category})
@@ -2496,7 +2481,7 @@ export default function AdminDashboardPage() {
             <form onSubmit={handleSaveHeroSlide} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                  Judul Utama Slide *
+                  Main Slide Title *
                 </label>
                 <input
                   type="text"
@@ -2510,11 +2495,11 @@ export default function AdminDashboardPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                  Sinopsis / Subtitle Banner
+                  Synopsis / Banner Subtitle
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Deskripsi cerita atau tagline cinematic..."
+                  placeholder="Story description or cinematic tagline..."
                   value={heroSubtitle}
                   onChange={(e) => setHeroSubtitle(e.target.value)}
                   style={{ width: "100%", resize: "vertical" }}
@@ -2536,7 +2521,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Kategori Genre
+                    Genre Category
                   </label>
                   <input
                     type="text"
@@ -2619,13 +2604,13 @@ export default function AdminDashboardPage() {
                     <div>
                       <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--text-primary)" }}>
                         {heroThumbUploading
-                          ? "Mengunggah gambar..."
+                          ? "Uploading image..."
                           : heroThumbFileName
                           ? heroThumbFileName
-                          : "Klik untuk upload poster/gambar backdrop"}
+                          : "Click to upload poster/backdrop image"}
                       </div>
                       <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                        Format: JPG, PNG, WebP (Maks. 15MB)
+                        Formats: JPG, PNG, WebP (Max. 15MB)
                       </div>
                     </div>
                   </label>
@@ -2648,7 +2633,7 @@ export default function AdminDashboardPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                  URL Video Trailer (Untuk tombol Watch Trailer)
+                  Trailer Video URL (For Watch Trailer button)
                 </label>
                 <input
                   type="url"
@@ -2662,19 +2647,19 @@ export default function AdminDashboardPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Teks Tombol CTA Utama
+                    Primary CTA Button Text
                   </label>
                   <input
                     type="text"
                     value={heroCtaPrimaryText}
                     onChange={(e) => setHeroCtaPrimaryText(e.target.value)}
-                    placeholder="Nonton Sekarang"
+                    placeholder="Watch Now"
                     style={{ width: "100%" }}
                   />
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 600 }}>
-                    Link Tujuan Tombol CTA Utama
+                    Primary CTA Button Link
                   </label>
                   <input
                     type="text"
@@ -2695,7 +2680,7 @@ export default function AdminDashboardPage() {
                   style={{ width: "18px", height: "18px", accentColor: "var(--accent-gold)" }}
                 />
                 <label htmlFor="hero-is-active" style={{ fontSize: "0.88rem", color: "var(--text-primary)", fontWeight: 600 }}>
-                  Aktifkan di Carousel Hero Homepage
+                  Enable in Hero Homepage Carousel
                 </label>
               </div>
 
@@ -2706,14 +2691,14 @@ export default function AdminDashboardPage() {
                   className="btn btn-primary"
                   style={{ flexGrow: 1 }}
                 >
-                  {savingHero ? "Menyimpan..." : editingHeroId ? "Simpan Perubahan Slide" : "Tambahkan ke Hero Section"}
+                  {savingHero ? "Saving..." : editingHeroId ? "Save Slide Changes" : "Add to Hero Section"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsHeroModalOpen(false)}
                   className="btn btn-secondary"
                 >
-                  Batal
+                  Cancel
                 </button>
               </div>
             </form>
@@ -2760,10 +2745,10 @@ export default function AdminDashboardPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.5rem", color: "var(--text-primary)" }}>
-                Tambah Produksi Film Baru
+                Add New Film Production
               </h3>
               <button onClick={() => setIsAddContentOpen(false)} style={{ color: "var(--text-muted)", fontSize: "1.2rem", background: "none", border: "none", cursor: "pointer" }}>
-                Tutup
+                Close
               </button>
             </div>
 
@@ -2787,7 +2772,7 @@ export default function AdminDashboardPage() {
             <form onSubmit={handleCreateContent} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                  Judul Film / Serial
+                  Film Title / Series
                 </label>
                 <input
                   type="text"
@@ -2802,12 +2787,12 @@ export default function AdminDashboardPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                  Deskripsi / Sinopsis
+                  Description / Synopsis
                 </label>
                 <textarea
                   required
                   rows={3}
-                  placeholder="Ringkasan cerita cinematic..."
+                  placeholder="Cinematic story synopsis..."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   style={{ width: "100%", resize: "vertical" }}
@@ -2819,7 +2804,7 @@ export default function AdminDashboardPage() {
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                     <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                      Kategori
+                      Category
                     </label>
                     <button
                       type="button"
@@ -2834,14 +2819,14 @@ export default function AdminDashboardPage() {
                         textDecoration: "underline",
                       }}
                     >
-                      {isCustomCategory ? "Pilih Daftar" : "+ Kategori Baru"}
+                      {isCustomCategory ? "Select from List" : "+ New Category"}
                     </button>
                   </div>
                   {isCustomCategory ? (
                     <input
                       type="text"
                       required
-                      placeholder="Nama kategori baru"
+                      placeholder="New category name"
                       value={customCategory}
                       onChange={(e) => setCustomCategory(e.target.value)}
                       style={{ width: "100%" }}
@@ -2865,14 +2850,14 @@ export default function AdminDashboardPage() {
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px", fontWeight: 600 }}>
-                    Tingkat Akses
+                    Access Level
                   </label>
                   <select
                     value={newAccess}
                     onChange={(e) => setNewAccess(e.target.value)}
                     style={{ width: "100%", fontWeight: 600 }}
                   >
-                    <option value="PUBLIC">PUBLIC (Bebas Nonton Semua Pengunjung)</option>
+                    <option value="PUBLIC">PUBLIC (Free for All Visitors)</option>
                     <option value="MEMBER">MEMBER (Patron Velvet Club)</option>
                     <option value="PREMIUM">PREMIUM (VIP Sovereign)</option>
                   </select>
@@ -2890,13 +2875,13 @@ export default function AdminDashboardPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                   <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--accent-gold)" }}>
-                    Detail Chapter Pertama (Episode Awal)
+                    First Chapter Details (Pilot Episode)
                   </span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                      No. Chapter
+                      Chapter No.
                     </label>
                     <input
                       type="number"
@@ -2914,7 +2899,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                      Judul Chapter
+                      Chapter Title
                     </label>
                     <input
                       type="text"
@@ -2932,7 +2917,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                   <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                    File Video Produksi
+                    Production Video File
                   </label>
                   <div style={{ display: "flex", gap: "6px", fontSize: "0.75rem" }}>
                     <button
@@ -2963,7 +2948,7 @@ export default function AdminDashboardPage() {
                         cursor: "pointer",
                       }}
                     >
-                      Link URL
+                      URL Link
                     </button>
                   </div>
                 </div>
@@ -2994,10 +2979,10 @@ export default function AdminDashboardPage() {
                       />
                       
                       <span style={{ fontSize: "0.92rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                        {videoUploading ? "Sedang Mengunggah Video ke Server Terproteksi..." : "Pilih File Video untuk Diunggah"}
+                        {videoUploading ? "Uploading Video to Protected Server..." : "Select Video File to Upload"}
                       </span>
                       <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                        Format MP4, WebM (Maks. 250MB) • Streaming Anti-Download Terenkripsi
+                        Formats: MP4, WebM (Max. 250MB) • Encrypted Stream Protection
                       </span>
                     </label>
 
@@ -3017,7 +3002,7 @@ export default function AdminDashboardPage() {
                         }}
                       >
                         <div>
-                          Video siap: <strong>{videoFileName || "Uploaded Video"}</strong>
+                          Video ready: <strong>{videoFileName || "Uploaded Video"}</strong>
                         </div>
                         <span style={{ fontSize: "0.68rem", backgroundColor: "#d1fae5", padding: "3px 8px", borderRadius: "4px", fontWeight: 800 }}>
                           PROTECTED STREAM
@@ -3041,7 +3026,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                   <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                    Poster / Thumbnail Film
+                    Film Poster / Thumbnail
                   </label>
                   <div style={{ display: "flex", gap: "6px", fontSize: "0.75rem" }}>
                     <button
@@ -3072,7 +3057,7 @@ export default function AdminDashboardPage() {
                         cursor: "pointer",
                       }}
                     >
-                      Link URL
+                      URL Link
                     </button>
                   </div>
                 </div>
@@ -3108,10 +3093,10 @@ export default function AdminDashboardPage() {
                     )}
                     <div>
                       <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                        {thumbUploading ? "Mengunggah Poster..." : newThumb ? `${thumbFileName || "Poster Terpasang"}` : "Pilih Gambar Poster Film"}
+                        {thumbUploading ? "Uploading Poster..." : newThumb ? `${thumbFileName || "Poster Attached"}` : "Select Film Poster Image"}
                       </div>
                       <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                        JPG, PNG, WebP (Rasio 16:9 disarankan)
+                        JPG, PNG, WebP (16:9 ratio recommended)
                       </div>
                     </div>
                   </label>
@@ -3134,14 +3119,14 @@ export default function AdminDashboardPage() {
                   className="btn btn-primary"
                   style={{ flexGrow: 1 }}
                 >
-                  {creatingContent ? "Membuat..." : "Simpan & Publikasikan Film"}
+                  {creatingContent ? "Creating..." : "Save & Publish Film"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddContentOpen(false)}
                   className="btn btn-secondary"
                 >
-                  Batal
+                  Cancel
                 </button>
               </div>
             </form>
@@ -3192,14 +3177,14 @@ export default function AdminDashboardPage() {
                   {selectedProduction.category}
                 </span>
                 <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", color: "var(--text-primary)", marginTop: "2px" }}>
-                  Tambah Chapter: {selectedProduction.title}
+                  Add Chapter: {selectedProduction.title}
                 </h3>
               </div>
               <button
                 onClick={() => setIsAddChapterModalOpen(false)}
                 style={{ color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer", background: "none", border: "none" }}
               >
-                Tutup
+                Close
               </button>
             </div>
 
@@ -3207,7 +3192,7 @@ export default function AdminDashboardPage() {
               <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "12px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                    No. Chapter
+                    Chapter No.
                   </label>
                   <input
                     type="number"
@@ -3220,7 +3205,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                    Judul Chapter
+                    Chapter Title
                   </label>
                   <input
                     type="text"
@@ -3235,11 +3220,11 @@ export default function AdminDashboardPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "6px" }}>
-                  Sinopsis Chapter (Opsional)
+                  Chapter Synopsis (Optional)
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Ringkasan adegan babak ini..."
+                  placeholder="Brief synopsis for this chapter..."
                   value={extraChapterDesc}
                   onChange={(e) => setExtraChapterDesc(e.target.value)}
                   style={{ width: "100%", resize: "vertical" }}
@@ -3250,7 +3235,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                   <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600 }}>
-                    File Video Chapter
+                    Chapter Video File
                   </label>
                   <div style={{ display: "flex", gap: "6px", fontSize: "0.75rem" }}>
                     <button
@@ -3281,7 +3266,7 @@ export default function AdminDashboardPage() {
                         cursor: "pointer",
                       }}
                     >
-                      Link URL
+                      URL Link
                     </button>
                   </div>
                 </div>
@@ -3312,10 +3297,10 @@ export default function AdminDashboardPage() {
                       />
                       
                       <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                        {extraChapterUploading ? "Mengunggah Video Chapter..." : "Pilih File Video Chapter"}
+                        {extraChapterUploading ? "Uploading Chapter Video..." : "Select Chapter Video File"}
                       </span>
                       <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                        Format MP4, WebM (Maks. 250MB) • Anti-Theft Protected Stream
+                        Formats: MP4, WebM (Max. 250MB) • Anti-Theft Protected Stream
                       </span>
                     </label>
 
@@ -3362,14 +3347,14 @@ export default function AdminDashboardPage() {
                   className="btn btn-primary"
                   style={{ flexGrow: 1 }}
                 >
-                  {savingChapter ? "Menyimpan..." : `Simpan Chapter ${extraChapterNum}`}
+                  {savingChapter ? "Saving..." : `Save Chapter ${extraChapterNum}`}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddChapterModalOpen(false)}
                   className="btn btn-secondary"
                 >
-                  Batal
+                  Cancel
                 </button>
               </div>
             </form>
@@ -3377,7 +3362,17 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* ================= MODAL: EDIT FILM / SERIAL (SUPER USER) ================= */}
+      {/* ================= MODAL: UPLOAD VIDEO & ADD NEW TITLE (ALL-IN-ONE) ================= */}
+      <UploadVideoContentModal
+        isOpen={isUploadVideoModalOpen}
+        onClose={() => setIsUploadVideoModalOpen(false)}
+        onSuccess={(newContent) => {
+          setContentList((prev) => [newContent, ...prev]);
+          if (stats) setStats({ ...stats, contentCount: stats.contentCount + 1 });
+        }}
+      />
+
+      {/* ================= MODAL: EDIT FILM / SERIES (SUPER USER) ================= */}
       <EditContentModal
         isOpen={isEditContentModalOpen}
         onClose={() => {
@@ -3387,11 +3382,11 @@ export default function AdminDashboardPage() {
         contentItem={editingContentItem}
         onSuccess={(updated) => {
           setContentList((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
-          alert(`Serial "${updated.title}" berhasil diperbarui!`);
+          alert(`Series "${updated.title}" updated successfully!`);
         }}
       />
 
-      {/* ================= MODAL: KELOLA CHAPTER SERIAL ================= */}
+      {/* ================= MODAL: MANAGE SERIES CHAPTERS ================= */}
       <ManageChaptersModal
         isOpen={isManageChaptersModalOpen}
         onClose={() => {
@@ -3401,7 +3396,7 @@ export default function AdminDashboardPage() {
         contentItem={managingContentForChapters}
       />
 
-      {/* ================= MODAL: USER CRUD (TAMBAH & EDIT PENGGUNA) ================= */}
+      {/* ================= MODAL: USER CRUD (ADD & EDIT USER) ================= */}
       <UserCrudModal
         isOpen={isUserCrudModalOpen}
         onClose={() => {
@@ -3410,7 +3405,7 @@ export default function AdminDashboardPage() {
         }}
         userToEdit={userToEdit}
         onSuccess={async () => {
-          alert(userToEdit ? "Pengguna berhasil diperbarui!" : "Pengguna baru berhasil dibuat!");
+          alert(userToEdit ? "User updated successfully!" : "New user created successfully!");
           await loadAllAdminData();
         }}
       />

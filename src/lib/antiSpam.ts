@@ -41,7 +41,7 @@ export function validateCommentContent(
   if (honeypot && honeypot.trim().length > 0) {
     return {
       isValid: false,
-      error: "Spam bot terdeteksi.",
+      error: "Spam bot detected.",
     };
   }
 
@@ -51,14 +51,14 @@ export function validateCommentContent(
   if (content.length < 3) {
     return {
       isValid: false,
-      error: "Komentar terlalu pendek (minimal 3 karakter).",
+      error: "Comment is too short (minimum 3 characters).",
     };
   }
 
   if (content.length > 1000) {
     return {
       isValid: false,
-      error: "Komentar terlalu panjang (maksimal 1.000 karakter).",
+      error: "Comment is too long (maximum 1,000 characters).",
     };
   }
 
@@ -69,7 +69,7 @@ export function validateCommentContent(
     const remainingSeconds = Math.ceil((15 * 1000 - (now - lastTime)) / 1000);
     return {
       isValid: false,
-      error: `Harap tunggu ${remainingSeconds} detik sebelum mengirim komentar baru (Anti-Spam).`,
+      error: `Please wait ${remainingSeconds} seconds before posting a new comment (Anti-Spam).`,
     };
   }
 
@@ -78,7 +78,7 @@ export function validateCommentContent(
   if (charFloodRegex.test(content)) {
     return {
       isValid: false,
-      error: "Komentar mengandung karakter berulang yang tidak wajar.",
+      error: "Comment contains abnormal repetitive characters.",
     };
   }
 
@@ -87,7 +87,7 @@ export function validateCommentContent(
   if (urlCount > 1) {
     return {
       isValid: false,
-      error: "Komentar tidak boleh memuat banyak tautan eksternal.",
+      error: "Comments cannot contain multiple external links.",
     };
   }
 
@@ -107,7 +107,7 @@ export function validateCommentContent(
     if (lowerContent.includes(keyword)) {
       return {
         isValid: false,
-        error: "Komentar terdeteksi memuat kata kunci promosi atau spam terlarang.",
+        error: "Comment detected containing promotional or prohibited spam keywords.",
       };
     }
   }
@@ -122,7 +122,7 @@ export function validateCommentContent(
   if (isDuplicate) {
     return {
       isValid: false,
-      error: "Anda baru saja mengirimkan komentar yang sama. Mohon hindari duplikasi.",
+      error: "You just submitted the same comment. Please avoid duplicates.",
     };
   }
 

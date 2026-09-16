@@ -98,7 +98,7 @@ export default function Header() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button
             onClick={() => setSidebarOpen(true)}
-            aria-label="Buka Menu Navigasi"
+            aria-label="Open Navigation Menu"
             style={{
               display: "inline-flex",
               flexDirection: "column",
@@ -117,7 +117,7 @@ export default function Header() {
               flexShrink: 0,
             }}
             className="header-left-toggle-btn"
-            title="Buka Menu Navigasi"
+            title="Open Navigation Menu"
             id="header-left-toggle"
           >
             <span style={{ width: "18px", height: "2px", backgroundColor: "currentColor", borderRadius: "2px" }} />
@@ -197,7 +197,7 @@ export default function Header() {
                     transition: "all 0.2s ease",
                   }}
                   id="admin-header-link"
-                  title="Panel Kontrol Administrator"
+                  title="Administrator Control Panel"
                 >
                   <svg
                     width="14"
@@ -215,7 +215,7 @@ export default function Header() {
                 </Link>
               )}
 
-              {/* Icon Profile User: Tersedia untuk semua pengguna yang login */}
+              {/* User Profile Icon */}
               <Link
                 href="/profile"
                 style={{
@@ -231,9 +231,9 @@ export default function Header() {
                   boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
                 }}
                 className="header-profile-link"
-                title="Profil Saya"
+                title="My Profile"
               >
-                {/* SVG Icon Profile dalam bulatan gradasi emas */}
+                {/* SVG Icon Profile */}
                 <div
                   style={{
                     width: "28px",
@@ -279,7 +279,7 @@ export default function Header() {
               </Link>
             </div>
           ) : (
-            /* Visitor: Icon Profile untuk Sign In / Register */
+            /* Visitor: Profile Icon for Sign In */
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <Link
                 href="/login"
@@ -299,7 +299,7 @@ export default function Header() {
                   boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
                 }}
                 className="header-profile-link"
-                title="Masuk ke Akun / Profil"
+                title="Sign In / Profile"
               >
                 <div
                   style={{

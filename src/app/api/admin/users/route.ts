@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     if (!email || !username || !password) {
       return NextResponse.json(
-        { error: "Email, username, dan password wajib diisi." },
+        { error: "Email, username, and password are required." },
         { status: 400 }
       );
     }
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
     if (existing) {
       return NextResponse.json(
-        { error: "Email sudah terdaftar dalam sistem." },
+        { error: "Email is already registered in the system." },
         { status: 409 }
       );
     }
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Pengguna baru berhasil dibuat.",
+      message: "New user created successfully.",
       user: {
         id: newUser.id,
         email: newUser.email,
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     }, { status: 201 });
   } catch (error) {
     console.error("Admin create user error:", error);
-    return NextResponse.json({ error: "Gagal membuat pengguna baru." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create new user." }, { status: 500 });
   }
 }
 
@@ -190,7 +190,7 @@ export async function PATCH(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, user: updatedUser, message: "Pengguna berhasil diperbarui." });
+    return NextResponse.json({ success: true, user: updatedUser, message: "User updated successfully." });
   } catch (error) {
     console.error("Admin patch user error:", error);
     return NextResponse.json({ error: "Failed to update user." }, { status: 500 });
@@ -208,12 +208,12 @@ export async function DELETE(request: Request) {
     const targetUserId = searchParams.get("id");
 
     if (!targetUserId) {
-      return NextResponse.json({ error: "User ID diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "User ID is required." }, { status: 400 });
     }
 
     if (targetUserId === user.id) {
       return NextResponse.json(
-        { error: "Anda tidak dapat menghapus akun administrator Anda sendiri." },
+        { error: "You cannot delete your own administrator account." },
         { status: 400 }
       );
     }
@@ -223,10 +223,10 @@ export async function DELETE(request: Request) {
       where: { id: targetUserId },
     });
 
-    return NextResponse.json({ success: true, message: "Pengguna dan semua data terkait berhasil dihapus permanen." });
+    return NextResponse.json({ success: true, message: "User and all associated data permanently deleted." });
   } catch (error) {
     console.error("Admin delete user error:", error);
-    return NextResponse.json({ error: "Gagal menghapus pengguna." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete user." }, { status: 500 });
   }
 }
 

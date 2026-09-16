@@ -33,7 +33,7 @@ export async function GET(
     return NextResponse.json({ comments });
   } catch (error) {
     console.error("Fetch chapter comments error:", error);
-    return NextResponse.json({ error: "Gagal memuat komentar chapter." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load chapter comments." }, { status: 500 });
   }
 }
 
@@ -45,14 +45,14 @@ export async function POST(
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
-        { error: "Wajib login akun terlebih dahulu untuk memberikan komentar." },
+        { error: "You must sign in first to post a comment." },
         { status: 401 }
       );
     }
 
     if (user.status === "BANNED" || user.status === "SUSPENDED") {
       return NextResponse.json(
-        { error: "Akun Anda tidak memiliki izin untuk berkomentar." },
+        { error: "Your account does not have permission to comment." },
         { status: 403 }
       );
     }
@@ -73,7 +73,7 @@ export async function POST(
     });
 
     if (!chapter) {
-      return NextResponse.json({ error: "Chapter tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Chapter not found." }, { status: 404 });
     }
 
     // 3. Create chapter comment
@@ -99,6 +99,6 @@ export async function POST(
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
   } catch (error) {
     console.error("Create chapter comment error:", error);
-    return NextResponse.json({ error: "Gagal mengirimkan komentar." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to post comment." }, { status: 500 });
   }
 }

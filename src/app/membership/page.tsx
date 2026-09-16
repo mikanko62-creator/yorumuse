@@ -106,7 +106,7 @@ export default function MembershipPage() {
               margin: "0 auto 36px",
             }}
           >
-            Berlangganan sekarang untuk mendapatkan akses penuh tanpa batas ke seluruh chapter serial manhwa dan komunitas YoruMuse.
+            Subscribe now to unlock unlimited access to all serialized manhwa chapters and the exclusive YoruMuse community.
           </p>
 
           {/* Billing Cycle Toggle */}

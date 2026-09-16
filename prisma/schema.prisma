@@ -181,9 +181,9 @@ model HeroSlide {
   thumbnail        String
   trailerUrl       String?
   contentSlug      String?
-  ctaPrimaryText   String?  @default("Nonton Sekarang")
+  ctaPrimaryText   String?  @default("Watch Now")
   ctaPrimaryLink   String?  @default("/content")
-  ctaSecondaryText String?  @default("Lihat Trailer")
+  ctaSecondaryText String?  @default("Watch Trailer")
   order            Int      @default(0)
   isActive         Boolean  @default(true)
   createdAt        DateTime @default(now())

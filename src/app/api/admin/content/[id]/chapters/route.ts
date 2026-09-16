@@ -27,6 +27,6 @@ export async function GET(
     return NextResponse.json({ chapters });
   } catch (error) {
     console.error("Admin fetch all chapters error:", error);
-    return NextResponse.json({ error: "Gagal mengambil daftar chapter." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch chapters list." }, { status: 500 });
   }
 }

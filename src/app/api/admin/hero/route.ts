@@ -7,7 +7,7 @@ export async function GET() {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
     if (!title || !thumbnail) {
       return NextResponse.json(
-        { error: "Judul dan URL Thumbnail gambar hero wajib diisi." },
+        { error: "Title and thumbnail image URL are required." },
         { status: 400 }
       );
     }
@@ -87,9 +87,9 @@ export async function POST(request: Request) {
         thumbnail: thumbnail.trim(),
         trailerUrl: trailerUrl ? trailerUrl.trim() : null,
         contentSlug: contentSlug ? contentSlug.trim() : null,
-        ctaPrimaryText: ctaPrimaryText ? ctaPrimaryText.trim() : "Nonton Sekarang",
+        ctaPrimaryText: ctaPrimaryText ? ctaPrimaryText.trim() : "Watch Now",
         ctaPrimaryLink: ctaPrimaryLink ? ctaPrimaryLink.trim() : (contentSlug ? `/content/${contentSlug}` : "/browse"),
-        ctaSecondaryText: ctaSecondaryText ? ctaSecondaryText.trim() : "Lihat Trailer",
+        ctaSecondaryText: ctaSecondaryText ? ctaSecondaryText.trim() : "Watch Trailer",
         order: typeof order === "number" ? order : defaultOrder,
         isActive: isActive !== undefined ? Boolean(isActive) : true,
       },
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, slide: newSlide });
   } catch (error) {
     console.error("Admin create hero slide error:", error);
-    return NextResponse.json({ error: "Gagal menambahkan slide hero." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to add hero slide." }, { status: 500 });
   }
 }
 
@@ -107,7 +107,7 @@ export async function PATCH(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -116,7 +116,7 @@ export async function PATCH(request: Request) {
     const { id, ...updates } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "ID slide diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "Slide ID is required." }, { status: 400 });
     }
 
     const updated = await prisma.heroSlide.update({
@@ -140,7 +140,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true, slide: updated });
   } catch (error) {
     console.error("Admin update hero slide error:", error);
-    return NextResponse.json({ error: "Gagal memperbarui slide hero." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update hero slide." }, { status: 500 });
   }
 }
 
@@ -149,7 +149,7 @@ export async function DELETE(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -158,14 +158,14 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "ID slide diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "Slide ID is required." }, { status: 400 });
     }
 
     await prisma.heroSlide.delete({ where: { id } });
 
-    return NextResponse.json({ success: true, message: "Slide hero berhasil dihapus." });
+    return NextResponse.json({ success: true, message: "Hero slide deleted successfully." });
   } catch (error) {
     console.error("Admin delete hero slide error:", error);
-    return NextResponse.json({ error: "Gagal menghapus slide hero." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete hero slide." }, { status: 500 });
   }
 }

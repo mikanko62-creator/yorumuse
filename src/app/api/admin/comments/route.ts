@@ -7,7 +7,7 @@ export async function GET() {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -47,7 +47,7 @@ export async function GET() {
     return NextResponse.json({ postComments, chapterComments });
   } catch (error) {
     console.error("Admin comments fetch error:", error);
-    return NextResponse.json({ error: "Gagal mengambil daftar komentar." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load comments list." }, { status: 500 });
   }
 }
 
@@ -56,7 +56,7 @@ export async function DELETE(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -66,7 +66,7 @@ export async function DELETE(request: Request) {
     const type = searchParams.get("type"); // "post" or "chapter"
 
     if (!commentId) {
-      return NextResponse.json({ error: "Comment ID diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "Comment ID is required." }, { status: 400 });
     }
 
     if (type === "chapter") {
@@ -79,9 +79,9 @@ export async function DELETE(request: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, message: "Komentar berhasil dihapus." });
+    return NextResponse.json({ success: true, message: "Comment deleted successfully." });
   } catch (error) {
     console.error("Admin delete comment error:", error);
-    return NextResponse.json({ error: "Gagal menghapus komentar." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete comment." }, { status: 500 });
   }
 }

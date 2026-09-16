@@ -14,7 +14,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     if (user.status === "BANNED" || user.status === "SUSPENDED") {
-      return NextResponse.json({ error: "Akun Anda sedang dibatasi dan tidak dapat berkomentar." }, { status: 403 });
+      return NextResponse.json({ error: "Your account is restricted and cannot comment." }, { status: 403 });
     }
 
     const { id: postId } = await params;
@@ -26,14 +26,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     });
 
     if (!post || post.status !== "PUBLISHED") {
-      return NextResponse.json({ error: "Postingan tidak ditemukan atau tidak aktif." }, { status: 404 });
+      return NextResponse.json({ error: "Post not found or is no longer active." }, { status: 404 });
     }
 
     const body = await request.json();
     const { content } = body;
 
     if (!content || !content.trim() || content.trim().length > 3000) {
-      return NextResponse.json({ error: "Isi komentar tidak boleh kosong (maksimal 3000 karakter)." }, { status: 400 });
+      return NextResponse.json({ error: "Comment content cannot be empty (maximum 3,000 characters)." }, { status: 400 });
     }
 
     const comment = await prisma.comment.create({

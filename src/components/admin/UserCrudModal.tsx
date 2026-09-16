@@ -102,14 +102,14 @@ export default function UserCrudModal({
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Gagal memperbarui pengguna.");
+        if (!res.ok) throw new Error(data.error || "Failed to update user.");
 
         onSuccess();
         onClose();
       } else {
         // Create user
         if (!password.trim() || password.trim().length < 6) {
-          throw new Error("Password minimal 6 karakter.");
+          throw new Error("Password must be at least 6 characters.");
         }
 
         const res = await fetch("/api/admin/users", {
@@ -126,13 +126,13 @@ export default function UserCrudModal({
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Gagal membuat pengguna baru.");
+        if (!res.ok) throw new Error(data.error || "Failed to create new user.");
 
         onSuccess();
         onClose();
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Terjadi kesalahan saat memproses akun.");
+      setErrorMessage(err instanceof Error ? err.message : "An error occurred while processing account.");
     } finally {
       setSaving(false);
     }
@@ -197,7 +197,7 @@ export default function UserCrudModal({
                 textTransform: "uppercase",
               }}
             >
-              SUPER USER • MANAJEMEN PENGGUNA
+              SUPER USER • USER MANAGEMENT
             </span>
             <h3
               style={{
@@ -208,7 +208,7 @@ export default function UserCrudModal({
                 fontWeight: 700,
               }}
             >
-              {isEditMode ? `Edit Akun: ${userToEdit?.username}` : "Tambah Pengguna Baru"}
+              {isEditMode ? `Edit Account: ${userToEdit?.username}` : "Add New User"}
             </h3>
           </div>
           <button
@@ -229,7 +229,7 @@ export default function UserCrudModal({
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
-            title="Tutup (Esc)"
+            title="Close (Esc)"
           >
             ✕
           </button>
@@ -282,7 +282,7 @@ export default function UserCrudModal({
                   fontWeight: 600,
                 }}
               >
-                Username (Nama Panggilan) *
+                Username *
               </label>
               <input
                 type="text"
@@ -312,7 +312,7 @@ export default function UserCrudModal({
                   fontWeight: 600,
                 }}
               >
-                Alamat Email *
+                Email Address *
               </label>
               <input
                 type="email"
@@ -343,7 +343,7 @@ export default function UserCrudModal({
                 }}
               >
                 {isEditMode
-                  ? "Password Baru (Kosongkan jika tidak ingin mengubah)"
+                  ? "New Password (Leave blank to keep current)"
                   : "Password *"}
               </label>
               <input
@@ -351,7 +351,7 @@ export default function UserCrudModal({
                 required={!isEditMode}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isEditMode ? "Masukkan password baru..." : "Minimal 6 karakter"}
+                placeholder={isEditMode ? "Enter new password..." : "At least 6 characters"}
                 style={{
                   width: "100%",
                   padding: "10px 12px",
@@ -375,7 +375,7 @@ export default function UserCrudModal({
                     fontWeight: 600,
                   }}
                 >
-                  Hak Akses (Role)
+                  Role
                 </label>
                 <select
                   value={role}
@@ -390,7 +390,7 @@ export default function UserCrudModal({
                     fontSize: "0.9rem",
                   }}
                 >
-                  <option value="USER">USER (Member Biasa)</option>
+                  <option value="USER">USER (Regular Member)</option>
                   <option value="ADMIN">ADMIN (Super User)</option>
                 </select>
               </div>
@@ -405,7 +405,7 @@ export default function UserCrudModal({
                     fontWeight: 600,
                   }}
                 >
-                  Status Akun
+                  Account Status
                 </label>
                 <select
                   value={status}
@@ -420,9 +420,9 @@ export default function UserCrudModal({
                     fontSize: "0.9rem",
                   }}
                 >
-                  <option value="ACTIVE">ACTIVE (Aktif Normal)</option>
-                  <option value="SUSPENDED">SUSPENDED (Ditangguhkan)</option>
-                  <option value="BANNED">BANNED (Diblokir Total)</option>
+                  <option value="ACTIVE">ACTIVE (Active)</option>
+                  <option value="SUSPENDED">SUSPENDED (Suspended)</option>
+                  <option value="BANNED">BANNED (Banned)</option>
                 </select>
               </div>
             </div>
@@ -437,7 +437,7 @@ export default function UserCrudModal({
                   fontWeight: 600,
                 }}
               >
-                Status Paket Langganan
+                Subscription Plan Status
               </label>
               <select
                 value={planId}
@@ -452,9 +452,9 @@ export default function UserCrudModal({
                   fontSize: "0.9rem",
                 }}
               >
-                <option value="free_tier">Pengguna Biasa (Tidak Berlangganan)</option>
+                <option value="free_tier">Regular User (Free Tier)</option>
                 <option value="member_monthly">
-                  Pengguna Subscription (Berlangganan - Akses Penuh)
+                  Subscriber (Full Access)
                 </option>
               </select>
               <span
@@ -465,7 +465,7 @@ export default function UserCrudModal({
                   display: "block",
                 }}
               >
-                Super User dapat mengatur status akun sebagai Pengguna Biasa atau Pengguna Subscription.
+                Super User can configure account status as Regular User or Subscriber.
               </span>
             </div>
           </div>
@@ -488,10 +488,10 @@ export default function UserCrudModal({
               style={{ flex: 1, padding: "12px", fontWeight: 600, fontSize: "0.9rem" }}
             >
               {saving
-                ? "Menyimpan..."
+                ? "Saving..."
                 : isEditMode
-                ? "Simpan Perubahan Akun"
-                : "Buat Akun Pengguna"}
+                ? "Save Account Changes"
+                : "Create User Account"}
             </button>
             <button
               type="button"
@@ -500,7 +500,7 @@ export default function UserCrudModal({
               className="btn btn-secondary"
               style={{ padding: "12px 20px", fontSize: "0.9rem" }}
             >
-              Batal
+              Cancel
             </button>
           </div>
         </form>

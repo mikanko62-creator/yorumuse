@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ posts });
   } catch (error) {
     console.error("Admin posts fetch error:", error);
-    return NextResponse.json({ error: "Gagal mengambil daftar postingan." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch posts list." }, { status: 500 });
   }
 }
 
@@ -82,7 +82,7 @@ export async function PATCH(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -91,12 +91,12 @@ export async function PATCH(request: Request) {
     const { postId, status } = body;
 
     if (!postId || !status) {
-      return NextResponse.json({ error: "Post ID dan status diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "Post ID and status are required." }, { status: 400 });
     }
 
     const validStatuses = ["PUBLISHED", "HIDDEN", "UNDER_REVIEW", "REMOVED"];
     if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: "Status tidak valid." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid status." }, { status: 400 });
     }
 
     const updated = await prisma.post.update({
@@ -117,7 +117,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true, post: updated });
   } catch (error) {
     console.error("Admin patch post error:", error);
-    return NextResponse.json({ error: "Gagal memperbarui status postingan." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update post status." }, { status: 500 });
   }
 }
 
@@ -126,7 +126,7 @@ export async function DELETE(request: Request) {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Akses ditolak: Hanya email yang terdaftar sebagai admin yang diizinkan." },
+        { error: "Access denied: Only authorized admin accounts are allowed." },
         { status: 403 }
       );
     }
@@ -135,16 +135,16 @@ export async function DELETE(request: Request) {
     const postId = searchParams.get("id");
 
     if (!postId) {
-      return NextResponse.json({ error: "Post ID diperlukan." }, { status: 400 });
+      return NextResponse.json({ error: "Post ID is required." }, { status: 400 });
     }
 
     await prisma.post.delete({
       where: { id: postId },
     });
 
-    return NextResponse.json({ success: true, message: "Postingan berhasil dihapus permanen." });
+    return NextResponse.json({ success: true, message: "Post permanently deleted." });
   } catch (error) {
     console.error("Admin delete post error:", error);
-    return NextResponse.json({ error: "Gagal menghapus postingan." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete post." }, { status: 500 });
   }
 }

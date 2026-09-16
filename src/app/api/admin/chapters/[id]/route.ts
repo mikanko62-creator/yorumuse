@@ -13,7 +13,7 @@ export async function PATCH(
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized. Hak akses Super User diperlukan." }, { status: 403 });
+      return NextResponse.json({ error: "Unauthorized. Administrator privileges required." }, { status: 403 });
     }
 
     const { id: chapterId } = await params;
@@ -52,11 +52,11 @@ export async function PATCH(
     return NextResponse.json({
       success: true,
       chapter: updatedChapter,
-      message: "Chapter berhasil diperbarui.",
+      message: "Chapter updated successfully.",
     });
   } catch (error) {
     console.error("Admin update chapter error:", error);
-    return NextResponse.json({ error: "Gagal memperbarui chapter." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update chapter." }, { status: 500 });
   }
 }
 
@@ -67,7 +67,7 @@ export async function DELETE(
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized. Hak akses Super User diperlukan." }, { status: 403 });
+      return NextResponse.json({ error: "Unauthorized. Administrator privileges required." }, { status: 403 });
     }
 
     const { id: chapterId } = await params;
@@ -90,10 +90,10 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Chapter dan semua komentar terkait berhasil dihapus.",
+      message: "Chapter and all related comments deleted successfully.",
     });
   } catch (error) {
     console.error("Admin delete chapter error:", error);
-    return NextResponse.json({ error: "Gagal menghapus chapter." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete chapter." }, { status: 500 });
   }
 }

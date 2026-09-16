@@ -57,7 +57,7 @@ export default function HomePage() {
       {/* 1. Cinematic Hero Slider */}
       <HeroSlider slides={heroSlides} onWatchTrailer={handleWatchTrailer} />
 
-      {/* 2. Gambar 1 Layout: Feed Rilis Manhwa Terbaru + Sidebar */}
+      {/* 2. Latest Manhwa Releases Feed + Sidebar Layout */}
       <section className="section" style={{ paddingTop: "48px", paddingBottom: "48px" }}>
         <div className="container">
           <div
@@ -68,9 +68,9 @@ export default function HomePage() {
               alignItems: "start",
             }}
           >
-            {/* Kolom Kiri Utama: List Rilis Episode (Gambar 1) */}
+            {/* Main Left Column: Episode Releases List */}
             <div style={{ minWidth: 0, flex: "1 1 65%" }}>
-              {/* Header Panel Bergaya HASIL RILIS */}
+              {/* LATEST RELEASES Header Panel */}
               <div
                 style={{
                   backgroundColor: "var(--bg-surface, #101016)",
@@ -104,7 +104,7 @@ export default function HomePage() {
                       margin: 0,
                     }}
                   >
-                    RILIS MANHWA TERBARU
+                    LATEST MANHWA RELEASES
                   </h2>
                 </div>
 
@@ -120,12 +120,12 @@ export default function HomePage() {
                     gap: "4px",
                   }}
                 >
-                  <span>Lihat Semua</span>
+                  <span>View All</span>
                   <span>→</span>
                 </Link>
               </div>
 
-              {/* Daftar Episode Card (Gambar 1 Stack) */}
+              {/* Episode Card List Stack */}
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 {latestItems.slice(0, 8).map((item) => (
                   <EpisodeListCard
@@ -137,7 +137,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Kolom Kanan Sidebar: Trending & Akses VIP */}
+            {/* Right Sidebar Column: Trending & VIP Access */}
             <div
               style={{
                 display: "flex",
@@ -175,9 +175,9 @@ export default function HomePage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    POPULER & TRENDING
+                    POPULAR & TRENDING
                   </span>
-                  <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Top Minggu Ini</span>
+                  <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Top This Week</span>
                 </div>
 
                 <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -280,17 +280,17 @@ export default function HomePage() {
                     fontWeight: 700,
                   }}
                 >
-                  Nonton Semua Chapter Tanpa Batas
+                  Watch All Chapters Without Limits
                 </h3>
                 <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "16px" }}>
-                  Buka semua chapter penuh serial manhwa favoritmu dengan menjadi pengguna subscription.
+                  Unlock all full chapters of your favorite manhwa series by becoming a subscriber.
                 </p>
                 <Link
                   href="/membership"
                   className="btn btn-primary"
                   style={{ width: "100%", justifyContent: "center", fontSize: "0.85rem", padding: "10px 16px" }}
                 >
-                  Mulai Berlangganan
+                  Start Subscription
                 </Link>
               </div>
             </div>
@@ -666,7 +666,7 @@ export default function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Buka akses tak terbatas ke seluruh episode dan chapter penuh serial manhwa dengan berlangganan.
+              Unlock unlimited access to all episodes and full chapters of manhwa series with a subscription.
             </p>
 
             <div
@@ -678,7 +678,7 @@ export default function HomePage() {
               }}
             >
               <Link href="/membership" className="btn btn-primary btn-lg" id="home-membership-cta">
-                Mulai Berlangganan
+                Start Subscription
               </Link>
               <Link href="/browse" className="btn btn-secondary btn-lg">
                 Browse Public Previews
