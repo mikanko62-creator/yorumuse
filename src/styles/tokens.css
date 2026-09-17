@@ -1,54 +1,62 @@
 /* ==========================================================================
    YORUMUSE DESIGN SYSTEM - DESIGN TOKENS
-   Aesthetic: Light / Premium / Minimal / Cinematic / Elegant / Editorial
+   Aesthetic: Sensual / Nocturnal Velvet Noir / Erotic Luxury / Crimson & Gold
    ========================================================================== */
 
 :root {
-  /* Color Palette - Core Light Mode */
-  --bg-base: #f8f9fa;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #f1f3f6;
-  --bg-surface-hover: #e8ebf0;
-  --bg-overlay: rgba(17, 24, 39, 0.45);
-  --bg-overlay-heavy: rgba(17, 24, 39, 0.78);
+  /* Color Palette - Sensual Nocturnal Velvet Noir */
+  --bg-base: #0c060a;
+  --bg-surface: #140911;
+  --bg-surface-elevated: #1c0e18;
+  --bg-surface-hover: #281322;
+  --bg-overlay: rgba(12, 6, 10, 0.72);
+  --bg-overlay-heavy: rgba(12, 6, 10, 0.92);
 
-  /* Text & Foreground - High Contrast Light Mode (WCAG AAA Compliant) */
-  --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-muted: #4b5563;
-  --text-inverse: #ffffff;
+  /* Text & Foreground - Luminous Silk Cream & Rose Quartz */
+  --text-primary: #fbf2f4;
+  --text-secondary: #d3bfc8;
+  --text-muted: #967e89;
+  --text-inverse: #0c060a;
 
-  /* Champagne / Antique Burnished Gold Accents (High Contrast on White) */
-  --accent-gold: #946c15;
-  --accent-gold-light: #7c580d;
-  --accent-gold-dark: #624305;
-  --accent-gold-surface: #fdfaf3;
-  --accent-gold-glow: rgba(148, 108, 21, 0.12);
-  --accent-gold-glow-strong: rgba(148, 108, 21, 0.25);
+  /* Sensual Champagne & Burnished Gold Accents */
+  --accent-gold: #d4af37;
+  --accent-gold-light: #f2d488;
+  --accent-gold-dark: #a88220;
+  --accent-gold-surface: rgba(212, 175, 55, 0.12);
+  --accent-gold-glow: rgba(212, 175, 55, 0.25);
+  --accent-gold-glow-strong: rgba(212, 175, 55, 0.45);
 
-  /* Subtle Borders */
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-medium: rgba(0, 0, 0, 0.14);
-  --border-active: rgba(166, 124, 30, 0.45);
-  --border-gold: #a67c1e;
+  /* Seductive Ruby / Crimson Highlights */
+  --accent-rose: #e11d48;
+  --accent-rose-light: #fb7185;
+  --accent-rose-dark: #9f1239;
+  --accent-rose-surface: rgba(225, 29, 72, 0.12);
+  --accent-rose-glow: rgba(225, 29, 72, 0.35);
+
+  /* Subtle Velvet Glass Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --border-active: rgba(225, 29, 72, 0.6);
+  --border-gold: rgba(212, 175, 55, 0.45);
 
   /* Status Colors */
-  --status-public: #2563eb;
-  --status-member: #a67c1e;
-  --status-premium: #7c3aed;
-  --status-success: #059669;
-  --status-error: #dc2626;
-  --status-warning: #d97706;
+  --status-public: #3b82f6;
+  --status-member: #d4af37;
+  --status-premium: #e11d48;
+  --status-success: #10b981;
+  --status-error: #f43f5e;
+  --status-warning: #f59e0b;
 
-  /* Typography - Clean Developer Modern Font Stack (Inter / System Sans-Serif) */
+  /* Typography - Sensual Modern Font Stack */
   --font-sans: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-serif: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  /* Elevation Shadows - Flat clean aesthetic without distracting shadows */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-gold: none;
+  /* Sensual Atmospheric Elevation Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(225, 29, 72, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 24px rgba(225, 29, 72, 0.15);
+  --shadow-gold: 0 0 24px rgba(212, 175, 55, 0.3);
+  --shadow-rose: 0 0 28px rgba(225, 29, 72, 0.35);
 
   /* Border Radii */
   --radius-xs: 4px;

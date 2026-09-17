@@ -166,13 +166,13 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
               />
             </div>
 
-            {/* Dark Cinematic Vignette Overlays */}
+            {/* Sensual Nocturnal Vignette Overlays */}
             <div
               style={{
                 position: "absolute",
                 inset: 0,
                 zIndex: 2,
-                background: "linear-gradient(90deg, rgba(17, 24, 39, 0.92) 0%, rgba(17, 24, 39, 0.72) 45%, rgba(17, 24, 39, 0.3) 80%, rgba(17, 24, 39, 0.75) 100%)",
+                background: "linear-gradient(90deg, rgba(12, 6, 10, 0.96) 0%, rgba(22, 10, 18, 0.82) 42%, rgba(12, 6, 10, 0.4) 80%, rgba(12, 6, 10, 0.88) 100%)",
               }}
             />
             <div
@@ -180,7 +180,7 @@ export default function HeroSlider({ slides, onWatchTrailer }: HeroSliderProps) 
                 position: "absolute",
                 inset: 0,
                 zIndex: 2,
-                background: "linear-gradient(0deg, var(--bg-base) 0%, rgba(17, 24, 39, 0.4) 18%, transparent 60%)",
+                background: "linear-gradient(0deg, var(--bg-base) 0%, rgba(12, 6, 10, 0.65) 25%, transparent 65%)",
               }}
             />
 

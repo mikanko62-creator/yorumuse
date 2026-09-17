@@ -71,9 +71,10 @@ export default function Logo({
               letterSpacing: "0.22em",
               color: "var(--text-primary)",
               textTransform: "uppercase",
-              background: "linear-gradient(180deg, #111827 0%, #374151 55%, var(--accent-gold) 100%)",
+              background: "linear-gradient(180deg, #ffffff 0%, #fae8c8 50%, var(--accent-gold) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              textShadow: "0 0 20px rgba(212, 175, 55, 0.25)",
             }}
           >
             YORUMUSE
@@ -90,7 +91,7 @@ export default function Logo({
               marginTop: "2px",
             }}
           >
-            CINEMA STUDIOS
+            MANHWA RECAP
           </span>
         </div>
       )}

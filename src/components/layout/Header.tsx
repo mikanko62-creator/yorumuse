@@ -76,10 +76,11 @@ export default function Header() {
         height: "var(--header-height)",
         zIndex: 1000,
         transition: "background-color 0.3s ease, backdrop-filter 0.3s ease, border-bottom 0.3s ease",
-        backgroundColor: scrolled ? "rgba(255, 255, 255, 0.94)" : "rgba(248, 249, 250, 0.85)",
+        backgroundColor: scrolled ? "rgba(12, 6, 10, 0.92)" : "rgba(12, 6, 10, 0.72)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
+        borderBottom: scrolled ? "1px solid rgba(225, 29, 72, 0.2)" : "1px solid transparent",
+        boxShadow: scrolled ? "0 8px 32px rgba(0, 0, 0, 0.6)" : "none",
       }}
     >
       <div
@@ -108,12 +109,12 @@ export default function Header() {
               width: "38px",
               height: "38px",
               borderRadius: "8px",
-              backgroundColor: "rgba(0, 0, 0, 0.04)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
+              backgroundColor: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
               cursor: "pointer",
               transition: "all 0.2s ease",
               padding: "8px",
-              color: "var(--text-primary, #111827)",
+              color: "var(--text-primary)",
               flexShrink: 0,
             }}
             className="header-left-toggle-btn"

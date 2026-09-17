@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SESSION_SECRET = process.env.SESSION_SECRET || "yorumuse-secret-key-32-character-minimum-hex-2026-auth";
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("CRITICAL SECURITY CONFIGURATION ERROR: SESSION_SECRET must be set in environment variables in production.");
+    }
+    return "dev-insecure-local-only-session-secret-change-in-env";
+  }
+  return secret;
+}
 
 interface TokenPayload {
   userId: string;
@@ -31,9 +40,10 @@ async function verifyEdgeToken(token: string): Promise<TokenPayload | null> {
     const [dataPart, signaturePart] = parts;
 
     const enc = new TextEncoder();
+    const secret = getSessionSecret();
     const key = await crypto.subtle.importKey(
       "raw",
-      enc.encode(SESSION_SECRET),
+      enc.encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["verify"]

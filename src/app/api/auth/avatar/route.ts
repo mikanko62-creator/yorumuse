@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { safeErrorResponse, sanitizeString } from "@/lib/security";
 import path from "path";
 import fs from "fs/promises";
+
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return safeErrorResponse("Unauthorized", 401);
   }
 
   try {
@@ -15,58 +23,53 @@ export async function POST(req: NextRequest) {
     const file = formData.get("avatar") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      return safeErrorResponse("File gambar tidak ditemukan.", 400);
     }
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed." },
-        { status: 400 }
+    // Strict MIME-type validation and extension derivation
+    const safeExt = MIME_TO_EXT[file.type];
+    if (!safeExt) {
+      return safeErrorResponse(
+        "Tipe file tidak didukung. Hanya file JPG, PNG, WebP, dan GIF yang diizinkan.",
+        400
       );
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 5MB." },
-        { status: 400 }
-      );
+      return safeErrorResponse("Ukuran file terlalu besar. Maksimal 5MB.", 400);
     }
 
-    // Create avatars directory if it doesn't exist
+    // Safe sanitized filename
+    const filename = `avatar_${user.id}_${Date.now()}.${safeExt}`;
     const uploadsDir = path.join(process.cwd(), "public", "uploads", "avatars");
     await fs.mkdir(uploadsDir, { recursive: true });
 
-    // Generate unique filename
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${user.id}-${Date.now()}.${ext}`;
     const filepath = path.join(uploadsDir, filename);
-
-    // Write file
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filepath, buffer);
 
-    // Delete old avatar file if it exists
-    if (user.avatarUrl) {
-      const oldPath = path.join(process.cwd(), "public", user.avatarUrl);
-      await fs.unlink(oldPath).catch(() => {});
+    // Delete old avatar safely (prevent directory traversal)
+    if (user.avatarUrl && typeof user.avatarUrl === "string") {
+      const sanitizedOldUrl = sanitizeString(user.avatarUrl, 255);
+      if (
+        sanitizedOldUrl.startsWith("/uploads/avatars/") &&
+        !sanitizedOldUrl.includes("..") &&
+        !sanitizedOldUrl.includes("\\")
+      ) {
+        const oldPath = path.join(process.cwd(), "public", sanitizedOldUrl);
+        await fs.unlink(oldPath).catch(() => {});
+      }
     }
 
-    // Update user in database
     const avatarUrl = `/uploads/avatars/${filename}`;
     await prisma.user.update({
       where: { id: user.id },
       data: { avatarUrl },
     });
 
-    return NextResponse.json({ avatarUrl });
+    return NextResponse.json({ success: true, avatarUrl });
   } catch (error) {
-    console.error("Avatar upload error:", error);
-    return NextResponse.json(
-      { error: "Failed to upload avatar" },
-      { status: 500 }
-    );
+    return safeErrorResponse("Gagal memproses upload avatar.", 500, error);
   }
 }

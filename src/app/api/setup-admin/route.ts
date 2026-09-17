@@ -1,25 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, createSession, getCurrentUser } from "@/lib/auth";
+import { safeErrorResponse, isValidEmail, isValidUsername, sanitizeString } from "@/lib/security";
 
 export async function POST(request: Request) {
   try {
     // 1. Authorization & Bootstrap verification
-    const existingAdminCount = await prisma.user.count({
-      where: { role: "ADMIN" },
-    }).catch(() => 0);
-
     const currentUser = await getCurrentUser();
     const setupKeyHeader = request.headers.get("x-setup-admin-key");
     const configuredKey = process.env.SETUP_ADMIN_KEY;
-    const isAuthorizedViaKey = configuredKey && setupKeyHeader === configuredKey;
+    const isAuthorizedViaKey = Boolean(configuredKey && setupKeyHeader && setupKeyHeader === configuredKey);
     const isAuthorizedAdmin = currentUser?.role === "ADMIN";
 
-    // If an administrator already exists, restrict creation to authenticated Admins or valid secret key
+    // Fail-closed admin check
+    const existingAdminCount = await prisma.user.count({
+      where: { role: "ADMIN" },
+    });
+
+    // If admins already exist, strictly forbid unauthenticated requests without the setup key
     if (existingAdminCount > 0 && !isAuthorizedAdmin && !isAuthorizedViaKey) {
-      return NextResponse.json(
-        { error: "Access denied: Administrator system is already active. Only registered Admins can add new admin accounts." },
-        { status: 403 }
+      return safeErrorResponse(
+        "Akses ditolak: Sistem administrator sudah aktif. Hanya Administrator atau Key resmi yang diizinkan.",
+        403
       );
     }
 
@@ -40,16 +42,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanEmail)) {
+    const cleanEmail = sanitizeString(email, 100).toLowerCase();
+    if (!isValidEmail(cleanEmail)) {
       return NextResponse.json(
-        { error: "Invalid email format." },
+        { error: "Format email tidak valid." },
         { status: 400 }
       );
     }
 
-    const cleanUsername = username?.trim() || cleanEmail.split("@")[0] || "Admin";
+    const cleanUsername = sanitizeString(username || cleanEmail.split("@")[0] || "Admin", 30);
     const passwordHash = await hashPassword(password);
 
     // Upsert admin user in database (Supabase PostgreSQL)
@@ -109,10 +110,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Setup admin error:", error);
-    return NextResponse.json(
-      { error: "Failed to create admin account: " + (error instanceof Error ? error.message : String(error)) },
-      { status: 500 }
-    );
+    return safeErrorResponse("Terjadi kesalahan saat memproses pembuatan administrator.", 500, error);
   }
 }

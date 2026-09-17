@@ -150,14 +150,14 @@ export default function NavigationSidebar({
           bottom: 0,
           width: "320px",
           maxWidth: "85vw",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--bg-surface)",
           zIndex: 99999,
           transform: isOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
           display: "flex",
           flexDirection: "column",
-          boxShadow: isOpen ? "12px 0 40px rgba(0, 0, 0, 0.25)" : "none",
-          borderRight: "1px solid rgba(0, 0, 0, 0.08)",
+          boxShadow: isOpen ? "16px 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(225, 29, 72, 0.15)" : "none",
+          borderRight: "1px solid var(--border-subtle)",
           overflow: "hidden",
         }}
         aria-label="Sidebar Category Menu"
@@ -167,11 +167,11 @@ export default function NavigationSidebar({
           style={{
             height: "64px",
             padding: "0 20px",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
+            borderBottom: "1px solid var(--border-subtle)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            backgroundColor: "#ffffff",
+            backgroundColor: "var(--bg-surface-elevated)",
             flexShrink: 0,
           }}
         >
@@ -188,9 +188,9 @@ export default function NavigationSidebar({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.04)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
-              color: "#374151",
+              backgroundColor: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "var(--text-primary)",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
@@ -248,13 +248,13 @@ export default function NavigationSidebar({
                         borderRadius: "10px",
                         fontSize: "0.92rem",
                         fontWeight: isActive || isBrowseActive ? 700 : 500,
-                        color: isActive || isBrowseActive ? "var(--accent-gold, #946c15)" : "#1f2937",
-                        backgroundColor: isActive || isBrowseActive ? "rgba(212, 175, 55, 0.1)" : "transparent",
+                        color: isActive || isBrowseActive ? "var(--accent-gold)" : "var(--text-primary)",
+                        backgroundColor: isActive || isBrowseActive ? "rgba(212, 175, 55, 0.15)" : "transparent",
                         textDecoration: "none",
                         transition: "all 0.15s ease",
                       }}
                     >
-                      <span style={{ color: isActive || isBrowseActive ? "var(--accent-gold, #946c15)" : "#6b7280", display: "flex" }}>
+                      <span style={{ color: isActive || isBrowseActive ? "var(--accent-gold)" : "var(--text-muted)", display: "flex" }}>
                         {item.icon}
                       </span>
                       <span style={{ flex: 1 }}>{item.label}</span>
@@ -292,7 +292,7 @@ export default function NavigationSidebar({
                             style={{
                               padding: "7px 10px",
                               fontSize: "0.82rem",
-                              color: "#4b5563",
+                              color: "var(--text-secondary)",
                               borderRadius: "6px",
                               textDecoration: "none",
                               transition: "color 0.15s ease",
@@ -406,7 +406,7 @@ export default function NavigationSidebar({
                     style={{
                       fontWeight: 700,
                       fontSize: "0.88rem",
-                      color: "#111827",
+                      color: "var(--text-primary)",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -417,7 +417,7 @@ export default function NavigationSidebar({
                   <div
                     style={{
                       fontSize: "0.72rem",
-                      color: "#6b7280",
+                      color: "var(--text-muted)",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -437,9 +437,9 @@ export default function NavigationSidebar({
                     textAlign: "center",
                     padding: "7px 10px",
                     borderRadius: "6px",
-                    backgroundColor: "#ffffff",
-                    border: "1px solid rgba(0, 0, 0, 0.12)",
-                    color: "#374151",
+                    backgroundColor: "var(--bg-surface)",
+                    border: "1px solid var(--border-medium)",
+                    color: "var(--text-primary)",
                     fontSize: "0.8rem",
                     fontWeight: 600,
                     textDecoration: "none",

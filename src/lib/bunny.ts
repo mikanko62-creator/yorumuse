@@ -3,9 +3,15 @@
  */
 
 const STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE || "yorumuse-storage";
-const ACCESS_KEY = process.env.BUNNY_API_KEY || "6e26ac2d-b4c9-485f-ae87572b2ebb-4567-4ae7";
+const ACCESS_KEY = process.env.BUNNY_API_KEY || "";
 const STORAGE_ENDPOINT = process.env.BUNNY_STORAGE_ENDPOINT || "storage.bunnycdn.com";
 const CDN_URL = (process.env.BUNNY_CDN_URL || "https://yorumuse.b-cdn.net").replace(/\/$/, "");
+
+function ensureBunnyConfigured() {
+  if (!ACCESS_KEY) {
+    throw new Error("BUNNY_API_KEY is not configured in environment variables.");
+  }
+}
 
 export interface BunnyStorageItem {
   Guid: string;
@@ -29,6 +35,7 @@ export async function uploadToBunny(
   filename: string,
   contentType: string = "application/octet-stream"
 ): Promise<string> {
+  ensureBunnyConfigured();
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const uploadUrl = cleanFolder
     ? `https://${STORAGE_ENDPOINT}/${STORAGE_ZONE}/${cleanFolder}/${encodeURIComponent(filename)}`
@@ -58,6 +65,7 @@ export async function uploadToBunny(
  * List files in Bunny Storage
  */
 export async function listBunnyFiles(folder: string = ""): Promise<BunnyStorageItem[]> {
+  ensureBunnyConfigured();
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const url = cleanFolder
     ? `https://${STORAGE_ENDPOINT}/${STORAGE_ZONE}/${cleanFolder}/`
@@ -92,6 +100,7 @@ export async function listBunnyFiles(folder: string = ""): Promise<BunnyStorageI
  * Delete a file or directory from Bunny Storage
  */
 export async function deleteFromBunny(filePath: string): Promise<boolean> {
+  ensureBunnyConfigured();
   // Strip leading and trailing slashes
   const cleanPath = filePath.replace(/^\/+/, "");
   const encodedParts = cleanPath.split("/").map((part) => encodeURIComponent(part)).join("/");

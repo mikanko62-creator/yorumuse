@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { safeErrorResponse, sanitizeString, sanitizeUrl } from "@/lib/security";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+    const rawCategory = searchParams.get("category");
+    const category = rawCategory ? sanitizeString(rawCategory, 50) : null;
 
     const whereClause: { status: string; category?: string } = {
       status: "PUBLISHED",
@@ -38,11 +40,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ posts });
   } catch (error) {
-    console.error("Fetch posts error:", error);
-    return NextResponse.json(
-      { error: "Unable to retrieve community discussions." },
-      { status: 500 }
-    );
+    return safeErrorResponse("Unable to retrieve community discussions.", 500, error);
   }
 }
 
@@ -50,44 +48,38 @@ export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: "You must be signed in to post in the community." },
-        { status: 401 }
-      );
+      return safeErrorResponse("You must be signed in to post in the community.", 401);
     }
 
     if (user.status === "BANNED" || user.status === "SUSPENDED") {
-      return NextResponse.json(
-        { error: "Akun Anda sedang dibatasi dan tidak dapat membuat postingan." },
-        { status: 403 }
-      );
+      return safeErrorResponse("Akun Anda sedang dibatasi dan tidak dapat membuat postingan.", 403);
     }
 
     const body = await request.json();
-    const { title, content, category, media } = body;
+    const cleanTitle = sanitizeString(body.title, 200);
+    const cleanContent = sanitizeString(body.content, 20000);
+    const cleanCategory = sanitizeString(body.category || "Discussions", 50);
+    const cleanMedia = body.media ? sanitizeUrl(body.media) : null;
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: "Title and content are required." },
-        { status: 400 }
-      );
+    if (!cleanTitle || !cleanContent) {
+      return safeErrorResponse("Title and content are required.", 400);
     }
 
     // Safety checks on title and content
-    if (title.trim().length < 5 || title.length > 200 || content.trim().length < 10 || content.length > 20000) {
-      return NextResponse.json(
-        { error: "Judul minimal 5 (maks 200) karakter, isi postingan minimal 10 (maks 20.000) karakter." },
-        { status: 400 }
+    if (cleanTitle.length < 5 || cleanContent.length < 10) {
+      return safeErrorResponse(
+        "Judul minimal 5 karakter, isi postingan minimal 10 karakter.",
+        400
       );
     }
 
     const post = await prisma.post.create({
       data: {
         authorId: user.id,
-        title: title.trim(),
-        content: content.trim(),
-        category: category || "Discussions",
-        media: media || null,
+        title: cleanTitle,
+        content: cleanContent,
+        category: cleanCategory || "Discussions",
+        media: cleanMedia,
         status: "PUBLISHED",
       },
       include: {
