@@ -92,11 +92,11 @@ export default function ReportModal({
         style={{
           width: "100%",
           maxWidth: "480px",
-          backgroundColor: "#ffffff",
-          border: "1px solid var(--border-medium)",
+          backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
+          border: "1px solid rgba(212, 175, 55, 0.3)",
           borderRadius: "16px",
           padding: "32px",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.15)",
+          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(225, 29, 72, 0.15)",
           position: "relative",
         }}
       >

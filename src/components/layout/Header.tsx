@@ -53,8 +53,7 @@ export default function Header() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/browse", label: "Browse" },
-    { href: "/membership", label: "Membership" },
-    { href: "/community", label: "Community" },
+    { href: "/#subscription", label: "Membership" },
   ];
 
   const isAdminOrSuperUser = Boolean(

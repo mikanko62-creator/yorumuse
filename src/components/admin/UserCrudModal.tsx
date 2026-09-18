@@ -167,10 +167,10 @@ export default function UserCrudModal({
           maxHeight: "min(92vh, 760px)",
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
           border: "1px solid rgba(212, 175, 55, 0.4)",
           borderRadius: "18px",
-          boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.45)",
+          boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.8)",
           margin: "auto",
           overflow: "hidden",
         }}
@@ -179,12 +179,12 @@ export default function UserCrudModal({
         <div
           style={{
             padding: "22px 28px 16px",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
+            borderBottom: "1px solid var(--border-subtle)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexShrink: 0,
-            backgroundColor: "#ffffff",
+            backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
           }}
         >
           <div>
@@ -474,8 +474,8 @@ export default function UserCrudModal({
           <div
             style={{
               padding: "16px 28px",
-              borderTop: "1px solid rgba(0, 0, 0, 0.08)",
-              backgroundColor: "#f9fafb",
+              borderTop: "1px solid var(--border-subtle)",
+              backgroundColor: "rgba(255, 255, 255, 0.02)",
               display: "flex",
               gap: "12px",
               flexShrink: 0,

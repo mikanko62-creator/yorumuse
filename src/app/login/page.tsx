@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Logo from "@/components/common/Logo";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/profile";
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +35,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/profile");
+      router.push(redirectUrl);
       router.refresh();
     } catch {
       setError("An unexpected network error occurred. Please try again.");
@@ -55,11 +58,11 @@ export default function LoginPage() {
         style={{
           width: "100%",
           maxWidth: "460px",
-          backgroundColor: "#ffffff",
-          border: "1px solid var(--border-medium)",
+          backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
+          border: "1px solid rgba(212, 175, 55, 0.3)",
           borderRadius: "20px",
           padding: "44px 36px",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.08), 0 0 30px rgba(166, 124, 30, 0.06)",
+          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(212, 175, 55, 0.08)",
           position: "relative",
         }}
       >
@@ -82,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.85rem", color: "var(--text-primary)", marginBottom: "6px" }}>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.85rem", color: "var(--text-primary)", marginBottom: "6px", fontWeight: 700 }}>
             Welcome Back
           </h2>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
@@ -95,9 +98,9 @@ export default function LoginPage() {
             style={{
               padding: "12px 16px",
               borderRadius: "var(--radius-sm)",
-              backgroundColor: "#fef2f2",
-              border: "1px solid #fecaca",
-              color: "#b91c1c",
+              backgroundColor: "rgba(225, 29, 72, 0.15)",
+              border: "1px solid rgba(225, 29, 72, 0.4)",
+              color: "#fca5a5",
               fontSize: "0.85rem",
               marginBottom: "20px",
             }}
@@ -114,7 +117,7 @@ export default function LoginPage() {
                 display: "block",
                 fontSize: "0.82rem",
                 color: "var(--text-secondary)",
-                marginBottom: "6px",
+                marginBottom: "8px",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 fontWeight: 600,
@@ -129,12 +132,17 @@ export default function LoginPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="e.g. member@yorumuse.com"
-              style={{ width: "100%" }}
+              style={{
+                width: "100%",
+                backgroundColor: "rgba(12, 6, 10, 0.7)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--text-primary)",
+              }}
             />
           </div>
 
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
               <label
                 htmlFor="password"
                 style={{
@@ -155,7 +163,12 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              style={{ width: "100%" }}
+              style={{
+                width: "100%",
+                backgroundColor: "rgba(12, 6, 10, 0.7)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--text-primary)",
+              }}
             />
           </div>
 
@@ -190,5 +203,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "var(--bg-base)" }} />}>
+      <LoginForm />
+    </Suspense>
   );
 }

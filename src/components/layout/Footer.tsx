@@ -91,11 +91,6 @@ export default function Footer() {
                   Members Exclusive
                 </Link>
               </li>
-              <li>
-                <Link href="/community" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  Community Discussions
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -116,18 +111,13 @@ export default function Footer() {
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px" }}>
               <li>
-                <Link href="/membership" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+                <Link href="/#subscription" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
                   Subscription Plans
                 </Link>
               </li>
               <li>
                 <Link href="/membership#faq" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
                   Billing FAQ & Access
-                </Link>
-              </li>
-              <li>
-                <Link href="/community/guidelines" style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  Community Standards
                 </Link>
               </li>
               <li>

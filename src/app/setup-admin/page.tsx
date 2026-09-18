@@ -75,10 +75,10 @@ export default function SetupAdminPage() {
         style={{
           width: "100%",
           maxWidth: "520px",
-          backgroundColor: "#ffffff",
-          border: "1px solid var(--border-subtle)",
+          backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
+          border: "1px solid rgba(212, 175, 55, 0.3)",
           borderRadius: "18px",
-          boxShadow: "var(--shadow-md)",
+          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(212, 175, 55, 0.08)",
           padding: "44px 36px",
           position: "relative",
           overflow: "hidden",

@@ -398,11 +398,11 @@ export default function CommunityPage() {
             style={{
               width: "100%",
               maxWidth: "540px",
-              backgroundColor: "#ffffff",
-              border: "1px solid var(--border-medium)",
+              backgroundColor: "var(--bg-surface-elevated, #1c0e18)",
+              border: "1px solid rgba(212, 175, 55, 0.3)",
               borderRadius: "18px",
               padding: "36px 32px",
-              boxShadow: "0 24px 70px rgba(0, 0, 0, 0.15)",
+              boxShadow: "0 24px 70px rgba(0, 0, 0, 0.8)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>

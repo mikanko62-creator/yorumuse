@@ -2,14 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import HeroSlider, { HeroSlideData } from "@/components/home/HeroSlider";
 import ContentCard from "@/components/content/ContentCard";
 import EpisodeListCard from "@/components/content/EpisodeListCard";
 import TrailerModal from "@/components/video/TrailerModal";
+import CheckoutModal from "@/components/payment/CheckoutModal";
+import { SUBSCRIPTION_PLANS } from "@/lib/payments/provider";
+import { SubscriptionPlan } from "@/lib/payments/types";
 import { MOCK_CONTENT, CATEGORIES } from "@/data/mockContent";
 import { ContentItem } from "@/types/content";
 
 export default function HomePage() {
+  const router = useRouter();
   const [selectedTrailer, setSelectedTrailer] = useState<ContentItem | null>(null);
 
   const featuredItems = MOCK_CONTENT.filter((item) => item.featured);
@@ -17,7 +22,20 @@ export default function HomePage() {
 
   const [contentList, setContentList] = useState<any[]>(MOCK_CONTENT);
 
+  // Subscription state from Gambar 1
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"month" | "year">("month");
+  const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan | null>(null);
+  const [checkoutSuccessMsg, setCheckoutSuccessMsg] = useState<string | null>(null);
+
   useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      })
+      .catch(() => {});
+
     fetch("/api/hero")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -36,6 +54,32 @@ export default function HomePage() {
       })
       .catch((err) => console.error("Error loading dynamic content:", err));
   }, []);
+
+  const subscriberPlan = SUBSCRIPTION_PLANS.find((p) => p.id === "vip_premium") || SUBSCRIPTION_PLANS[1];
+  const isCurrentActiveSubscriber = currentUser?.subscription?.status === "ACTIVE";
+  const displayPrice =
+    billingCycle === "year" && subscriberPlan.price > 0
+      ? Number((subscriberPlan.price * 0.75 * 12).toFixed(2))
+      : subscriberPlan.price;
+
+  const handleSelectSubscription = () => {
+    if (!currentUser) {
+      router.push("/login?redirect=/#subscription");
+      return;
+    }
+    if (subscriberPlan) {
+      setCheckoutPlan(subscriberPlan);
+    }
+  };
+
+  const handleCheckoutSuccess = (result: { paymentMethod: string; planName: string; currentPeriodEnd: string }) => {
+    setCheckoutPlan(null);
+    setCheckoutSuccessMsg(`Access unlocked via ${result.paymentMethod}! Redirecting...`);
+    setTimeout(() => {
+      setCheckoutSuccessMsg(null);
+      window.location.reload();
+    }, 1500);
+  };
 
   const latestItems = [...contentList].sort(
     (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
@@ -248,50 +292,251 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Widget 2: Subscription Card */}
+              {/* Widget 2: Subscriber Membership Card (from Gambar 1) */}
               <div
+                id="subscription"
                 style={{
                   backgroundColor: "var(--bg-surface, #101016)",
-                  border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
-                  borderRadius: "12px",
-                  padding: "20px 18px",
-                  textAlign: "center",
-                  boxShadow: "none",
+                  border: "1.5px solid rgba(212, 175, 55, 0.4)",
+                  borderRadius: "16px",
+                  padding: "24px 20px",
+                  position: "relative",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.08)",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                <span
+                {/* Top Badge */}
+                <div
                   style={{
-                    fontSize: "0.74rem",
+                    position: "absolute",
+                    top: "-12px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    backgroundColor: "var(--accent-gold, #d4af37)",
+                    color: "#0c060a",
+                    padding: "3px 14px",
+                    borderRadius: "9999px",
+                    fontSize: "0.68rem",
                     fontWeight: 800,
-                    letterSpacing: "0.1em",
+                    letterSpacing: "0.12em",
                     textTransform: "uppercase",
-                    color: "var(--accent-gold)",
-                    display: "block",
-                    marginBottom: "8px",
+                    boxShadow: "0 2px 10px rgba(212, 175, 55, 0.3)",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  SUBSCRIPTION
-                </span>
-                <h3
+                  MOST POPULAR
+                </div>
+
+                <div style={{ textAlign: "center", marginTop: "4px", marginBottom: "16px" }}>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontSize: "1.45rem",
+                      fontWeight: 800,
+                      color: "var(--text-primary)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Subscriber
+                  </h3>
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.45, margin: 0 }}>
+                    Full unlimited access to all serialized manhwa chapters and subscriber privileges.
+                  </p>
+                </div>
+
+                {/* Billing Cycle Toggle */}
+                <div
                   style={{
-                    fontSize: "1.15rem",
-                    color: "var(--text-primary)",
-                    marginBottom: "8px",
-                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                    padding: "4px",
+                    borderRadius: "9999px",
+                    backgroundColor: "rgba(255, 255, 255, 0.04)",
+                    border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+                    marginBottom: "18px",
                   }}
                 >
-                  Watch All Chapters Without Limits
-                </h3>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "16px" }}>
-                  Unlock all full chapters of your favorite manhwa series by becoming a subscriber.
-                </p>
-                <Link
-                  href="/membership"
+                  <button
+                    type="button"
+                    onClick={() => setBillingCycle("month")}
+                    style={{
+                      flex: 1,
+                      padding: "6px 12px",
+                      borderRadius: "9999px",
+                      fontSize: "0.76rem",
+                      fontWeight: 600,
+                      backgroundColor: billingCycle === "month" ? "#ffffff" : "transparent",
+                      color: billingCycle === "month" ? "#0c060a" : "var(--text-secondary)",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      textAlign: "center",
+                    }}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBillingCycle("year")}
+                    style={{
+                      flex: 1,
+                      padding: "6px 10px",
+                      borderRadius: "9999px",
+                      fontSize: "0.76rem",
+                      fontWeight: 600,
+                      backgroundColor: billingCycle === "year" ? "var(--accent-gold)" : "transparent",
+                      color: billingCycle === "year" ? "#0c060a" : "var(--text-secondary)",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span>Annual</span>
+                    <span
+                      style={{
+                        fontSize: "0.62rem",
+                        padding: "1px 5px",
+                        borderRadius: "4px",
+                        backgroundColor: billingCycle === "year" ? "rgba(0, 0, 0, 0.25)" : "rgba(212, 175, 55, 0.15)",
+                        color: billingCycle === "year" ? "#ffffff" : "var(--accent-gold)",
+                        fontWeight: 800,
+                      }}
+                    >
+                      -25%
+                    </span>
+                  </button>
+                </div>
+
+                {/* Price Display */}
+                <div style={{ textAlign: "center", marginBottom: "18px" }}>
+                  <div style={{ display: "inline-flex", alignItems: "baseline", gap: "4px" }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-serif)",
+                        fontSize: "2.4rem",
+                        fontWeight: 800,
+                        color: "var(--text-primary)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      €{displayPrice.toFixed(2)}
+                    </span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                      /{billingCycle === "year" ? "year" : "month"}
+                    </span>
+                  </div>
+                  {billingCycle === "year" && (
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        color: "var(--accent-gold)",
+                        marginTop: "4px",
+                        display: "block",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Billed annually (effectively €{(subscriberPlan.price * 0.75).toFixed(2)}/mo)
+                    </span>
+                  )}
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  type="button"
+                  onClick={handleSelectSubscription}
+                  disabled={isCurrentActiveSubscriber}
                   className="btn btn-primary"
-                  style={{ width: "100%", justifyContent: "center", fontSize: "0.85rem", padding: "10px 16px" }}
+                  style={{
+                    width: "100%",
+                    justifyContent: "center",
+                    fontSize: "0.9rem",
+                    padding: "12px 18px",
+                    fontWeight: 700,
+                    marginBottom: "20px",
+                    cursor: isCurrentActiveSubscriber ? "default" : "pointer",
+                    opacity: isCurrentActiveSubscriber ? 0.6 : 1,
+                  }}
+                  id="home-subscriber-cta"
                 >
-                  Start Subscription
-                </Link>
+                  {isCurrentActiveSubscriber ? "Active Subscriber" : "Unlock Access"}
+                </button>
+
+                {/* Features List */}
+                <div
+                  style={{
+                    borderTop: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+                    paddingTop: "16px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.68rem",
+                      fontWeight: 800,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "var(--text-muted)",
+                      display: "block",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    WHAT IS INCLUDED:
+                  </span>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {[
+                      "Unlimited access to all chapter updates",
+                      "Full VIP manhwa serials library",
+                      "High-definition image quality",
+                      "Exclusive creator art drops",
+                      "Ad-free uninterrupted reading",
+                    ].map((feature, idx) => (
+                      <li
+                        key={idx}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "10px",
+                          fontSize: "0.8rem",
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "var(--accent-gold, #d4af37)",
+                            fontSize: "0.85rem",
+                            lineHeight: 1,
+                            marginTop: "2px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          ✓
+                        </span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Subtitle footnote for free tier */}
+                <div
+                  style={{
+                    marginTop: "16px",
+                    paddingTop: "12px",
+                    borderTop: "1px dashed rgba(255, 255, 255, 0.08)",
+                    textAlign: "center",
+                  }}
+                >
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                    Free Guest tier (€0) active by default.
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -479,130 +724,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. Community Spotlight Section */}
-      <section
-        className="section"
-        style={{
-          backgroundColor: "var(--bg-surface-elevated)",
-          borderTop: "1px solid var(--border-subtle)",
-          borderBottom: "1px solid var(--border-subtle)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div className="container">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: "48px",
-              alignItems: "center",
-            }}
-          >
-            <div>
-              <span className="section-subtitle">The Discerning Circle</span>
-              <h2
-                className="section-title"
-                style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)", marginBottom: "18px" }}
-              >
-                A Curated Community for Cinephiles & Creators
-              </h2>
-              <p
-                style={{
-                  fontSize: "1rem",
-                  lineHeight: 1.7,
-                  color: "var(--text-secondary)",
-                  marginBottom: "28px",
-                }}
-              >
-                YoruMuse is more than streaming. Engage in thoughtful discussions, share reflections with fellow patrons, interact directly with verified creators, and explore episodic filmmaking in a curated, respectful community lounge.
-              </p>
-
-              <div style={{ display: "flex", gap: "24px", marginBottom: "32px", flexWrap: "wrap" }}>
-                <div>
-                  <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", color: "var(--accent-gold)" }}>
-                    100%
-                  </div>
-                  <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Verified Members
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", color: "var(--accent-gold)" }}>
-                    Ultra HD
-                  </div>
-                  <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Ad-Free Experience
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", color: "var(--accent-gold)" }}>
-                    Direct
-                  </div>
-                  <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Creator Access
-                  </div>
-                </div>
-              </div>
-
-              <Link href="/community" className="btn btn-outline-gold btn-lg">
-                Enter Community Lounge
-              </Link>
-            </div>
-
-            {/* Teaser Preview Cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div
-                style={{
-                  padding: "20px 24px",
-                  borderRadius: "var(--radius-md)",
-                  backgroundColor: "var(--bg-surface)",
-                  border: "1px solid var(--border-subtle)",
-                  boxShadow: "none",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 700 }}>
-                    DISCUSSIONS • 48 replies
-                  </span>
-                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>2 hours ago</span>
-                </div>
-                <h4 style={{ fontSize: "1.05rem", color: "var(--text-primary)", marginBottom: "6px" }}>
-                  The aesthetic nuances of &apos;Shadows in Champagne&apos;
-                </h4>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                  &ldquo;The lighting design in scene three completely subverts traditional tropes. Thoughts on the director&apos;s cut?&rdquo;
-                </p>
-              </div>
-
-              <div
-                style={{
-                  padding: "20px 24px",
-                  borderRadius: "var(--radius-md)",
-                  backgroundColor: "var(--bg-surface)",
-                  border: "1px solid var(--border-subtle)",
-                  boxShadow: "none",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 700 }}>
-                    MANHWA • 112 replies
-                  </span>
-                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>5 hours ago</span>
-                </div>
-                <h4 style={{ fontSize: "1.05rem", color: "var(--text-primary)", marginBottom: "6px" }}>
-                  Upcoming Velvet Sessions: Milan Series teaser feedback
-                </h4>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                  &ldquo;Early access members, what did you think of the orchestral score integration?&rdquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Membership Conversion Banner */}
+      {/* 5. Membership Conversion Banner */}
       <section className="section" style={{ padding: "100px 0" }}>
         <div className="container">
           <div
@@ -610,11 +732,12 @@ export default function HomePage() {
               position: "relative",
               borderRadius: "24px",
               padding: "clamp(36px, 6vw, 72px) clamp(24px, 5vw, 60px)",
-              background: "linear-gradient(135deg, #ffffff 0%, #fdfbf7 50%, #f7f3e8 100%)",
-              border: "1px solid rgba(166, 124, 30, 0.25)",
-              boxShadow: "none",
+              background: "linear-gradient(135deg, rgba(28, 14, 24, 0.95) 0%, rgba(20, 9, 17, 0.98) 50%, rgba(12, 6, 10, 0.99) 100%)",
+              border: "1px solid rgba(212, 175, 55, 0.35)",
+              boxShadow: "0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(212, 175, 55, 0.12)",
               textAlign: "center",
               overflow: "hidden",
+              backdropFilter: "blur(12px)",
             }}
           >
             {/* Ambient Background Gold Flare */}
@@ -624,9 +747,9 @@ export default function HomePage() {
                 top: "-40%",
                 left: "50%",
                 transform: "translateX(-50%)",
-                width: "600px",
-                height: "300px",
-                background: "radial-gradient(ellipse at center, rgba(166, 124, 30, 0.12) 0%, transparent 70%)",
+                width: "650px",
+                height: "320px",
+                background: "radial-gradient(ellipse at center, rgba(212, 175, 55, 0.18) 0%, rgba(225, 29, 72, 0.08) 50%, transparent 70%)",
                 pointerEvents: "none",
               }}
             />
@@ -697,6 +820,40 @@ export default function HomePage() {
         title={selectedTrailer?.title || ""}
         category={selectedTrailer?.category}
       />
+
+      {/* Checkout Modal for Direct Subscription */}
+      {checkoutPlan && (
+        <CheckoutModal
+          isOpen={!!checkoutPlan}
+          onClose={() => setCheckoutPlan(null)}
+          plan={checkoutPlan}
+          billingCycle={billingCycle}
+          userEmail={currentUser?.email}
+          onSuccess={handleCheckoutSuccess}
+        />
+      )}
+
+      {/* Checkout Success Notification Toast */}
+      {checkoutSuccessMsg && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "32px",
+            right: "32px",
+            zIndex: 99999,
+            backgroundColor: "#064e3b",
+            color: "#a7f3d0",
+            padding: "16px 24px",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.2)",
+            border: "1px solid #059669",
+            fontWeight: 600,
+            fontSize: "0.95rem",
+          }}
+        >
+          ✓ {checkoutSuccessMsg}
+        </div>
+      )}
 
       <style jsx>{`
         .category-card:hover {
